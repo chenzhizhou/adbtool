@@ -576,6 +576,7 @@ public class tool {
 		
 		//清空config
 		JButton clearconfig = new JButton();
+		clearconfig.setToolTipText("\u6E05\u7A7A");
 		clearconfig.setFont(new Font("宋体", Font.PLAIN, 10));
 		clearconfig.addMouseListener(new MouseAdapter() {
 			@Override
@@ -1174,6 +1175,7 @@ public class tool {
 		
 		//清空apps
 		JButton btnclearApps = new JButton();
+		btnclearApps.setToolTipText("\u6E05\u7A7A");
 		btnclearApps.setFont(new Font("宋体", Font.PLAIN, 10));
 		btnclearApps.addMouseListener(new MouseAdapter() {
 			@Override
