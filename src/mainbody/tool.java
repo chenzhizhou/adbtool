@@ -85,6 +85,7 @@ import javax.swing.JComboBox;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import javax.swing.JProgressBar;
+import javax.swing.SwingConstants;
 
 
 
@@ -93,7 +94,7 @@ import javax.swing.JProgressBar;
 
 public class tool {
 
-	final static String AppVersion = "v.1.3.3";
+	final static String AppVersion = "v.1.3.4";
 	private JFrame frame;
 	JLabel ConTip;
 	JLabel PrtScTip;
@@ -116,7 +117,7 @@ public class tool {
 	JComboBox<String> nowVendor;
 	ComboBoxEditor nowVendoreditor;
 	private static JLabel updateFlagIcon;
-	//private static String updateHost = "10.5.16.200";
+	private static String updateHost = "10.5.16.200";
 	private static String filepath = "C:/inhandTool/";
 	//private static String workPath = "C:\\inhandTool\\";
 	private int now;
@@ -1569,7 +1570,7 @@ public class tool {
 		
 		
 		JButton changeMachineId = new JButton("更改售货机编号");
-		changeMachineId.setBounds(10, 528, 152, 23);
+		changeMachineId.setBounds(10, 528, 142, 23);
 		frame.getContentPane().add(changeMachineId);
 		//更改售货机编号
 		changeMachineId.addMouseListener(new MouseAdapter() {
@@ -1643,26 +1644,25 @@ public class tool {
 		simKeyEventPanel.add(btnSimKeyMode);
 		
 		JButton btnToolUpdate = new JButton("工具更新");
-		btnToolUpdate.setBounds(172, 528, 93, 23);
+		btnToolUpdate.setBounds(191, 528, 99, 23);
 		frame.getContentPane().add(btnToolUpdate);
 		btnToolUpdate.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					String command = "cmd.exe /c java -jar "+filepath+"adbtool_upgrade.jar"; 
-					Process p = Runtime.getRuntime().exec(command);
-					p.waitFor();
-					p.destroy();
-					Thread.sleep(2000);
-					System.exit(0);
-				} catch (IOException | InterruptedException e1) {
+					UpgradeTool u = new UpgradeTool(filepath, updateHost);
+					u.setVisible(true);
+//					Thread.sleep(2000);
+//					System.exit(0);
+				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			}
 		});
 		
-		updateFlagIcon = new JLabel();
-		updateFlagIcon.setBounds(267, 528, 22, 23);
+		updateFlagIcon = new JLabel("...");
+		updateFlagIcon.setHorizontalAlignment(SwingConstants.CENTER);
+		updateFlagIcon.setBounds(191, 551, 99, 23);
 		frame.getContentPane().add(updateFlagIcon);
 		
 		JButton btnchannelcfg = new JButton("货道快速配置");
@@ -2216,9 +2216,9 @@ public class tool {
 					e.printStackTrace();
 				}
 	    	   }
-//		   		Check checkup = new Check(updateFlagIcon,updateHost);
-//				Thread tcheck = new Thread(checkup);
-//				tcheck.start();
+		   		Check checkup = new Check(updateFlagIcon,updateHost);
+				Thread tcheck = new Thread(checkup);
+				tcheck.start();
 	       }  
 	   }, delay, period);  
 	}
@@ -2471,10 +2471,13 @@ public class tool {
             	netVerStr = getNowVer(localPath+"/ver.txt");
                 if(netVerStr.equals(AppVersion)){
                 	System.out.print("no need update");
+                	//FlagIcon.setText("无需更新");
                 	//FlagIcon.setIcon(new ImageIcon(getClass().getResource("/toolIcon/success.png")));
                 }
                 else{
                 	System.out.print("need update");
+                	FlagIcon.setText("可更新");
+                	FlagIcon.setForeground(Color.ORANGE);
                 	//FlagIcon.setIcon(new ImageIcon(getClass().getResource("/toolIcon/warning.png")));
                 }
 	            
