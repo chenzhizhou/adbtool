@@ -997,7 +997,7 @@ public class tool {
 							NodeList orgNamelist = orgNamedoc.getElementsByTagName("org-name");
 							NodeList seriallist = orgNamedoc.getElementsByTagName("cabinet");
 							Element orgNameele = (Element) orgNamelist.item(0);
-							Element serialele = (Element) seriallist.item(0);
+							
 							NodeList vendorlist = orgNamedoc.getElementsByTagName("current-vendor");
 							Element vendorele = (Element) vendorlist.item(0);
 							String key = getKey(vendormap, (String) nowVendor.getSelectedItem());
@@ -1008,7 +1008,13 @@ public class tool {
 							//serialele.setAttribute("serial", serialPort.getSelectedItem().toString());
 				            serveraddressele.setTextContent((String) serverAddress.getSelectedItem());
 				            orgNameele.setTextContent((String) orgName.getSelectedItem());
-				            serialele.setAttribute("serial", (String) serialPort.getSelectedItem());
+				            
+				            for(int i=0;i<seriallist.getLength();i++){
+				            	Element serialele = (Element) seriallist.item(i);
+				            	serialele.setAttribute("vendor", (String) key);
+				            	serialele.setAttribute("serial", (String) serialPort.getSelectedItem());
+				            }
+				            
 				            vendorele.setTextContent((String) key);
 				            InstallProgress(all, now+=1, installprogressBar);
 				            //保存xml
@@ -2470,8 +2476,9 @@ public class tool {
             	FtpUtil.downloadSftpFile(ftpHost, ftpUserName, ftpPassword, ftpPort, ftpPath, localPath, fileName); 
             	netVerStr = getNowVer(localPath+"/ver.txt");
                 if(netVerStr.equals(AppVersion)){
-                	System.out.print("no need update");
-                	//FlagIcon.setText("无需更新");
+                	//System.out.print("no need update");
+                	FlagIcon.setText("...");
+                	FlagIcon.setForeground(Color.BLACK);
                 	//FlagIcon.setIcon(new ImageIcon(getClass().getResource("/toolIcon/success.png")));
                 }
                 else{
