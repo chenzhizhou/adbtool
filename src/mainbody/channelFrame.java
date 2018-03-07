@@ -5,7 +5,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 
-
+import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -26,6 +27,8 @@ import org.dom4j.Node;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+
+
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
@@ -43,7 +46,16 @@ public class channelFrame extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		chacfg();
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					chacfg();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		
 	}
 	public static void chacfg() {
 		channelFrame frame = new channelFrame();
@@ -61,6 +73,10 @@ public class channelFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		newfolder("C:\\inhandTool\\config\\channeltemp");
+		JLabel lblNewLabel_1 = new JLabel("一键配置前请同步平台商品");
+		lblNewLabel_1.setBounds(10, 150, 164, 15);
+		lblNewLabel_1.setForeground(Color.ORANGE);
+		contentPane.add(lblNewLabel_1);
 		
 		JButton btnNewButton_1 = new JButton("一键改所有货道价格");
 		btnNewButton_1.setSize(164, 40);
@@ -156,26 +172,33 @@ public class channelFrame extends JFrame {
 				Document goodsdocument=load("C:\\inhandTool\\config\\channeltemp\\goods_info.xml");
 				List<Node>smartvmlist=smartvmdocument.selectNodes("//cabinet[@id]");
 				//System.out.print(smartvmlist.size());
+				List<Node>goodslist=goodsdocument.selectNodes("//goods");
+				int goodscount = goodslist.size();
+				int cursor = 0;
 				for(int i=0;i<smartvmlist.size();i++){
 					String vmnumber = ((Element) smartvmlist.get(i)).attributeValue("id").toString();
 					String vmType = ((Element) smartvmlist.get(i)).attributeValue("machineType").toString();
 					List<Node>smartlist=smartvmdocument.selectNodes("//cabinet[@id='"+vmnumber+"']//channel");
-					List<Node>goodslist=goodsdocument.selectNodes("//goods");
 					int channelNumber = smartlist.size();
-					int goodscount = goodslist.size();
 					if (goodscount<=channelNumber) {
 						channelNumber=goodscount;
 					}
 					//System.out.println(channelNumber);
 					String[] channelList = new String[channelNumber];
-					String[] goodsIdList = new String[channelNumber];
-					String[] goodsPriceList = new String[channelNumber];
-					for(int i2=0;i2<channelNumber;i2++){
-			            channelList[i2] = smartlist.get(i2).getText().toString();
+					String[] goodsIdList = new String[goodscount];
+					String[] goodsPriceList = new String[goodscount];
+					for(int i2=0;i2<goodscount;i2++){
+						if(i2<channelNumber){
+							channelList[i2] = smartlist.get(i2).getText().toString();
+						}
 			            goodsIdList[i2] = ((Element) goodslist.get(i2)).attributeValue("id").toString();
 			            goodsPriceList[i2] = ((Element) goodslist.get(i2)).attributeValue("price").toString();
 					}
-					insertGoods(cabinetsElem,vmnumber,goodsIdList,vmType,channelList,goodsPriceList);
+					cursor += channelNumber;
+					if (cursor>=goodscount) {
+						cursor = 0;
+					}
+					insertGoods(cabinetsElem,vmnumber,goodsIdList,vmType,channelList,goodsPriceList,cursor);
 				}
 				//指定文件输出的位置
 		        FileOutputStream out;
@@ -261,11 +284,11 @@ public class channelFrame extends JFrame {
 		contentPane.add(btnNewButton);
 	}
 
-	public static void insertGoods(Element cabinetsElem,String vmnumber,String[] goodsidList, String machineType,String[] channelList,String[] goodsPriceList){
+	public static void insertGoods(Element cabinetsElem,String vmnumber,String[] goodsidList, String machineType,String[] channelList,String[] goodsPriceList,int cursor){
         Element cabinetElem=cabinetsElem.addElement("cabinet");
         cabinetElem.addAttribute("machineType", machineType);
         cabinetElem.addAttribute("number", vmnumber);
-        int idnum = 0;
+        int idnum = cursor;
         for(String i:channelList){
         	Element channelElem = cabinetElem.addElement("channel");
             channelElem.addAttribute("id", i);
