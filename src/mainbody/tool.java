@@ -258,7 +258,7 @@ public class tool {
 				}
 			}
 		});
-		commonTagscomboBox.setBounds(49, 111, 79, 21);
+		commonTagscomboBox.setBounds(49, 111, 70, 22);
 		commonTagscomboBox.addItem("");
 		commonTagscomboBox.addItem("广告");
 		commonTagscomboBox.addItem("出货");
@@ -269,6 +269,11 @@ public class tool {
 		JLabel lblNewLabel = new JLabel("常用：");
 		lblNewLabel.setBounds(10, 114, 54, 15);
 		panel_1ogcat.add(lblNewLabel);
+		
+		JButton addLogTag = new JButton("+");
+		addLogTag.setFont(new Font("宋体", Font.PLAIN, 12));
+		addLogTag.setBounds(127, 111, 40, 22);
+		panel_1ogcat.add(addLogTag);
 		
 		JPanel panel_save1ogcat = new JPanel();
 		panel_save1ogcat.setBackground(Color.WHITE);
@@ -949,6 +954,18 @@ public class tool {
 		nowVendoreditor = nowVendor.getEditor();
 		nowVendor.setBounds(74, 119, 118, 21);
 		CloudSetup.add(nowVendor);
+		
+		JButton addOrg = new JButton("ADD");
+		addOrg.setToolTipText("新增机构");
+		addOrg.setFont(new Font("宋体", Font.PLAIN, 12));
+		addOrg.setBounds(202, 23, 54, 23);
+		CloudSetup.add(addOrg);
+		
+		JButton addAddress = new JButton("ADD");
+		addAddress.setToolTipText("新增平台地址");
+		addAddress.setFont(new Font("宋体", Font.PLAIN, 12));
+		addAddress.setBounds(202, 54, 54, 23);
+		CloudSetup.add(addAddress);
 		
 		//更新并下发基本配置，修改VMC串口、机构名称和服务器地址
 		btnUpdateCloudConfig.addMouseListener(new MouseAdapter() {

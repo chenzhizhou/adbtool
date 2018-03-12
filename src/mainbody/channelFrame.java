@@ -175,6 +175,12 @@ public class channelFrame extends JFrame {
 				List<Node>goodslist=goodsdocument.selectNodes("//goods");
 				int goodscount = goodslist.size();
 				int cursor = 0;
+				String[] goodsIdList = new String[goodscount];
+				String[] goodsPriceList = new String[goodscount];
+				for(int i2=0;i2<goodscount;i2++){
+		            goodsIdList[i2] = ((Element) goodslist.get(i2)).attributeValue("id").toString();
+		            goodsPriceList[i2] = ((Element) goodslist.get(i2)).attributeValue("price").toString();
+				}
 				for(int i=0;i<smartvmlist.size();i++){
 					String vmnumber = ((Element) smartvmlist.get(i)).attributeValue("id").toString();
 					String vmType = ((Element) smartvmlist.get(i)).attributeValue("machineType").toString();
@@ -185,20 +191,19 @@ public class channelFrame extends JFrame {
 					}
 					//System.out.println(channelNumber);
 					String[] channelList = new String[channelNumber];
-					String[] goodsIdList = new String[goodscount];
-					String[] goodsPriceList = new String[goodscount];
+
 					for(int i2=0;i2<goodscount;i2++){
 						if(i2<channelNumber){
 							channelList[i2] = smartlist.get(i2).getText().toString();
 						}
-			            goodsIdList[i2] = ((Element) goodslist.get(i2)).attributeValue("id").toString();
-			            goodsPriceList[i2] = ((Element) goodslist.get(i2)).attributeValue("price").toString();
+//			            goodsIdList[i2] = ((Element) goodslist.get(i2)).attributeValue("id").toString();
+//			            goodsPriceList[i2] = ((Element) goodslist.get(i2)).attributeValue("price").toString();
 					}
-					cursor += channelNumber;
 					if (cursor>=goodscount) {
 						cursor = 0;
 					}
 					insertGoods(cabinetsElem,vmnumber,goodsIdList,vmType,channelList,goodsPriceList,cursor);
+					cursor += channelNumber;
 				}
 				//指定文件输出的位置
 		        FileOutputStream out;
@@ -289,7 +294,13 @@ public class channelFrame extends JFrame {
         cabinetElem.addAttribute("machineType", machineType);
         cabinetElem.addAttribute("number", vmnumber);
         int idnum = cursor;
+        int goodslength=goodsidList.length;
+        System.out.println("\ngoodsidList:"+goodsidList.length+"idnum:"+idnum);
         for(String i:channelList){
+        	if (goodslength==idnum) {
+				return;
+			}
+        	System.out.println("\n"+idnum);
         	Element channelElem = cabinetElem.addElement("channel");
             channelElem.addAttribute("id", i);
             channelElem.addAttribute("capacity", "20");
@@ -306,6 +317,7 @@ public class channelFrame extends JFrame {
             channelElem.addAttribute("calorie", "");
             channelElem.addAttribute("package", "0");
             idnum += 1;
+            
         }
 	}
     public static void RestartAPP(){
