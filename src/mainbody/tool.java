@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 //import java.util.Properties;
 import java.util.Timer;
@@ -69,8 +68,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -172,6 +169,15 @@ public class tool {
 	 * Initialize the contents of the frame.
 	 */
 	public void initialize() {
+		newfolder(filepath);
+		deleteFile(filepath+"ver.txt");
+		try {
+			creatNewFile(filepath+"ver.txt");
+			writeFile(filepath+"ver.txt",AppVersion);
+		} catch (IOException e3) {
+			e3.printStackTrace();
+		}
+		
 		customize.initCFGxml();
 		frame = new JFrame();
 		//frame.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/toolIcon/logo.png")));
