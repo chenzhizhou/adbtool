@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 //import java.util.Properties;
 import java.util.Timer;
@@ -68,6 +69,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Element;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -81,6 +84,8 @@ import java.awt.datatransfer.Transferable;
 import javax.swing.JComponent;
 import javax.swing.JSpinner;
 import java.awt.Font;
+import java.awt.Frame;
+
 import javax.swing.JComboBox;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
@@ -94,7 +99,7 @@ import javax.swing.SwingConstants;
 
 public class tool {
 
-	final static String AppVersion = "v.1.3.4";
+	final static String AppVersion = "v.1.3.5";
 	private JFrame frame;
 	JLabel ConTip;
 	JLabel PrtScTip;
@@ -107,8 +112,8 @@ public class tool {
 	File[] ChoosedConfigs;
 	ArrayList<String> ChoosedConfigsstr = new ArrayList<String>();
 	boolean mDataConnectionState = false;
-	JComboBox<String> orgName;
-	JComboBox<String> serverAddress;
+	static JComboBox<String> orgName;
+	public static JComboBox<String> serverAddress;
 	ComboBoxEditor orgNameeditor;
 	ComboBoxEditor serverAddresseditor;
 	JComboBox<String> serialPort;
@@ -167,6 +172,7 @@ public class tool {
 	 * Initialize the contents of the frame.
 	 */
 	public void initialize() {
+		customize.initCFGxml();
 		frame = new JFrame();
 		//frame.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/toolIcon/logo.png")));
 		frame.setBounds(100, 100, 800, 610);
@@ -271,6 +277,13 @@ public class tool {
 		panel_1ogcat.add(lblNewLabel);
 		
 		JButton addLogTag = new JButton("+");
+		addLogTag.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Component tip = null;
+				JOptionPane.showMessageDialog(tip, "暂不可用", "暂不可用",JOptionPane.CANCEL_OPTION);
+			}
+		});
 		addLogTag.setFont(new Font("宋体", Font.PLAIN, 12));
 		addLogTag.setBounds(127, 111, 40, 22);
 		panel_1ogcat.add(addLogTag);
@@ -827,23 +840,25 @@ public class tool {
 		orgName = new JComboBox<String>();
 		orgName.setBounds(74, 24, 118, 21);
 		orgName.addItem("");
-		orgName.addItem("inhand-chenzhiz");
-		orgName.addItem("chenzhiz");
-		orgName.addItem("fengorg");
-		orgName.addItem("lizy_inhand");
-		orgName.addItem("czztest");
+//		orgName.addItem("inhand-chenzhiz");
+//		orgName.addItem("chenzhiz");
+//		orgName.addItem("fengorg");
+//		orgName.addItem("lizy_inhand");
+//		orgName.addItem("czztest");
 		orgName.setEditable(true);
 		orgNameeditor = orgName.getEditor();
 		CloudSetup.add(orgName);
+		customize.addressRead(orgName,"orgname");
 
 		
 		serverAddress = new JComboBox<String>();
 		serverAddress.setBounds(74, 55, 118, 21);
 		serverAddress.addItem("");
-		serverAddress.addItem("121.42.28.70");
-		serverAddress.addItem("182.150.21.232:10081");
-		serverAddress.addItem("115.28.180.246");
-		serverAddress.addItem("mall.inhand.com.cn");
+//		serverAddress.addItem("121.42.28.70");
+//		serverAddress.addItem("182.150.21.232:10081");
+//		serverAddress.addItem("115.28.180.246");
+//		serverAddress.addItem("mall.inhand.com.cn");
+		customize.addressRead(serverAddress,"serveraddress");
 		serverAddress.setEditable(true);
 		serverAddresseditor = serverAddress.getEditor();
 		CloudSetup.add(serverAddress);
@@ -943,6 +958,7 @@ public class tool {
 				
 			}
 		});
+
 		btnGetCloudConfig.setBounds(10, 146, 86, 23);
 		CloudSetup.add(btnGetCloudConfig);
 		
@@ -960,12 +976,26 @@ public class tool {
 		addOrg.setFont(new Font("宋体", Font.PLAIN, 12));
 		addOrg.setBounds(202, 23, 54, 23);
 		CloudSetup.add(addOrg);
+		addOrg.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Frame frame = new customize("orgname");
+				frame.setVisible(true);
+			}
+		});
 		
 		JButton addAddress = new JButton("ADD");
 		addAddress.setToolTipText("新增平台地址");
 		addAddress.setFont(new Font("宋体", Font.PLAIN, 12));
 		addAddress.setBounds(202, 54, 54, 23);
 		CloudSetup.add(addAddress);
+		addAddress.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Frame frame = new customize("serveraddress");
+				frame.setVisible(true);
+			}
+		});
 		
 		//更新并下发基本配置，修改VMC串口、机构名称和服务器地址
 		btnUpdateCloudConfig.addMouseListener(new MouseAdapter() {
