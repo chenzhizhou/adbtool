@@ -90,6 +90,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
+import javax.swing.Box;
 
 
 
@@ -98,7 +99,7 @@ import javax.swing.SwingConstants;
 
 public class tool {
 
-	final static String AppVersion = "v.1.3.6";
+	final static String AppVersion = "v.1.3.7";
 	private JFrame frame;
 	JLabel ConTip;
 	JLabel PrtScTip;
@@ -186,13 +187,13 @@ public class tool {
 		customize.initCFGxml();
 		frame = new JFrame();
 		//frame.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/toolIcon/logo.png")));
-		frame.setBounds(100, 100, 816, 610);
+		frame.setBounds(100, 100, 832, 610);
 		frame.getContentPane().setLayout(null);
 		String Title = AppVersion+"——By.chenzhiz@inhand.com.cn";
 		frame.setTitle("adb工具"+AppVersion);
 		JLabel versionBottom = new JLabel(Title);
 		versionBottom.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 10));
-		versionBottom.setBounds(590, 556, 194, 15);
+		versionBottom.setBounds(612, 556, 194, 15);
 		frame.getContentPane().add(versionBottom);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JTextArea adbdevicesArea = new JTextArea();
@@ -521,12 +522,12 @@ public class tool {
 		
 		JScrollPane pushConfigscrollPane = new JScrollPane(pushConfigArea);
 		pushConfigscrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		pushConfigscrollPane.setBounds(10, 47, 126, 87);
+		pushConfigscrollPane.setBounds(126, 20, 144, 106);
 		pushConfigscrollPane.setViewportView(pushConfigArea);
 		
 		JPanel configPanel = new JPanel();
 		configPanel.setLayout(null);
-		configPanel.setBorder(BorderFactory.createTitledBorder("下发运行配置、修改Android时间"));
+		configPanel.setBorder(BorderFactory.createTitledBorder("运行配置"));
 		configPanel.setBackground(Color.WHITE);
 		configPanel.setBounds(300, 15, 280, 169);
 		frame.getContentPane().add(configPanel);
@@ -582,10 +583,17 @@ public class tool {
 						installprogressBar.setValue(0);
 						try{
 							for(String tmp:ChoosedConfigsstr){
-					            Process p1 = Runtime.getRuntime().exec("adb push " + tmp + " sdcard/inbox/config");
-					            p1.waitFor();
-					            p1.destroy();
-					            InstallProgress(all, now+=1, installprogressBar);
+								if (tmp.contains("game") || tmp.contains("promotion")) {
+									Process p1 = Runtime.getRuntime().exec("adb push " + tmp + " sdcard/inbox/game");
+						            p1.waitFor();
+						            p1.destroy();
+								}
+								else {
+									Process p1 = Runtime.getRuntime().exec("adb push " + tmp + " sdcard/inbox/config");
+						            p1.waitFor();
+						            p1.destroy();
+						            InstallProgress(all, now+=1, installprogressBar);
+								}
 							}
 							RestartAPP();
 							//Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
@@ -601,13 +609,12 @@ public class tool {
 				t1.start();
 			}
 		});
-		btnPushingConfig.setBounds(10, 136, 72, 23);
+		btnPushingConfig.setBounds(201, 136, 72, 23);
 		configPanel.add(btnPushingConfig);
 		
 		//清空config
 		JButton clearconfig = new JButton();
 		clearconfig.setToolTipText("\u6E05\u7A7A");
-		clearconfig.setFont(new Font("宋体", Font.PLAIN, 10));
 		clearconfig.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -616,32 +623,16 @@ public class tool {
 				pushConfigArea.setText("选择配置文件或拖拽配置文件至文本框");
 			}
 		});
-		clearconfig.setText("...");
+		clearconfig.setText("\u6E05\u7A7A");
 		//clearconfig.setIcon(new ImageIcon(getClass().getResource("/toolIcon/searchreset.png")));
-		clearconfig.setBounds(92, 136, 44, 23);
+		clearconfig.setBounds(126, 136, 72, 23);
 		configPanel.add(clearconfig);
 		
 		//时间选择器
 		SpinnerDateModel datemodel = new SpinnerDateModel();
-		JSpinner datespinner = new JSpinner(datemodel);
-		datespinner.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 11));
-		datespinner.setValue(new Date());
-		JSpinner.DateEditor editor = new JSpinner.DateEditor(datespinner,"yyyy-MM-dd HH:mm:ss");
-		datespinner.setEditor(editor);
-		datespinner.setBounds(146, 20, 124, 77);
-		configPanel.add(datespinner);
 		
-		JButton btnSetTime = new JButton("设置时间");
-		btnSetTime.setBounds(146, 107, 124, 23);
-		configPanel.add(btnSetTime);
-		
-		JButton btnRevertTime = new JButton("还原当前时间");
-		
-		btnRevertTime.setBounds(146, 136, 124, 23);
-		configPanel.add(btnRevertTime);
-		
-		JButton btnPullConfig = new JButton("获取配置文件");
-		btnPullConfig.setBounds(10, 20, 126, 23);
+		JButton btnPullConfig = new JButton("获取运行配置");
+		btnPullConfig.setBounds(10, 20, 112, 43);
 		configPanel.add(btnPullConfig);
 		//获取运行配置
 		btnPullConfig.addMouseListener(new MouseAdapter() {
@@ -650,6 +641,40 @@ public class tool {
 					getConfigs();
 				}
 		});
+		
+		JButton btnPullGameCfg = new JButton("获取活动配置");
+		btnPullGameCfg.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String command2 = "cmd.exe /c adb pull sdcard/inbox/game C:\\inhandTool\\config";
+				String command3 = "cmd.exe /c start C:\\inhandTool\\config\\";
+				String response = getMachineId();
+				String MachineID = response;
+					if(response == null){
+						ConTip.setVisible(true);
+					}
+					else{
+						ConTip.setVisible(false);
+						command2 = command2 + "\\" + MachineID + "\\game";
+						newfolder("C:\\inhandTool\\config\\"+MachineID+"\\game");
+						try {
+							Process p;
+							p = Runtime.getRuntime().exec(command3+MachineID+"\\game");
+							p.waitFor();
+							p.destroy();
+							//System.out.println(command2);
+							p = Runtime.getRuntime().exec(command2);
+							p.waitFor();
+							p.destroy();
+						} catch (IOException | InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					}
+			}
+		});
+		btnPullGameCfg.setBounds(10, 73, 112, 23);
+		configPanel.add(btnPullGameCfg);
+
 		
 		JPanel inhandApp = new JPanel();
 		inhandApp.setLayout(null);
@@ -1219,7 +1244,7 @@ public class tool {
 				}
 			}
 		});
-		btn_mWifiConnectionState.setBounds(682, 507, 92, 43);
+		btn_mWifiConnectionState.setBounds(714, 507, 92, 43);
 		frame.getContentPane().add(btn_mWifiConnectionState);
 		
 		
@@ -1304,8 +1329,8 @@ public class tool {
 		btnclearApps.setBounds(112, 128, 75, 23);
 		inhandApp.add(btnclearApps);
 		
-		JButton btnInstallAll = new JButton("<html>卸载并安装</html>");
-		btnInstallAll.setBounds(197, 68, 73, 45);
+		JButton btnInstallAll = new JButton("<html>卸载<br>全部<br>并安装</html>");
+		btnInstallAll.setBounds(197, 37, 73, 59);
 		inhandApp.add(btnInstallAll);
 		
 		JButton btnOnlyInstall = new JButton("仅安装");
@@ -1316,10 +1341,6 @@ public class tool {
 		installprogressBar.setStringPainted(true);
 		installprogressBar.setBounds(10, 154, 260, 14);
 		inhandApp.add(installprogressBar);
-		
-		JButton btnInstalled = new JButton("当前版本");
-		btnInstalled.setBounds(198, 20, 72, 38);
-		inhandApp.add(btnInstalled);
 		
 			JButton btnUninstallAll = new JButton("全部卸载");
 			btnUninstallAll.setBounds(10, 127, 92, 23);
@@ -1405,18 +1426,6 @@ public class tool {
 					t1.start();
 				}
 			});
-		btnInstalled.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				try {
-					Process p = Runtime.getRuntime().exec("adb shell am start com.inhand.inboxcore/.fragment.AppVersionInfo");
-					p.waitFor();
-					p.destroy();
-				} catch (IOException | InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
-		});
 		//仅安装
 		btnOnlyInstall.addMouseListener(new MouseAdapter() {
 			@Override
@@ -1573,46 +1582,6 @@ public class tool {
 					t1.start();
 			}
 		});
-		//设置Android时间
-			btnSetTime.addMouseListener(new MouseAdapter() {
-				private Process p;
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					Object time = datespinner.getValue();
-					SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
-					String time2 = formatter.format(time);
-					System.out.print(time2);
-					try {
-						p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s\"yymmdd.hhmmss\"");
-						if(p.waitFor()==0)
-							p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + time2);
-							p.waitFor();
-							p.destroy();
-					} catch (IOException | InterruptedException e1) {
-						e1.printStackTrace();
-					}
-				}
-			});
-			//还原Android时间
-			btnRevertTime.addMouseListener(new MouseAdapter() {
-				private Process p;
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
-					String nowtime = formatter.format(new Date());
-					System.out.print(nowtime);
-					try {
-						p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s\"yymmdd.hhmmss\"");
-						if(p.waitFor()==0)
-							p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + nowtime);
-							p.waitFor();
-							p.destroy();
-					} catch (IOException | InterruptedException e1) {
-						e1.printStackTrace();
-					}
-					datespinner.setValue(new Date());
-				}
-			});
 	//保存崩溃日志
 			btnCrashlog.addMouseListener(new MouseAdapter() {
 				@Override
@@ -1736,25 +1705,80 @@ public class tool {
 		JPanel simKeyEventPanel = new JPanel();
 		simKeyEventPanel.setBackground(Color.WHITE);
 		simKeyEventPanel.setLayout(null);
-		simKeyEventPanel.setBorder(BorderFactory.createTitledBorder("模拟按键"));
-		simKeyEventPanel.setBounds(590, 15, 194, 169);
+		simKeyEventPanel.setBorder(BorderFactory.createTitledBorder("模拟按键、时间"));
+		simKeyEventPanel.setBounds(590, 15, 216, 169);
 		frame.getContentPane().add(simKeyEventPanel);
 		
 		JButton btnSimKeyHome = new JButton("HOME");
-		btnSimKeyHome.setBounds(10, 24, 93, 23);
+		btnSimKeyHome.setBounds(10, 24, 68, 23);
 		simKeyEventPanel.add(btnSimKeyHome);
 		
 		JButton btnSimKeyBack = new JButton("BACK");
-		btnSimKeyBack.setBounds(10, 56, 93, 23);
+		btnSimKeyBack.setBounds(10, 56, 68, 23);
 		simKeyEventPanel.add(btnSimKeyBack);
 		
 		JButton btnSimKeyMenu = new JButton("MENU");
-		btnSimKeyMenu.setBounds(10, 89, 93, 23);
+		btnSimKeyMenu.setBounds(10, 89, 68, 23);
 		simKeyEventPanel.add(btnSimKeyMenu);
 		
 		JButton btnSimKeyMode = new JButton("MODE");
-		btnSimKeyMode.setBounds(81, 136, 93, 23);
+		btnSimKeyMode.setBounds(10, 122, 68, 37);
 		simKeyEventPanel.add(btnSimKeyMode);
+		JSpinner datespinner = new JSpinner(datemodel);
+		datespinner.setBounds(88, 17, 124, 77);
+		simKeyEventPanel.add(datespinner);
+		datespinner.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 11));
+		datespinner.setValue(new Date());
+		JSpinner.DateEditor editor = new JSpinner.DateEditor(datespinner,"yyyy-MM-dd HH:mm:ss");
+		datespinner.setEditor(editor);
+		
+		JButton btnSetTime = new JButton("设置时间");
+		btnSetTime.setBounds(88, 103, 124, 23);
+		simKeyEventPanel.add(btnSetTime);
+		
+		JButton btnRevertTime = new JButton("还原当前时间");
+		btnRevertTime.setBounds(88, 136, 124, 23);
+		simKeyEventPanel.add(btnRevertTime);
+		//还原Android时间
+		btnRevertTime.addMouseListener(new MouseAdapter() {
+			private Process p;
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
+				String nowtime = formatter.format(new Date());
+				System.out.print(nowtime);
+				try {
+					p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s\"yymmdd.hhmmss\"");
+					if(p.waitFor()==0)
+						p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + nowtime);
+						p.waitFor();
+						p.destroy();
+				} catch (IOException | InterruptedException e1) {
+					e1.printStackTrace();
+				}
+				datespinner.setValue(new Date());
+			}
+		});
+		//设置Android时间
+			btnSetTime.addMouseListener(new MouseAdapter() {
+				private Process p;
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					Object time = datespinner.getValue();
+					SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
+					String time2 = formatter.format(time);
+					System.out.print(time2);
+					try {
+						p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s\"yymmdd.hhmmss\"");
+						if(p.waitFor()==0)
+							p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + time2);
+							p.waitFor();
+							p.destroy();
+					} catch (IOException | InterruptedException e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
 		
 		JButton btnToolUpdate = new JButton("工具更新");
 		btnToolUpdate.setBounds(191, 528, 99, 23);
@@ -1793,17 +1817,17 @@ public class tool {
 		panel.setLayout(null);
 		panel.setBorder(BorderFactory.createTitledBorder("卸载应用"));
 		panel.setBackground(Color.WHITE);
-		panel.setBounds(590, 194, 194, 178);
+		panel.setBounds(590, 194, 216, 178);
 		frame.getContentPane().add(panel);
 		
 		insatlled3app = new JComboBox<String>();
-		insatlled3app.setBounds(10, 54, 174, 32);
+		insatlled3app.setBounds(10, 82, 196, 32);
 		panel.add(insatlled3app);
 		insatlled3app.addItem("刷新获取已安装应用");
 		
 		//已安装的第三方应用
-		JButton button = new JButton("刷新");
-		button.addMouseListener(new MouseAdapter() {
+		JButton btn_getInstalled3 = new JButton("刷新");
+		btn_getInstalled3.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
@@ -1840,8 +1864,8 @@ public class tool {
 				}
 			}
 		});
-		button.setBounds(10, 21, 80, 23);
-		panel.add(button);
+		btn_getInstalled3.setBounds(10, 21, 80, 36);
+		panel.add(btn_getInstalled3);
 		
 		JButton uninstallapp = new JButton("卸载");
 		uninstallapp.addMouseListener(new MouseAdapter() {
@@ -1912,8 +1936,71 @@ public class tool {
 				}
 			}
 		});
-		uninstallapp.setBounds(91, 136, 93, 32);
+		uninstallapp.setBounds(113, 136, 93, 32);
 		panel.add(uninstallapp);
+		
+		JButton btnInstalled = new JButton("<html>当前<br>版本号</html>");
+		btnInstalled.setBounds(100, 21, 100, 36);
+		panel.add(btnInstalled);
+		
+		JLabel lblNewLabel_2 = new JLabel("选择需要删除的应用：");
+		lblNewLabel_2.setBounds(10, 67, 196, 15);
+		panel.add(lblNewLabel_2);
+		btnInstalled.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Process plist3package = null;
+				String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
+				try {
+					
+					plist3package = Runtime.getRuntime().exec(list3packagecommand);
+					plist3package.waitFor();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				InputStream isplist3package = plist3package.getInputStream();
+				InputStreamReader biplist3package = new InputStreamReader(isplist3package);
+				BufferedReader brlist3package = new BufferedReader(biplist3package);
+				List<String> packageList=new ArrayList<String>();
+				String line;
+				try {
+					while((line = brlist3package.readLine())!= null){
+						if (!line.equals("")) {
+							line.trim();
+							line = line.replace("package:", "");
+							packageList.add(line);
+						}
+					}
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				StringBuffer sb = new StringBuffer();
+				Iterator<String> iterator = packageList.iterator();
+				while(iterator.hasNext()){
+				    String packagename = iterator.next();
+				    //System.out.println(packagename);
+				    String getVersioncmd = "cmd.exe /c adb shell dumpsys package "+packagename+" | grep versionName";
+				    //System.out.println(getVersioncmd);
+				    try {
+						Process p = Runtime.getRuntime().exec(getVersioncmd);
+						InputStream is = p.getInputStream();
+						InputStreamReader bi = new InputStreamReader(is);
+						BufferedReader br = new BufferedReader(bi);
+						String versionstr = null;
+						versionstr = br.readLine();
+						if (versionstr != null) {
+							versionstr = versionstr.replace("versionName=", "");
+							sb.append(packagename+versionstr+"\n");
+							//System.out.println(packagename+versionstr);
+						}
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+				Component tip = null;
+				JOptionPane.showMessageDialog(tip, sb, "APP版本",JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
 		
 		
 		//模拟按键
