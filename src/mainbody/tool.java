@@ -12,6 +12,7 @@ import java.awt.Robot;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.sound.sampled.Line;
 import javax.swing.BorderFactory;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JButton;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 //import java.util.Properties;
 import java.util.Timer;
@@ -96,7 +98,7 @@ import javax.swing.SwingConstants;
 
 public class tool {
 
-	final static String AppVersion = "v.1.3.5";
+	final static String AppVersion = "v.1.3.6";
 	private JFrame frame;
 	JLabel ConTip;
 	JLabel PrtScTip;
@@ -109,6 +111,7 @@ public class tool {
 	File[] ChoosedConfigs;
 	ArrayList<String> ChoosedConfigsstr = new ArrayList<String>();
 	boolean mDataConnectionState = false;
+	boolean mWifiConnectionState = false;
 	static JComboBox<String> orgName;
 	public static JComboBox<String> serverAddress;
 	ComboBoxEditor orgNameeditor;
@@ -116,6 +119,7 @@ public class tool {
 	JComboBox<String> serialPort;
 	ComboBoxEditor serialPorteditor;
 	boolean DataConnectionFlag = false;
+	boolean WifiConnectionFlag = false;
 	JComboBox<String> nowVendor;
 	ComboBoxEditor nowVendoreditor;
 	private static JLabel updateFlagIcon;
@@ -125,6 +129,7 @@ public class tool {
 	private int now;
 	private JProgressBar installprogressBar;
 	Map<String, String>vendormap = new HashMap<String, String>();
+	private JComboBox<String> insatlled3app;
 	
 	
 	/**
@@ -181,7 +186,7 @@ public class tool {
 		customize.initCFGxml();
 		frame = new JFrame();
 		//frame.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/toolIcon/logo.png")));
-		frame.setBounds(100, 100, 800, 610);
+		frame.setBounds(100, 100, 816, 610);
 		frame.getContentPane().setLayout(null);
 		String Title = AppVersion+"——By.chenzhiz@inhand.com.cn";
 		frame.setTitle("adb工具"+AppVersion);
@@ -1163,8 +1168,59 @@ public class tool {
 				}
 			}
 		});
-		btn_mDataConnectionState.setBounds(590, 200, 124, 43);
+		btn_mDataConnectionState.setBounds(590, 507, 92, 43);
 		frame.getContentPane().add(btn_mDataConnectionState);
+		
+		JButton btn_mWifiConnectionState = new JButton("<html>WIFI网络<br>状态:UNKNOWN</html>");
+		btn_mWifiConnectionState.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				class breaknet implements Runnable{
+					@Override
+					public void run() {
+						btn_mWifiConnectionState.setBackground(new Color(255, 160, 122));
+						btn_mWifiConnectionState.setText("<html>WIFI网络<br>状态:OFF</html>");
+						btn_mWifiConnectionState.setEnabled(true);
+						mWifiConnectionState = false;
+						WifiConnectionFlag = true;
+						String command_off = "cmd.exe /c adb shell su -c svc wifi disable";
+						try {
+							while(WifiConnectionFlag){
+								Process p = Runtime.getRuntime().exec(command_off);
+								p.waitFor();
+								p.destroy();
+								Thread.sleep(3000);
+							}
+						} catch (IOException | InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					}
+					
+				}
+				breaknet breaknetT = new breaknet();
+	    		Thread t1 = new Thread(breaknetT);
+				if (mWifiConnectionState) {
+		    		t1.start();
+				}
+				else {
+					WifiConnectionFlag = false;
+					t1.interrupt();
+					String command2 = "cmd.exe /c adb shell su -c svc wifi enable";
+					try {
+						Process p = Runtime.getRuntime().exec(command2);
+						p.waitFor();
+						p.destroy();
+					} catch (IOException | InterruptedException e1) {
+						e1.printStackTrace();
+					}
+					btn_mWifiConnectionState.setBackground(new Color(240, 230, 140));
+					btn_mWifiConnectionState.setText("<html>WIFI网络<br>状态:OFF</html>");
+					btn_mWifiConnectionState.setEnabled(true);
+				}
+			}
+		});
+		btn_mWifiConnectionState.setBounds(682, 507, 92, 43);
+		frame.getContentPane().add(btn_mWifiConnectionState);
 		
 		
 		//已选APK框
@@ -1234,9 +1290,8 @@ public class tool {
 		inhandApp.add(choosedappsScrollPane);
 		
 		//清空apps
-		JButton btnclearApps = new JButton();
+		JButton btnclearApps = new JButton("清空");
 		btnclearApps.setToolTipText("\u6E05\u7A7A");
-		btnclearApps.setFont(new Font("宋体", Font.PLAIN, 10));
 		btnclearApps.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -1245,24 +1300,111 @@ public class tool {
 				choosedappsArea.setText("选择APK文件或拖拽APK文件至文本框\n");
 			}
 		});
-		btnclearApps.setText("...");
 		//btnclearApps.setIcon(new ImageIcon(getClass().getResource("/toolIcon/searchreset.png")));
-		btnclearApps.setBounds(129, 128, 58, 23);
+		btnclearApps.setBounds(112, 128, 75, 23);
 		inhandApp.add(btnclearApps);
-	
-		JButton btnUninstallAll = new JButton("Uninstall ALL");
-		btnUninstallAll.setBounds(10, 128, 109, 23);
-		inhandApp.add(btnUninstallAll);
 		
 		JButton btnInstallAll = new JButton("<html>卸载并安装</html>");
-		btnInstallAll.setBounds(197, 70, 73, 39);
+		btnInstallAll.setBounds(197, 68, 73, 45);
 		inhandApp.add(btnInstallAll);
 		
 		JButton btnOnlyInstall = new JButton("仅安装");
-		btnOnlyInstall.setBounds(197, 121, 73, 23);
+		btnOnlyInstall.setBounds(197, 128, 73, 23);
 		inhandApp.add(btnOnlyInstall);
 		
-		JButton btnInstalled = new JButton("<html>已安装版本</html>");
+		installprogressBar = new JProgressBar();
+		installprogressBar.setStringPainted(true);
+		installprogressBar.setBounds(10, 154, 260, 14);
+		inhandApp.add(installprogressBar);
+		
+		JButton btnInstalled = new JButton("当前版本");
+		btnInstalled.setBounds(198, 20, 72, 38);
+		inhandApp.add(btnInstalled);
+		
+			JButton btnUninstallAll = new JButton("全部卸载");
+			btnUninstallAll.setBounds(10, 127, 92, 23);
+			inhandApp.add(btnUninstallAll);
+			
+			//卸载ALLApk
+			btnUninstallAll.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					class uninstall implements Runnable{
+						@Override
+						public void run() {
+							now = 0;
+							int all = 16;
+							installprogressBar.setValue(0);
+							Process p;
+							try {
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.videoplayer");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.smartvm");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.smartvm.theme");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vmcsettings");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vcs");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.ads");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.dms");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.game");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.inboxcore");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.payservice");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.slavevmcservice");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vmcservice");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inbox.vm.vmcplugservice");
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.member.greenfortune");
+								p.waitFor();
+								p.destroy();
+								installprogressBar.setValue(100);
+							} catch (IOException | InterruptedException e) {
+								e.printStackTrace();
+							}
+							
+						}
+						
+					}
+					uninstall uIt = new uninstall();
+					Thread t1 = new Thread(uIt);
+					t1.start();
+				}
+			});
 		btnInstalled.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -1273,94 +1415,6 @@ public class tool {
 				} catch (IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
-			}
-		});
-		btnInstalled.setBounds(197, 21, 73, 39);
-		inhandApp.add(btnInstalled);
-		
-		installprogressBar = new JProgressBar();
-		installprogressBar.setStringPainted(true);
-		installprogressBar.setBounds(10, 154, 260, 14);
-		inhandApp.add(installprogressBar);
-		
-		//卸载ALLApk
-		btnUninstallAll.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				class uninstall implements Runnable{
-					@Override
-					public void run() {
-						now = 0;
-						int all = 16;
-						installprogressBar.setValue(0);
-						Process p;
-						try {
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.videoplayer");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.smartvm");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.smartvm.theme");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vmcsettings");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vcs");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.ads");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.dms");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.game");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.inboxcore");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.payservice");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.slavevmcservice");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vmcservice");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inbox.vm.vmcplugservice");
-							p.waitFor();
-							p.destroy();
-							InstallProgress(all, now+=1, installprogressBar);
-							p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.member.greenfortune");
-							p.waitFor();
-							p.destroy();
-							installprogressBar.setValue(100);
-						} catch (IOException | InterruptedException e) {
-							e.printStackTrace();
-						}
-						
-					}
-					
-				}
-				uninstall uIt = new uninstall();
-				Thread t1 = new Thread(uIt);
-				t1.start();
 			}
 		});
 		//仅安装
@@ -1619,7 +1673,7 @@ public class tool {
 				}
 			});
 		//轮询已连接设备
-		adbdevicesTimerDemo(adbdevicesArea,btn_mDataConnectionState);
+		adbdevicesTimerDemo(adbdevicesArea,btn_mDataConnectionState,btn_mWifiConnectionState);
 		
 		//连接断开提示
 		ConTip = new JLabel("Device Disconnect");
@@ -1683,7 +1737,7 @@ public class tool {
 		simKeyEventPanel.setBackground(Color.WHITE);
 		simKeyEventPanel.setLayout(null);
 		simKeyEventPanel.setBorder(BorderFactory.createTitledBorder("模拟按键"));
-		simKeyEventPanel.setBounds(590, 15, 184, 169);
+		simKeyEventPanel.setBounds(590, 15, 194, 169);
 		frame.getContentPane().add(simKeyEventPanel);
 		
 		JButton btnSimKeyHome = new JButton("HOME");
@@ -1732,8 +1786,134 @@ public class tool {
 				c.setVisible(true);
 			}
 		});
-		btnchannelcfg.setBounds(590, 323, 124, 49);
+		btnchannelcfg.setBounds(590, 382, 124, 49);
 		frame.getContentPane().add(btnchannelcfg);
+		
+		JPanel panel = new JPanel();
+		panel.setLayout(null);
+		panel.setBorder(BorderFactory.createTitledBorder("卸载应用"));
+		panel.setBackground(Color.WHITE);
+		panel.setBounds(590, 194, 194, 178);
+		frame.getContentPane().add(panel);
+		
+		insatlled3app = new JComboBox<String>();
+		insatlled3app.setBounds(10, 54, 174, 32);
+		panel.add(insatlled3app);
+		insatlled3app.addItem("刷新获取已安装应用");
+		
+		//已安装的第三方应用
+		JButton button = new JButton("刷新");
+		button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
+				insatlled3app.removeAllItems();
+				Process plist3package = null;
+				try {
+					plist3package = Runtime.getRuntime().exec(list3packagecommand);
+					plist3package.waitFor();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				InputStream isplist3package = plist3package.getInputStream();
+				InputStreamReader biplist3package = new InputStreamReader(isplist3package);
+				BufferedReader brlist3package = new BufferedReader(biplist3package);
+				List<String> packageList=new ArrayList<String>();
+				String line;
+				try {
+					while((line = brlist3package.readLine())!= null){
+						if (!line.equals("")) {
+							line.trim();
+							line = line.replace("package:", "");
+							packageList.add(line);
+						}
+					}
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				insatlled3app.addItem("选择要删除的应用");
+				Iterator<String> iterator = packageList.iterator();
+				while(iterator.hasNext()){
+				    String i = iterator.next();
+				    System.out.println(i);
+				    insatlled3app.addItem(i);
+				}
+			}
+		});
+		button.setBounds(10, 21, 80, 23);
+		panel.add(button);
+		
+		JButton uninstallapp = new JButton("卸载");
+		uninstallapp.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String uninstallPackageName = insatlled3app.getSelectedItem().toString();
+				class uninstall implements Runnable{
+					@Override
+					public void run() {
+						now = 0;
+						int all = 1;
+						installprogressBar.setValue(0);
+						try{
+							Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb uninstall "+uninstallPackageName);
+				            p1.waitFor();
+				            p1.destroy();
+				            InstallProgress(all, now+=1, installprogressBar);
+							installprogressBar.setValue(100);
+							//刷新
+							String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
+							insatlled3app.removeAllItems();
+							Process plist3package = null;
+							try {
+								plist3package = Runtime.getRuntime().exec(list3packagecommand);
+								plist3package.waitFor();
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
+							InputStream isplist3package = plist3package.getInputStream();
+							InputStreamReader biplist3package = new InputStreamReader(isplist3package);
+							BufferedReader brlist3package = new BufferedReader(biplist3package);
+							List<String> packageList=new ArrayList<String>();
+							String line;
+							try {
+								while((line = brlist3package.readLine())!= null){
+									if (!line.equals("")) {
+										line.trim();
+										line = line.replace("package:", "");
+										packageList.add(line);
+									}
+								}
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+							insatlled3app.addItem("选择要删除的应用");
+							Iterator<String> iterator = packageList.iterator();
+							while(iterator.hasNext()){
+							    String i = iterator.next();
+							    System.out.println(i);
+							    insatlled3app.addItem(i);
+							}
+							Component tip = null;
+							JOptionPane.showMessageDialog(tip, uninstallPackageName+"\n已卸载", "卸载完成",JOptionPane.OK_CANCEL_OPTION);
+						}
+						catch(IOException | InterruptedException e1){
+							e1.printStackTrace();
+						}
+					}
+				}
+				if (uninstallPackageName.contains("com")) {
+					uninstall unins = new uninstall();
+					Thread t1 = new Thread(unins);
+					t1.start();
+				}
+				else {
+					Component tip = null;
+					JOptionPane.showMessageDialog(tip, "请选择需要卸载的包", "提示",JOptionPane.CANCEL_OPTION);
+				}
+			}
+		});
+		uninstallapp.setBounds(91, 136, 93, 32);
+		panel.add(uninstallapp);
 		
 		
 		//模拟按键
@@ -2048,10 +2228,11 @@ public class tool {
 				}
 		}
 	}
-	private void getdevices(JTextArea adbdevicesArea,JButton btn_mDataConnectionState) throws IOException {
+	private void getdevices(JTextArea adbdevicesArea,JButton btn_mDataConnectionState,JButton btn_mWifiConnectionState) throws IOException {
 		String command = "cmd.exe /c adb devices";
 		String response = null;
 		String response1 = null;
+		String response2 = null;
 		Process p = Runtime.getRuntime().exec(command);
 		try {
 			p.waitFor();
@@ -2111,8 +2292,65 @@ public class tool {
 			btn_mDataConnectionState.setText("<html>蜂窝网络<br>状态:UNKNOWN</html>");
 			btn_mDataConnectionState.setEnabled(false);
 		}
+		
+		String command2 = "cmd.exe /c adb shell dumpsys wifi | grep \"Wi-Fi is\"";
+		Process p2 = Runtime.getRuntime().exec(command2);
+		try {
+			p2.waitFor();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		InputStream is2 = p2.getInputStream();
+		InputStreamReader bi2 = new InputStreamReader(is2);
+		BufferedReader br2 = new BufferedReader(bi2);
+		String message2 = br2.readLine();
+		while(message2 != null && !"".equals(message2)){
+			//System.out.print(message1);
+			response2 = message2;
+			message2 = br2.readLine();
+		}
+		if (response2 != null){
+			response2 = response2.trim();
+		}
+		if("Wi-Fi is enabled".equals(response2) && response2 != null){
+			btn_mWifiConnectionState.setBackground(new Color(0, 250, 154));
+			btn_mWifiConnectionState.setText("<html>WIFI网络<br>状态:ON</html>");
+			btn_mWifiConnectionState.setEnabled(true);
+			mWifiConnectionState = true;
+		}
+		else{
+			btn_mWifiConnectionState.setBackground(new Color(255, 160, 122));
+			btn_mWifiConnectionState.setText("<html>WIFI网络<br>状态:OFF</html>");
+			btn_mWifiConnectionState.setEnabled(true);
+			mWifiConnectionState = false;
+		}
 		p1.destroy();
+		p2.destroy();
 		p.destroy();
+		
+//		String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
+//		Process plist3package = Runtime.getRuntime().exec(list3packagecommand);
+//		try {
+//			plist3package.waitFor();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		InputStream isplist3package = plist3package.getInputStream();
+//		InputStreamReader biplist3package = new InputStreamReader(isplist3package);
+//		BufferedReader brlist3package = new BufferedReader(biplist3package);
+//		List<String> packageList=new ArrayList<String>();
+//		String line;
+//		while((line = brlist3package.readLine())!= null){
+//			line = line.replace("package:", "");
+//			//System.out.println(line);
+//			packageList.add(line);
+//		}
+//		Iterator<String> iterator = packageList.iterator();
+//		while(iterator.hasNext()){
+//		    String i = iterator.next();
+//		    System.out.println(i);
+//		}
+		
 	}
 	public String getConfigs(){
 		String command2 = "cmd.exe /c adb pull sdcard/inbox/config C:\\inhandTool\\config";
@@ -2142,7 +2380,7 @@ public class tool {
 			return MachineID;
 	}
 
-	public void adbdevicesTimerDemo(JTextArea adbdevicesArea,JButton mDataConnectionState)
+	public void adbdevicesTimerDemo(JTextArea adbdevicesArea,JButton mDataConnectionState,JButton mWifiConnectionState)
 	{
 	Timer timer = new Timer();
 	int delay = 0;//ms
@@ -2150,7 +2388,7 @@ public class tool {
 	   timer.schedule(new TimerTask() {    
 	       public void run() {  
 	    	   try{
-	    		   getdevices(adbdevicesArea,mDataConnectionState);
+	    		   getdevices(adbdevicesArea,mDataConnectionState,mWifiConnectionState);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
