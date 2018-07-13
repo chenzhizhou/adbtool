@@ -12,7 +12,6 @@ import java.awt.Robot;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.sound.sampled.Line;
 import javax.swing.BorderFactory;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JButton;
@@ -193,7 +192,7 @@ public class tool {
 		frame.setTitle("adb工具"+AppVersion);
 		JLabel versionBottom = new JLabel(Title);
 		versionBottom.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 10));
-		versionBottom.setBounds(612, 556, 194, 15);
+		versionBottom.setBounds(622, 556, 194, 15);
 		frame.getContentPane().add(versionBottom);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JTextArea adbdevicesArea = new JTextArea();
@@ -674,6 +673,17 @@ public class tool {
 		});
 		btnPullGameCfg.setBounds(10, 73, 112, 23);
 		configPanel.add(btnPullGameCfg);
+		
+		JButton btnchannelcfg = new JButton("货道快速配置");
+		btnchannelcfg.setBounds(10, 125, 112, 34);
+		configPanel.add(btnchannelcfg);
+		btnchannelcfg.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				channelFrame c = new channelFrame();
+				c.setVisible(true);
+			}
+		});
 
 		
 		JPanel inhandApp = new JPanel();
@@ -1157,7 +1167,7 @@ public class tool {
 						btn_mDataConnectionState.setEnabled(true);
 						mDataConnectionState = false;
 						DataConnectionFlag = true;
-						String command_off = "adb shell su -c svc data disable";
+						String command_off = "adb shell su 0 svc data disable";
 						try {
 							while(DataConnectionFlag){
 								Process p = Runtime.getRuntime().exec(command_off);
@@ -1179,7 +1189,7 @@ public class tool {
 				else {
 					DataConnectionFlag = false;
 					t1.interrupt();
-					String command2 = "cmd.exe /c adb shell su -c svc data enable";
+					String command2 = "cmd.exe /c adb shell su 0 svc data enable";
 					try {
 						Process p = Runtime.getRuntime().exec(command2);
 						p.waitFor();
@@ -1208,7 +1218,7 @@ public class tool {
 						btn_mWifiConnectionState.setEnabled(true);
 						mWifiConnectionState = false;
 						WifiConnectionFlag = true;
-						String command_off = "cmd.exe /c adb shell su -c svc wifi disable";
+						String command_off = "cmd.exe /c adb shell su 0 svc wifi disable";
 						try {
 							while(WifiConnectionFlag){
 								Process p = Runtime.getRuntime().exec(command_off);
@@ -1230,7 +1240,7 @@ public class tool {
 				else {
 					WifiConnectionFlag = false;
 					t1.interrupt();
-					String command2 = "cmd.exe /c adb shell su -c svc wifi enable";
+					String command2 = "cmd.exe /c adb shell su 0 svc wifi enable";
 					try {
 						Process p = Runtime.getRuntime().exec(command2);
 						p.waitFor();
@@ -1330,11 +1340,11 @@ public class tool {
 		inhandApp.add(btnclearApps);
 		
 		JButton btnInstallAll = new JButton("<html>卸载<br>全部<br>并安装</html>");
-		btnInstallAll.setBounds(197, 37, 73, 59);
+		btnInstallAll.setBounds(197, 21, 73, 59);
 		inhandApp.add(btnInstallAll);
 		
 		JButton btnOnlyInstall = new JButton("仅安装");
-		btnOnlyInstall.setBounds(197, 128, 73, 23);
+		btnOnlyInstall.setBounds(197, 116, 73, 35);
 		inhandApp.add(btnOnlyInstall);
 		
 		installprogressBar = new JProgressBar();
@@ -1801,17 +1811,6 @@ public class tool {
 		updateFlagIcon.setHorizontalAlignment(SwingConstants.CENTER);
 		updateFlagIcon.setBounds(191, 551, 99, 23);
 		frame.getContentPane().add(updateFlagIcon);
-		
-		JButton btnchannelcfg = new JButton("货道快速配置");
-		btnchannelcfg.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				channelFrame c = new channelFrame();
-				c.setVisible(true);
-			}
-		});
-		btnchannelcfg.setBounds(590, 382, 124, 49);
-		frame.getContentPane().add(btnchannelcfg);
 		
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
