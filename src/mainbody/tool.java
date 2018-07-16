@@ -206,6 +206,30 @@ public class tool {
 		adbdevicesAreascrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		adbdevicesAreascrollPane.setBounds(10, 10, 171, 63);
 		frame.getContentPane().add(adbdevicesAreascrollPane);
+		
+		JButton activity_cfg_Button = new JButton("优惠打折快速配置");
+		activity_cfg_Button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					activityFrame frame = new activityFrame();
+					frame.setVisible(true);
+					newfolder("C:\\inhandTool\\temp\\activity");
+					deleteFile("C:\\inhandTool\\temp\\activity\\channel_cfg.xml");
+					String command1 = "cmd.exe /c adb pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\temp\\activity";
+					Process p = Runtime.getRuntime().exec(command1);
+					p.waitFor();
+					p.destroy();
+				} catch (Exception e1) {
+					Component tip = null;
+					JOptionPane.showMessageDialog(tip, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
+					e1.printStackTrace();
+				}
+			}
+		});
+		activity_cfg_Button.setBounds(590, 382, 216, 49);
+		frame.getContentPane().add(activity_cfg_Button);
+		
 		JPanel panel_1ogcat = new JPanel();
 		panel_1ogcat.setBackground(Color.WHITE);
 		panel_1ogcat.setBorder(BorderFactory.createTitledBorder("打印日志"));
@@ -1945,6 +1969,7 @@ public class tool {
 		JLabel lblNewLabel_2 = new JLabel("选择需要删除的应用：");
 		lblNewLabel_2.setBounds(10, 67, 196, 15);
 		panel.add(lblNewLabel_2);
+		
 		btnInstalled.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {

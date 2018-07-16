@@ -1,6 +1,6 @@
 package mainbody;
 
-import java.awt.BorderLayout;
+
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerDateModel;
-import javax.swing.border.EmptyBorder;
+
 import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JButton;
@@ -25,9 +25,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
+
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -43,11 +46,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JComboBox;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.awt.Rectangle;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.GridLayout;
+import javax.swing.JLabel;
+import javax.swing.SpinnerNumberModel;
+import java.awt.Color;
+
 
 public class activityFrame extends JFrame {
 
@@ -55,6 +63,14 @@ public class activityFrame extends JFrame {
 	private JTextField discountNum_textField;
 	private JTextArea channel_view_textArea;
 	private JTextField sigle_channel_textField;
+	ArrayList<Long> start_time_list = new ArrayList<Long>();
+	ArrayList<Long> end_time_list = new ArrayList<Long>();
+	ArrayList<String> discount_list = new ArrayList<String>();
+	private JTextField separate_discount_textField;
+	private JTextArea separate_time_view;
+	private JRadioButton unitetime_rdbtnNewRadioButton;
+	private JRadioButton separate_rdbtnNewRadioButton;
+	private JButton reset;
 
 	/**
 	 * Launch the application.
@@ -84,8 +100,9 @@ public class activityFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public activityFrame() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setBounds(500, 200, 451, 319);
+		setTitle("优惠活动快速配置");
 		contentPane = new JPanel();
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
@@ -93,7 +110,7 @@ public class activityFrame extends JFrame {
 		//开始时间选择器
 		SpinnerDateModel datemodel1 = new SpinnerDateModel();
 		JSpinner starttime_datespinner = new JSpinner(datemodel1);
-		starttime_datespinner.setBounds(10, 10, 81, 37);
+		starttime_datespinner.setBounds(10, 39, 81, 37);
 		contentPane.add(starttime_datespinner);
 		starttime_datespinner.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 11));
 		starttime_datespinner.setValue(new Date());
@@ -102,15 +119,29 @@ public class activityFrame extends JFrame {
 		//结束时间选择器
 		SpinnerDateModel datemodel2 = new SpinnerDateModel();
 		JSpinner endtime_datespinner = new JSpinner(datemodel2);
-		endtime_datespinner.setBounds(111, 10, 81, 37);
+		endtime_datespinner.setBounds(111, 39, 81, 37);
 		contentPane.add(endtime_datespinner);
 		endtime_datespinner.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 11));
 		endtime_datespinner.setValue(new Date());
 		JSpinner.DateEditor endtime_editor = new JSpinner.DateEditor(endtime_datespinner,"yyyy-MM-dd");
 		endtime_datespinner.setEditor(endtime_editor);
 		
+		JLabel unitLabel = new JLabel("折/分");
+		unitLabel.setBounds(397, 180, 54, 15);
+		contentPane.add(unitLabel);
+		
+		JLabel unitLabe2 = new JLabel("折/分");
+		unitLabe2.setBounds(151, 225, 54, 15);
+		contentPane.add(unitLabe2);
+		
+		reset = new JButton("重置");
+		reset.setForeground(Color.GREEN);
+		reset.setBounds(338, 208, 86, 23);
+		contentPane.add(reset);
+		reset.setVisible(false);
+		
 		JPanel paystylePanel = new JPanel();
-		paystylePanel.setBounds(10, 62, 182, 54);
+		paystylePanel.setBounds(10, 86, 182, 54);
 		contentPane.add(paystylePanel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 0, 0};
@@ -141,7 +172,7 @@ public class activityFrame extends JFrame {
 		paystylePanel.add(union_chckbxNewCheckBox, gbc_chckbxNewCheckBox_2);
 		
 		JPanel panel = new JPanel();
-		panel.setBounds(10, 126, 182, 54);
+		panel.setBounds(10, 150, 182, 54);
 		contentPane.add(panel);
 		
 		GridBagLayout gbl2_panel = new GridBagLayout();
@@ -169,6 +200,24 @@ public class activityFrame extends JFrame {
 		panel.add(sales_rdbtnNewRadioButton, gbc_rdbtnNewRadioButton_2);
 		
 		JRadioButton onefree_rdbtnNewRadioButton = new JRadioButton("买一送一");
+		onefree_rdbtnNewRadioButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (onefree_rdbtnNewRadioButton.isSelected()) {
+					discountNum_textField.setText("");
+					discountNum_textField.setVisible(false);
+					separate_discount_textField.setText("");
+					separate_discount_textField.setVisible(false);
+				}
+				else {
+					discountNum_textField.setText("10");
+					discountNum_textField.setVisible(true);
+					if (separate_rdbtnNewRadioButton.isSelected()) {
+						separate_discount_textField.setText(discountNum_textField.getText());
+						separate_discount_textField.setVisible(true);
+					}
+				}
+			}
+		});
 		GridBagConstraints gbc_rdbtnNewRadioButton_1 = new GridBagConstraints();
 		gbc_rdbtnNewRadioButton_1.insets = new Insets(0, 0, 0, 5);
 		gbc_rdbtnNewRadioButton_1.gridx = 0;
@@ -176,6 +225,7 @@ public class activityFrame extends JFrame {
 		panel.add(onefree_rdbtnNewRadioButton, gbc_rdbtnNewRadioButton_1);
 		
 		JRadioButton focus_rdbtnNewRadioButton = new JRadioButton("关注有奖");
+		focus_rdbtnNewRadioButton.setEnabled(false);
 		GridBagConstraints gbc_rdbtnNewRadioButton_3 = new GridBagConstraints();
 		gbc_rdbtnNewRadioButton_3.gridx = 1;
 		gbc_rdbtnNewRadioButton_3.gridy = 1;
@@ -188,7 +238,7 @@ public class activityFrame extends JFrame {
 		
 		discountNum_textField = new JTextField();
 		discountNum_textField.setText("5");
-		discountNum_textField.setBounds(10, 190, 182, 37);
+		discountNum_textField.setBounds(10, 214, 131, 37);
 		contentPane.add(discountNum_textField);
 		discountNum_textField.setColumns(10);
 		
@@ -269,6 +319,21 @@ public class activityFrame extends JFrame {
 		panel_1.add(onechannel_rdbtnNewRadioButton, gbc1_rdbtnNewRadioButton);
 		
 		JRadioButton randomchannel_rdbtnNewRadioButton = new JRadioButton("随机货道");
+		randomchannel_rdbtnNewRadioButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (randomchannel_rdbtnNewRadioButton.isSelected()) {
+					channel_view_textArea.setText("随机货道\n请填写概率\n默认30%");
+				}
+			}
+		});
+		channel_view_textArea.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				if (randomchannel_rdbtnNewRadioButton.isSelected()) {
+					channel_view_textArea.setText("");
+				}
+			}
+		});
 		GridBagConstraints gbc1_rdbtnNewRadioButton_1 = new GridBagConstraints();
 		gbc1_rdbtnNewRadioButton_1.insets = new Insets(0, 0, 5, 0);
 		gbc1_rdbtnNewRadioButton_1.gridx = 0;
@@ -276,6 +341,27 @@ public class activityFrame extends JFrame {
 		panel_1.add(randomchannel_rdbtnNewRadioButton, gbc1_rdbtnNewRadioButton_1);
 		
 		JRadioButton allchannel_rdbtnNewRadioButton = new JRadioButton("全部货道");
+		allchannel_rdbtnNewRadioButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (allchannel_rdbtnNewRadioButton.isSelected()) {
+					String channel_String = "";
+					for(int i=0;i<smartvmlist.size();i++){
+						String vmnumber = ((Element) smartvmlist.get(i)).attributeValue("number").toString();
+						smartvm_comboBox.addItem(vmnumber);
+						channel_String += vmnumber + "\n";
+						List<Node>channellist=channeldocument.selectNodes("//cabinet[@number='"+vmnumber+"']//channel");
+						for(int i1 = 0;i1<channellist.size();i1++){
+							String channel_id = ((Element)channellist.get(i1)).attributeValue("id").toString();
+							String channel_id_goodsId = ((Element)channellist.get(i1)).attributeValue("goodsId").toString();
+							channel_String += channel_id;
+							channel_String += ";";
+						}
+						channel_String += "\n";
+					}
+					channel_view_textArea.setText(channel_String);
+				}
+			}
+		});
 		allchannel_rdbtnNewRadioButton.setSelected(true);
 		GridBagConstraints gbc1_rdbtnNewRadioButton_2 = new GridBagConstraints();
 		gbc1_rdbtnNewRadioButton_2.gridx = 0;
@@ -286,10 +372,143 @@ public class activityFrame extends JFrame {
 		choosechannel_TypeGroup.add(randomchannel_rdbtnNewRadioButton);
 		choosechannel_TypeGroup.add(onechannel_rdbtnNewRadioButton);
 		
-
+		
+		JPanel timeType_panel = new JPanel();
+		timeType_panel.setBounds(202, 235, 131, 37);
+		contentPane.add(timeType_panel);
+		timeType_panel.setLayout(new GridLayout(1, 0, 0, 0));
 		
 		
-		JButton btn_generate_cfg = new JButton("New button");
+		separate_time_view = new JTextArea("优惠时间段：");
+		separate_time_view.setEditable(false);
+		separate_time_view.setBounds(202, 99, 131, 108);
+		contentPane.add(separate_time_view);
+		JScrollPane separate_time_view_textArea_ScrollPane = new JScrollPane(separate_time_view);
+		separate_time_view_textArea_ScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		separate_time_view_textArea_ScrollPane.setBounds(new Rectangle(202, 99, 131, 108));
+		contentPane.add(separate_time_view_textArea_ScrollPane);
+		
+		JSpinner start_hour_spinner = new JSpinner();
+		start_hour_spinner.setModel(new SpinnerNumberModel(0, 0, 23, 1));
+		start_hour_spinner.setBounds(338, 99, 35, 22);
+		contentPane.add(start_hour_spinner);
+		
+		JSpinner start_minute_spinner = new JSpinner();
+		start_minute_spinner.setModel(new SpinnerNumberModel(0, 0, 59, 15));
+		start_minute_spinner.setBounds(383, 99, 41, 22);
+		contentPane.add(start_minute_spinner);
+		
+		JSpinner end_hour_spinner = new JSpinner();
+		end_hour_spinner.setModel(new SpinnerNumberModel(0, 0, 23, 1));
+		end_hour_spinner.setBounds(338, 145, 35, 22);
+		contentPane.add(end_hour_spinner);
+		
+		JSpinner end_minute_spinner = new JSpinner();
+		end_minute_spinner.setModel(new SpinnerNumberModel(59, 0, 59, 15));
+		end_minute_spinner.setBounds(383, 145, 41, 22);
+		contentPane.add(end_minute_spinner);
+		
+		
+		separate_discount_textField = new JTextField();
+		separate_discount_textField.setText("5");
+		separate_discount_textField.setBounds(338, 177, 53, 21);
+		contentPane.add(separate_discount_textField);
+		separate_discount_textField.setColumns(10);
+		
+		JButton add_time_Button = new JButton("加时段");
+		add_time_Button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				long startunixTimestamp = 0;
+				long endunixTimestamp = 0;				
+				Object starttime = starttime_datespinner.getValue();
+				SimpleDateFormat startsimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+		        String starttime2 = startsimpleDateFormat.format(starttime);
+		        Date startdate;
+				try {
+					startdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(starttime2);
+					startunixTimestamp = startdate.getTime()/1000;
+//					System.out.println(startunixTimestamp);
+//					System.out.print(starttime2);
+				} catch (ParseException e2) {
+					e2.printStackTrace();
+				}
+				
+				Object endtime = endtime_datespinner.getValue();
+				SimpleDateFormat endsimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+		        String endtime2 = endsimpleDateFormat.format(endtime);
+		        Date enddate;
+				try {
+					enddate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endtime2);
+					endunixTimestamp = enddate.getTime()/1000;
+//					System.out.print("\n");
+//					System.out.println(endunixTimestamp);
+//					System.out.print(endtime2);
+				} catch (ParseException e2) {
+					e2.printStackTrace();
+				}
+				long days = (endunixTimestamp - startunixTimestamp) / (3600 * 24);
+				System.out.println("\n"+days);
+				int start_hour = (int) start_hour_spinner.getValue();
+				int start_min = (int) start_minute_spinner.getValue();
+				long start_timestamp = startunixTimestamp + start_hour * 3600 + start_min * 60;
+//				System.out.print(start_timestamp);
+				int end_hour = (int) end_hour_spinner.getValue();
+				int end_min = (int) end_minute_spinner.getValue();
+				long end_timestamp = endunixTimestamp + end_hour * 3600 + end_min * 60 + 59;
+//				System.out.print("\n"+end_timestamp);
+				separate_time_view.append("\n"+start_hour+":"+start_min+"——"+end_hour+":"+end_min+"——"+separate_discount_textField.getText());
+				for(long i = 0; i<=days; i++){
+					start_time_list.add(start_timestamp+3600*24*i);
+					end_time_list.add(end_timestamp+3600*24*i);
+					discount_list.add(separate_discount_textField.getText());
+				}
+				System.out.println("\n"+start_time_list);
+				System.out.println("\n"+end_time_list);
+				System.out.println("\n"+discount_list);
+			}
+		});
+		add_time_Button.setBounds(338, 208, 86, 23);
+		contentPane.add(add_time_Button);
+		
+		unitetime_rdbtnNewRadioButton = new JRadioButton("统一");
+		unitetime_rdbtnNewRadioButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (unitetime_rdbtnNewRadioButton.isSelected()) {
+					separate_discount_textField.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					start_hour_spinner.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					end_hour_spinner.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					start_minute_spinner.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					end_minute_spinner.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					add_time_Button.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					separate_time_view.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					separate_time_view_textArea_ScrollPane.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					unitLabel.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+				}
+				else {
+					separate_discount_textField.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					start_hour_spinner.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					end_hour_spinner.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					start_minute_spinner.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					end_minute_spinner.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					add_time_Button.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					separate_time_view.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					separate_time_view_textArea_ScrollPane.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+					unitLabel.setVisible(!unitetime_rdbtnNewRadioButton.isSelected());
+				}
+			}
+		});
+		timeType_panel.add(unitetime_rdbtnNewRadioButton);
+		unitetime_rdbtnNewRadioButton.setSelected(true);
+		
+		separate_rdbtnNewRadioButton = new JRadioButton("分时段");
+		timeType_panel.add(separate_rdbtnNewRadioButton);
+		
+		ButtonGroup timeTypeGroup = new ButtonGroup();
+		timeTypeGroup.add(unitetime_rdbtnNewRadioButton);
+		timeTypeGroup.add(separate_rdbtnNewRadioButton);
+		
+		JButton btn_generate_cfg = new JButton("下发");
 		btn_generate_cfg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -366,12 +585,24 @@ public class activityFrame extends JFrame {
 		        Element endtimeElem=configElem.addElement("end-time");
 		        endtimeElem.setText(String.valueOf(endunixTimestamp));
 		        Element discountElem=configElem.addElement("discount");
-		        discountElem.setText(discountNum_textField.getText());
+		        if (!onefree_rdbtnNewRadioButton.isSelected()) {
+		        	discountElem.setText(discountNum_textField.getText());
+				}
 		        Element timeSlotsElem=configElem.addElement("timeSlots");
-		        Element timeSlotElem=timeSlotsElem.addElement("timeSlot");
-		        timeSlotElem.addAttribute("startTime", String.valueOf(startunixTimestamp));
-		        timeSlotElem.addAttribute("endTime", String.valueOf(endunixTimestamp));
-		        timeSlotElem.addAttribute("discount", discountNum_textField.getText());
+		        if (unitetime_rdbtnNewRadioButton.isSelected()) {
+		        	Element timeSlotElem=timeSlotsElem.addElement("timeSlot");
+			        timeSlotElem.addAttribute("startTime", String.valueOf(startunixTimestamp));
+			        timeSlotElem.addAttribute("endTime", String.valueOf(endunixTimestamp));
+			        timeSlotElem.addAttribute("discount", discountNum_textField.getText());
+				}
+		        if (separate_rdbtnNewRadioButton.isSelected()) {
+					for(int i = 0;i<start_time_list.size();i++){
+						Element timeSlotElem=timeSlotsElem.addElement("timeSlot");
+						timeSlotElem.addAttribute("startTime", String.valueOf(start_time_list.get(i)));
+				        timeSlotElem.addAttribute("endTime", String.valueOf(end_time_list.get(i)));
+				        timeSlotElem.addAttribute("discount", discount_list.get(i));
+					}
+				}
 		        
 		        Element cabinetsElem=specialofferElem.addElement("cabinets");
 //		        Element cabinetElem=cabinetsElem.addElement("cabinet");
@@ -385,7 +616,7 @@ public class activityFrame extends JFrame {
 		        	List<Node>smartvmlist=channeldocument.selectNodes("//cabinet[@number]");
 		    		for(int i=0;i<smartvmlist.size();i++){
 		    			String vmnumber = ((Element) smartvmlist.get(i)).attributeValue("number").toString();
-		    			System.out.println(vmnumber);
+		    			System.out.println("\n"+vmnumber);
 		    			Element cabinetElem=cabinetsElem.addElement("cabinet");
 		    			cabinetElem.addAttribute("id", vmnumber);
 		    			List<Node>channellist=channeldocument.selectNodes("//cabinet[@number='"+vmnumber+"']//channel");
@@ -399,69 +630,110 @@ public class activityFrame extends JFrame {
 		    			}
 		    		}
 				}
+		        if (randomchannel_rdbtnNewRadioButton.isSelected()) {
+		        	int plbint = 30;
+		        	if (channel_view_textArea.getText() == "") {
+						plbint = 30;
+					}
+		        	else {
+		        		try {
+				        	String regEx="[^0-9]";
+				        	Pattern p = Pattern.compile(regEx);
+				        	Matcher m = p.matcher(channel_view_textArea.getText().trim());
+				        	String plb = m.replaceAll("").trim();
+				        	plbint = Integer.parseInt(plb);
+						} catch (Exception e2) {
+							plbint = 30;
+						}
+					}
+		        	List<Node>smartvmlist=channeldocument.selectNodes("//cabinet[@number]");
+		    		for(int i=0;i<smartvmlist.size();i++){
+		    			String vmnumber = ((Element) smartvmlist.get(i)).attributeValue("number").toString();
+		    			System.out.println("\n"+vmnumber);
+		    			Element cabinetElem=cabinetsElem.addElement("cabinet");
+		    			cabinetElem.addAttribute("id", vmnumber);
+		    			List<Node>channellist=channeldocument.selectNodes("//cabinet[@number='"+vmnumber+"']//channel");
+		    			int channel_num = 0;
+		    			for(int i1 = 0;i1<channellist.size();i1++){
+		    				Random rand = new Random();
+		    				int random_num = rand.nextInt(100)+ 1;
+		    				if (random_num<=plbint || ((i1 == channellist.size() - 1) && channel_num == 0)) {
+			    				String channel_id = ((Element)channellist.get(i1)).attributeValue("id").toString();
+			    				String channel_id_goodsId = ((Element)channellist.get(i1)).attributeValue("goodsId").toString();
+			    				System.out.println(channel_id+" "+channel_id_goodsId);
+			    				Element channelElem = cabinetElem.addElement("channel");
+			    				channelElem.addAttribute("goodsId", channel_id_goodsId);
+			    				channelElem.setText(channel_id);
+			    				channel_num += 1;
+							}
+		    			}
+		    		}
+				}
 		        
 		        FileOutputStream out;
 				try {
-					out = new FileOutputStream("D:\\1.xml");
+					out = new FileOutputStream("C:\\inhandTool\\temp\\activity\\promotion.xml");
 			        OutputFormat format=OutputFormat.createPrettyPrint();
 			        format.setEncoding("UTF-8");
 			        XMLWriter writer=new XMLWriter(out,format);
 			        writer.write(doc);
 			        writer.close();
+			        String command3 = "cmd.exe /c adb push C:\\inhandTool\\temp\\activity\\promotion.xml sdcard/inbox/game";
+			        Process p = Runtime.getRuntime().exec(command3);
+					p.waitFor();
+					p.destroy();
+					RestartAPP();
 				}
-				catch (IOException e1) {
+				catch (IOException | InterruptedException e1) {
 					e1.printStackTrace();
+				}
+				finally {
+					if (separate_rdbtnNewRadioButton.isSelected()) {
+						reset.setVisible(true);
+						add_time_Button.setVisible(false);
+					}
 				}
 			}
 		});
-		btn_generate_cfg.setBounds(260, 190, 164, 61);
+		btn_generate_cfg.setBounds(338, 241, 86, 31);
 		contentPane.add(btn_generate_cfg);
-
 		
+		JLabel label = new JLabel("开始时间：");
+		label.setBounds(10, 14, 81, 15);
+		contentPane.add(label);
+		
+		JLabel label_1 = new JLabel("结束时间：");
+		label_1.setBounds(111, 14, 81, 15);
+		contentPane.add(label_1);
+		
+		JLabel label_2 = new JLabel(":");
+		label_2.setBounds(375, 150, 16, 15);
+		contentPane.add(label_2);
+		
+		JLabel label_3 = new JLabel(":");
+		label_3.setBounds(375, 104, 16, 15);
+		contentPane.add(label_3);
+		
+		JLabel label_4 = new JLabel("↓");
+		label_4.setBounds(370, 129, 16, 15);
+		contentPane.add(label_4);
+		
+		reset.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				start_time_list.clear();
+				end_time_list.clear();
+				discount_list.clear();
+				separate_time_view.setText("优惠时间段：");
+				reset.setVisible(false);
+				add_time_Button.setVisible(true);
+			}
+		});
+		
+
+
 	}
 
-	public static void generate_cfg(){
-		Document doc=DocumentHelper.createDocument();
-        Element specialofferElem=doc.addElement("special-offer");
-        Element configElem=specialofferElem.addElement("config");
-        Element paystylesElem=configElem.addElement("paystyles");
-        Element paystyleElem=paystylesElem.addElement("paystyle");
-        paystyleElem.setText("2");
-        Element typeElem=configElem.addElement("type");
-        typeElem.setText("4");
-        Element starttimeElem=configElem.addElement("start-time");
-        starttimeElem.setText("1531324800");
-        Element endtimeElem=configElem.addElement("end-time");
-        endtimeElem.setText("1531756799");
-        Element discountElem=configElem.addElement("discount");
-        discountElem.setText("5");
-        Element timeSlotsElem=configElem.addElement("timeSlots");
-        Element timeSlotElem=timeSlotsElem.addElement("timeSlot");
-        timeSlotElem.addAttribute("startTime", "1531324800");
-        timeSlotElem.addAttribute("endTime", "1531756799");
-        timeSlotElem.addAttribute("discount", "5");
-        
-        Element cabinetsElem=specialofferElem.addElement("cabinets");
-        Element cabinetElem=cabinetsElem.addElement("cabinet");
-        cabinetElem.addAttribute("id", "master");
-        for(int i = 1;i<=10;i++){
-        	Element channelElem = cabinetElem.addElement("channel");
-        	channelElem.addAttribute("goodsId", "XxXxXxXxXxXxXxXx");
-        	channelElem.setText(Integer.toString(i));
-        }
-        FileOutputStream out;
-		try {
-			out = new FileOutputStream("D:\\1.xml");
-	        OutputFormat format=OutputFormat.createPrettyPrint();
-	        format.setEncoding("UTF-8");
-	        XMLWriter writer=new XMLWriter(out,format);
-	        writer.write(doc);
-	        writer.close();
-		}
-		catch (IOException e1) {
-			e1.printStackTrace();
-		}
-	}
 	public static boolean deleteFile(String fileName) {
         File file = new File(fileName);
         if (!file.exists()){
@@ -496,4 +768,14 @@ public class activityFrame extends JFrame {
 		}
 		return document;
 	} 
+    public static void RestartAPP(){
+    	Process p;
+    	try {
+			p = Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
+			p.waitFor();
+			p.destroy();
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+    }
 }
