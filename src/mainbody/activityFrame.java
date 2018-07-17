@@ -71,6 +71,7 @@ public class activityFrame extends JFrame {
 	private JRadioButton unitetime_rdbtnNewRadioButton;
 	private JRadioButton separate_rdbtnNewRadioButton;
 	private JButton reset;
+	private JTextField other_paystyle_textfield;
 
 	/**
 	 * Launch the application.
@@ -131,7 +132,7 @@ public class activityFrame extends JFrame {
 		contentPane.add(unitLabel);
 		
 		JLabel unitLabe2 = new JLabel("折/分");
-		unitLabe2.setBounds(151, 225, 54, 15);
+		unitLabe2.setBounds(151, 246, 54, 15);
 		contentPane.add(unitLabe2);
 		
 		reset = new JButton("重置");
@@ -141,12 +142,12 @@ public class activityFrame extends JFrame {
 		reset.setVisible(false);
 		
 		JPanel paystylePanel = new JPanel();
-		paystylePanel.setBounds(10, 86, 182, 54);
+		paystylePanel.setBounds(10, 107, 182, 54);
 		contentPane.add(paystylePanel);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{0, 0, 0};
+		gbl_panel.columnWidths = new int[]{0, 0, 0, 0};
 		gbl_panel.rowHeights = new int[]{0, 0, 0};
-		gbl_panel.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		paystylePanel.setLayout(gbl_panel);
 		
@@ -159,7 +160,7 @@ public class activityFrame extends JFrame {
 		
 		JCheckBox wechat_chckbxNewCheckBox = new JCheckBox("微信");
 		GridBagConstraints gbc_chckbxNewCheckBox_1 = new GridBagConstraints();
-		gbc_chckbxNewCheckBox_1.insets = new Insets(0, 0, 5, 0);
+		gbc_chckbxNewCheckBox_1.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxNewCheckBox_1.gridx = 1;
 		gbc_chckbxNewCheckBox_1.gridy = 0;
 		paystylePanel.add(wechat_chckbxNewCheckBox, gbc_chckbxNewCheckBox_1);
@@ -171,8 +172,23 @@ public class activityFrame extends JFrame {
 		gbc_chckbxNewCheckBox_2.gridy = 1;
 		paystylePanel.add(union_chckbxNewCheckBox, gbc_chckbxNewCheckBox_2);
 		
+		JCheckBox otherpaystyle_chckbxNewCheckBox = new JCheckBox("其他:");
+		GridBagConstraints gbc_chckbxNewCheckBox_3 = new GridBagConstraints();
+		gbc_chckbxNewCheckBox_3.insets = new Insets(0, 0, 0, 5);
+		gbc_chckbxNewCheckBox_3.gridx = 1;
+		gbc_chckbxNewCheckBox_3.gridy = 1;
+		paystylePanel.add(otherpaystyle_chckbxNewCheckBox, gbc_chckbxNewCheckBox_3);
+		
+		other_paystyle_textfield = new JTextField();
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.gridx = 2;
+		gbc_textField.gridy = 1;
+		paystylePanel.add(other_paystyle_textfield, gbc_textField);
+		other_paystyle_textfield.setColumns(10);
+		
 		JPanel panel = new JPanel();
-		panel.setBounds(10, 150, 182, 54);
+		panel.setBounds(10, 171, 182, 54);
 		contentPane.add(panel);
 		
 		GridBagLayout gbl2_panel = new GridBagLayout();
@@ -238,7 +254,7 @@ public class activityFrame extends JFrame {
 		
 		discountNum_textField = new JTextField();
 		discountNum_textField.setText("5");
-		discountNum_textField.setBounds(10, 214, 131, 37);
+		discountNum_textField.setBounds(10, 235, 131, 37);
 		contentPane.add(discountNum_textField);
 		discountNum_textField.setColumns(10);
 		
@@ -312,6 +328,7 @@ public class activityFrame extends JFrame {
 				}
 			}
 		});
+		onechannel_rdbtnNewRadioButton.setVisible(false);
 		GridBagConstraints gbc1_rdbtnNewRadioButton = new GridBagConstraints();
 		gbc1_rdbtnNewRadioButton.insets = new Insets(0, 0, 5, 0);
 		gbc1_rdbtnNewRadioButton.gridx = 0;
@@ -322,7 +339,7 @@ public class activityFrame extends JFrame {
 		randomchannel_rdbtnNewRadioButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (randomchannel_rdbtnNewRadioButton.isSelected()) {
-					channel_view_textArea.setText("随机货道\n请填写概率\n默认30%");
+					channel_view_textArea.setText("随机配置货道\n请填写概率\n默认30%配置");
 				}
 			}
 		});
@@ -385,7 +402,7 @@ public class activityFrame extends JFrame {
 		contentPane.add(separate_time_view);
 		JScrollPane separate_time_view_textArea_ScrollPane = new JScrollPane(separate_time_view);
 		separate_time_view_textArea_ScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		separate_time_view_textArea_ScrollPane.setBounds(new Rectangle(202, 99, 131, 108));
+		separate_time_view_textArea_ScrollPane.setBounds(new Rectangle(202, 99, 131, 132));
 		contentPane.add(separate_time_view_textArea_ScrollPane);
 		
 		JSpinner start_hour_spinner = new JSpinner();
@@ -457,7 +474,7 @@ public class activityFrame extends JFrame {
 				int end_min = (int) end_minute_spinner.getValue();
 				long end_timestamp = endunixTimestamp + end_hour * 3600 + end_min * 60 + 59;
 //				System.out.print("\n"+end_timestamp);
-				separate_time_view.append("\n"+start_hour+":"+start_min+"——"+end_hour+":"+end_min+"——"+separate_discount_textField.getText());
+				separate_time_view.append("\n"+formatDateInt(start_hour)+":"+formatDateInt(start_min)+"——"+formatDateInt(end_hour)+":"+formatDateInt(end_min)+"——"+separate_discount_textField.getText());
 				for(long i = 0; i<=days; i++){
 					start_time_list.add(start_timestamp+3600*24*i);
 					end_time_list.add(end_timestamp+3600*24*i);
@@ -553,6 +570,11 @@ public class activityFrame extends JFrame {
 				if (union_chckbxNewCheckBox.isSelected()) {
 					paystyles.add("21");
 				}
+				if (otherpaystyle_chckbxNewCheckBox.isSelected()) {
+					if (other_paystyle_textfield.getText()!= "") {
+						paystyles.add(other_paystyle_textfield.getText());
+					}
+				}
 				if (focus_rdbtnNewRadioButton.isSelected()) {
 					activityType = "1";
 				}
@@ -605,13 +627,6 @@ public class activityFrame extends JFrame {
 				}
 		        
 		        Element cabinetsElem=specialofferElem.addElement("cabinets");
-//		        Element cabinetElem=cabinetsElem.addElement("cabinet");
-//		        cabinetElem.addAttribute("id", "master");
-//		        for(int i = 1;i<=10;i++){
-//		        	Element channelElem = cabinetElem.addElement("channel");
-//		        	channelElem.addAttribute("goodsId", "XxXxXxXxXxXxXxXx");
-//		        	channelElem.setText(Integer.toString(i));
-//		        }
 		        if (allchannel_rdbtnNewRadioButton.isSelected()) {
 		        	List<Node>smartvmlist=channeldocument.selectNodes("//cabinet[@number]");
 		    		for(int i=0;i<smartvmlist.size();i++){
@@ -718,6 +733,10 @@ public class activityFrame extends JFrame {
 		label_4.setBounds(370, 129, 16, 15);
 		contentPane.add(label_4);
 		
+		JLabel label_5 = new JLabel("支付类型与优惠活动类型：");
+		label_5.setBounds(10, 86, 182, 15);
+		contentPane.add(label_5);
+		
 		reset.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -734,6 +753,17 @@ public class activityFrame extends JFrame {
 
 	}
 
+	public static String formatDateInt(int dateNumber) {
+		if (dateNumber<10) {
+			String number = "0" + Integer.toString(dateNumber);
+			return number;
+		}
+		else {
+			String number = Integer.toString(dateNumber);
+			return number;
+		}
+	}
+	
 	public static boolean deleteFile(String fileName) {
         File file = new File(fileName);
         if (!file.exists()){
