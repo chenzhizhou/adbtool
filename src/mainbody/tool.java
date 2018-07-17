@@ -6,7 +6,6 @@ import mainbody.FtpUtil;
 
 import java.awt.AWTException;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Robot;
 
@@ -69,6 +68,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Element;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -89,7 +90,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
-import javax.swing.Box;
 
 
 
@@ -98,7 +98,7 @@ import javax.swing.Box;
 
 public class tool {
 
-	final static String AppVersion = "v.1.3.7";
+	final static String AppVersion = "v.1.4.1";
 	private JFrame frame;
 	JLabel ConTip;
 	JLabel PrtScTip;
@@ -116,8 +116,8 @@ public class tool {
 	public static JComboBox<String> serverAddress;
 	ComboBoxEditor orgNameeditor;
 	ComboBoxEditor serverAddresseditor;
-	JComboBox<String> serialPort;
-	ComboBoxEditor serialPorteditor;
+	JComboBox<String> master_serialPort;
+	ComboBoxEditor master_serialPorteditor;
 	boolean DataConnectionFlag = false;
 	boolean WifiConnectionFlag = false;
 	JComboBox<String> nowVendor;
@@ -130,6 +130,9 @@ public class tool {
 	private JProgressBar installprogressBar;
 	Map<String, String>vendormap = new HashMap<String, String>();
 	private JComboBox<String> insatlled3app;
+	private String log_savepath;
+	protected String save_log_formatTime;
+	static JComboBox<String> commonTagscomboBox;
 	
 	
 	/**
@@ -221,8 +224,7 @@ public class tool {
 					p.waitFor();
 					p.destroy();
 				} catch (Exception e1) {
-					Component tip = null;
-					JOptionPane.showMessageDialog(tip, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
+					JOptionPane.showMessageDialog(null, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
 					e1.printStackTrace();
 				}
 			}
@@ -252,12 +254,12 @@ public class tool {
 		panel_1ogcat.add(label_1);
 		
 		JTextField tagsField = new JTextField();
-		tagsField.setBounds(49, 85, 118, 21);
+		tagsField.setBounds(49, 111, 118, 21);
 		panel_1ogcat.add(tagsField);
 		tagsField.setColumns(10);
 		
 		Label label_2 = new Label("Tags:");
-		label_2.setBounds(10, 85, 33, 23);
+		label_2.setBounds(10, 97, 33, 23);
 		panel_1ogcat.add(label_2);
 		
 		JButton clearbeforeLog = new JButton("<html>清空<br>日志缓存</html>");
@@ -277,51 +279,37 @@ public class tool {
 		clearbeforeLog.setBounds(177, 108, 93, 39);
 		panel_1ogcat.add(clearbeforeLog);
 		
-		JComboBox<String> commonTagscomboBox = new JComboBox<String>();
+		commonTagscomboBox = new JComboBox<String>();
 		commonTagscomboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				switch (commonTagscomboBox.getSelectedItem().toString()) {
-				case "广告":
-					tagsField.setText("Player PlayerPolicy PlayerController VideoPlayer AdService");
-					break;
-				case "出货":
-					tagsField.setText("WSDeliverGoods ObtainQRIndentTask");
-					break;
-				case "网络连接":
-					tagsField.setText("WSConnectTask Steper ObtainTokenTask");
-					break;
-				case "远程升级":
-					tagsField.setText("ReportAdsTask DeviceManagerService");
-					break;
-				default:
-					tagsField.setText("");
-					break;
+				try {
+					String s = commonTagscomboBox.getSelectedItem().toString();
+					String tags = s.split(":")[1];
+					tagsField.setText(tags);
+				} catch (Exception e2) {
+					
 				}
 			}
 		});
-		commonTagscomboBox.setBounds(49, 111, 70, 22);
-		commonTagscomboBox.addItem("");
-		commonTagscomboBox.addItem("广告");
-		commonTagscomboBox.addItem("出货");
-		commonTagscomboBox.addItem("网络连接");
-		commonTagscomboBox.addItem("远程升级");
+		commonTagscomboBox.setBounds(49, 85, 118, 22);
+		customize.addressRead(commonTagscomboBox,"log_tag");
 		panel_1ogcat.add(commonTagscomboBox);
-		
-		JLabel lblNewLabel = new JLabel("常用：");
-		lblNewLabel.setBounds(10, 114, 54, 15);
-		panel_1ogcat.add(lblNewLabel);
 		
 		JButton addLogTag = new JButton("+");
 		addLogTag.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				Component tip = null;
-				JOptionPane.showMessageDialog(tip, "暂不可用", "暂不可用",JOptionPane.CANCEL_OPTION);
+				Frame frame = new customize("log_tag");
+				frame.setVisible(true);
 			}
 		});
 		addLogTag.setFont(new Font("宋体", Font.PLAIN, 12));
-		addLogTag.setBounds(127, 111, 40, 22);
+		addLogTag.setBounds(93, 139, 40, 22);
 		panel_1ogcat.add(addLogTag);
+		
+		JLabel lblNewLabel_3 = new JLabel("添加常用Tag：");
+		lblNewLabel_3.setBounds(10, 143, 93, 15);
+		panel_1ogcat.add(lblNewLabel_3);
 		
 		JPanel panel_save1ogcat = new JPanel();
 		panel_save1ogcat.setBackground(Color.WHITE);
@@ -512,8 +500,7 @@ public class tool {
             			Matcher m = p.matcher(configstring);
             			if(m.find()){
             				//System.out.print("\n包含中文");
-            				Component tip = null;
-							JOptionPane.showMessageDialog(tip, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
 							pushConfigArea.setText("");
             			}
             			else{
@@ -556,46 +543,12 @@ public class tool {
 		frame.getContentPane().add(configPanel);
 		configPanel.add(pushConfigscrollPane);
 		
-//		JButton btnPushConfig = new JButton("选择配置文件");
-//		btnPushConfig.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				ChoosedConfigs = null;
-//				ChoosedConfigs = FileChooser.multipathConfigChooser();
-//				for(int i = 0; i < ChoosedConfigs.length; i++){
-////					System.out.print(ChoosedConfigs[i].getAbsolutePath()+"\n");
-////					System.out.print(ChoosedConfigs[i].getName()+"\n");
-//					ChoosedappsStr.add(ChoosedConfigs[i].getAbsolutePath());
-//					pushConfigArea.append(ChoosedConfigs[i].getAbsolutePath()+"\n");
-//				}
-//			}
-//		});
-//		btnPushConfig.setBounds(10, 27, 126, 23);
-//		configPanel.add(btnPushConfig);
 		
 		//下发config
 		JButton btnPushingConfig = new JButton("下发");
 		btnPushingConfig.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-//				try {
-//					String batName = "./bat/pushConfig.bat";
-//					deleteFile(batName);
-//					creatNewFile(batName);
-////					for(int i = 0; i < ChoosedConfigs.length; i++){
-////						writeFile(batName, "adb push " + ChoosedConfigs[i].getAbsolutePath() + " sdcard/inbox/config\n");
-////					}
-//					for(String tmp:ChoosedConfigsstr){
-//			            //System.out.println(tmp);
-//			            writeFile(batName, "adb push " + tmp + " sdcard/inbox/config\n");
-//			        }
-//					writeFile(batName, "adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
-//					readFile(batName);
-//					Runtime.getRuntime().exec(batName);
-//					//deleteFile(batName);
-//				} catch (IOException e1) {
-//					e1.printStackTrace();
-//				}
 				class pushConfig implements Runnable{
 					@Override
 					public void run() {
@@ -604,23 +557,27 @@ public class tool {
 						all = all + ChoosedConfigsstr.size();
 						installprogressBar.setValue(0);
 						installprogressBar.setValue(0);
+						String dialogStr = "";
 						try{
 							for(String tmp:ChoosedConfigsstr){
 								if (tmp.contains("game") || tmp.contains("promotion")) {
 									Process p1 = Runtime.getRuntime().exec("adb push " + tmp + " sdcard/inbox/game");
 						            p1.waitFor();
 						            p1.destroy();
+						            dialogStr += tmp + "\n";
 								}
 								else {
 									Process p1 = Runtime.getRuntime().exec("adb push " + tmp + " sdcard/inbox/config");
 						            p1.waitFor();
 						            p1.destroy();
 						            InstallProgress(all, now+=1, installprogressBar);
+						            dialogStr += tmp + "\n";
 								}
 							}
 							RestartAPP();
 							//Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
 							installprogressBar.setValue(100);
+							JOptionPane.showMessageDialog(null, "下发\n"+dialogStr+"完成！", "下发配置成功",JOptionPane.PLAIN_MESSAGE);
 						}
 						catch(IOException | InterruptedException e1){
 							e1.printStackTrace();
@@ -717,11 +674,6 @@ public class tool {
 		inhandApp.setBounds(300, 194, 280, 178);
 		frame.getContentPane().add(inhandApp);
 		
-//		JButton btnChooseApps = new JButton("选择Apk");
-//		btnChooseApps.setIcon(new ImageIcon("./toolIcon/open.png"));
-//
-//		btnChooseApps.setBounds(10, 136, 109, 23);
-//		inhandApp.add(btnChooseApps);
 		
 		
 //如下代码使用Jmeter，现去掉这些功能
@@ -910,11 +862,6 @@ public class tool {
 		orgName = new JComboBox<String>();
 		orgName.setBounds(74, 24, 118, 21);
 		orgName.addItem("");
-//		orgName.addItem("inhand-chenzhiz");
-//		orgName.addItem("chenzhiz");
-//		orgName.addItem("fengorg");
-//		orgName.addItem("lizy_inhand");
-//		orgName.addItem("czztest");
 		orgName.setEditable(true);
 		orgNameeditor = orgName.getEditor();
 		CloudSetup.add(orgName);
@@ -924,29 +871,25 @@ public class tool {
 		serverAddress = new JComboBox<String>();
 		serverAddress.setBounds(74, 55, 118, 21);
 		serverAddress.addItem("");
-//		serverAddress.addItem("121.42.28.70");
-//		serverAddress.addItem("182.150.21.232:10081");
-//		serverAddress.addItem("115.28.180.246");
-//		serverAddress.addItem("mall.inhand.com.cn");
 		customize.addressRead(serverAddress,"serveraddress");
 		serverAddress.setEditable(true);
 		serverAddresseditor = serverAddress.getEditor();
 		CloudSetup.add(serverAddress);
 		
-		serialPort = new JComboBox<String>();
-		serialPort.setBounds(74, 88, 118, 21);
-		serialPort.setEditable(true);
-		serialPort.addItem("");
-		serialPort.addItem("ttyO1");
-		serialPort.addItem("ttyO2");
-		serialPort.addItem("ttyO3");
-		serialPort.addItem("ttyO4");
-		serialPort.addItem("ttyO5");
-		serialPort.addItem("ttyO6");
-		serialPort.addItem("ttyO7");
-		serialPort.addItem("ttyO8");
-		serialPorteditor = serialPort.getEditor();
-		CloudSetup.add(serialPort);
+		master_serialPort = new JComboBox<String>();
+		master_serialPort.setBounds(74, 88, 54, 21);
+		master_serialPort.setEditable(true);
+		master_serialPort.addItem("");
+		master_serialPort.addItem("ttyO1");
+		master_serialPort.addItem("ttyO2");
+		master_serialPort.addItem("ttyO3");
+		master_serialPort.addItem("ttyO4");
+		master_serialPort.addItem("ttyO5");
+		master_serialPort.addItem("ttyO6");
+		master_serialPort.addItem("ttyO7");
+		master_serialPort.addItem("ttyO8");
+		master_serialPorteditor = master_serialPort.getEditor();
+		CloudSetup.add(master_serialPort);
 		
 		
 		JLabel labelorgName = new JLabel("机构名：");
@@ -981,6 +924,7 @@ public class tool {
 					//Thread.sleep(1000);
 					String serveraddressPath = "C:\\inhandTool\\config\\temp\\config.xml";
 					String orgNamePath = "C:\\inhandTool\\config\\temp\\smartvm_cfg.xml";
+					org.dom4j.Document smartvmdocument=load(orgNamePath);
 					DocumentBuilderFactory serveraddressdbFactory = DocumentBuilderFactory.newInstance();
 					DocumentBuilderFactory orgNamedbFactory = DocumentBuilderFactory.newInstance();
 					DocumentBuilder serveraddressdBuilder, orgNamedBuilder,vendordBuilder;
@@ -991,9 +935,11 @@ public class tool {
 					orgNamedBuilder = orgNamedbFactory.newDocumentBuilder();
 					Document orgNamedoc = orgNamedBuilder.parse(orgNamePath);
 					NodeList orgNamelist = orgNamedoc.getElementsByTagName("org-name");
-					NodeList seriallist = orgNamedoc.getElementsByTagName("cabinet");
 					Element orgNameele = (Element) orgNamelist.item(0);
-					Element serialele = (Element) seriallist.item(0);
+					//dom4j:
+					List<Node>smartvmlist=smartvmdocument.selectNodes("//cabinet[@id='master']");
+					String master_serial = ((org.dom4j.Element)smartvmlist.get(0)).attributeValue("serial").toString();
+					
 					DocumentBuilderFactory vendordbFactory = DocumentBuilderFactory.newInstance();
 					vendordBuilder = vendordbFactory.newDocumentBuilder();
 					Document vendordoc = vendordBuilder.parse(orgNamePath);
@@ -1021,9 +967,11 @@ public class tool {
 					orgName.setSelectedItem(orgNameele.getTextContent());
 					serverAddresseditor.setItem(serveraddressele.getTextContent());
 					serverAddress.setSelectedItem(serveraddressele.getTextContent());
-					serialPorteditor.setItem(serialele.getAttribute("serial"));
-					serialPort.setSelectedItem(serialele.getAttribute("serial"));
-				} catch (Exception e2) {
+					master_serialPorteditor.setItem(master_serial);
+					master_serialPort.setSelectedItem(master_serial);
+					JOptionPane.showMessageDialog(null, "刷新完成！", "刷新成功",JOptionPane.PLAIN_MESSAGE);
+				} 
+				catch (Exception e2) {
 				}
 				
 			}
@@ -1059,6 +1007,10 @@ public class tool {
 		addAddress.setFont(new Font("宋体", Font.PLAIN, 12));
 		addAddress.setBounds(202, 54, 54, 23);
 		CloudSetup.add(addAddress);
+		
+		JCheckBox only_matser_serial_chckbxNewCheckBox = new JCheckBox("只修改主柜串口");
+		only_matser_serial_chckbxNewCheckBox.setBounds(134, 87, 122, 23);
+		CloudSetup.add(only_matser_serial_chckbxNewCheckBox);
 		addAddress.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -1077,7 +1029,7 @@ public class tool {
 					public void run() {
 						try{
 							now = 0;
-							int all = 10;
+							int all = 11;
 							installprogressBar.setValue(0);
 							
 							newfolder("C:\\inhandTool\\config\\temp");
@@ -1114,24 +1066,40 @@ public class tool {
 							NodeList orgNamelist = orgNamedoc.getElementsByTagName("org-name");
 							NodeList seriallist = orgNamedoc.getElementsByTagName("cabinet");
 							Element orgNameele = (Element) orgNamelist.item(0);
-							
-							NodeList vendorlist = orgNamedoc.getElementsByTagName("current-vendor");
-							Element vendorele = (Element) vendorlist.item(0);
 							String key = getKey(vendormap, (String) nowVendor.getSelectedItem());
 				            int keyint = Integer.parseInt(key)+1;
 				            key = Integer.toString(keyint);
+							if (only_matser_serial_chckbxNewCheckBox.isSelected()) {
+								Element serialele = (Element) seriallist.item(0);
+								serialele.setAttribute("serial", master_serialPort.getSelectedItem().toString());
+								try {
+									NodeList master_tag_serial = orgNamedoc.getElementsByTagName("master");
+									Element master_tag_serialele = (Element) master_tag_serial.item(0);
+									master_tag_serialele.setAttribute("serial", master_serialPort.getSelectedItem().toString());
+								} catch (Exception e2) {
+								}
+							}
+							else{
+					            for(int i=0;i<seriallist.getLength();i++){
+					            	Element serialele = (Element) seriallist.item(i);
+					            	serialele.setAttribute("vendor", (String) key);
+					            	serialele.setAttribute("serial", (String) master_serialPort.getSelectedItem());
+					            }
+							}
+							InstallProgress(all, now+=1, installprogressBar);
+							NodeList vendorlist = orgNamedoc.getElementsByTagName("current-vendor");
+							Element vendorele = (Element) vendorlist.item(0);
+							try {
+								NodeList master_tag_serial = orgNamedoc.getElementsByTagName("master");
+								Element master_tag_serialele = (Element) master_tag_serial.item(0);
+								master_tag_serialele.setAttribute("serial", master_serialPort.getSelectedItem().toString());
+							} catch (Exception e2) {
+							}
 				            InstallProgress(all, now+=1, installprogressBar);
 				            //修改xml
-							//serialele.setAttribute("serial", serialPort.getSelectedItem().toString());
 				            serveraddressele.setTextContent((String) serverAddress.getSelectedItem());
 				            orgNameele.setTextContent((String) orgName.getSelectedItem());
-				            
-				            for(int i=0;i<seriallist.getLength();i++){
-				            	Element serialele = (Element) seriallist.item(i);
-				            	serialele.setAttribute("vendor", (String) key);
-				            	serialele.setAttribute("serial", (String) serialPort.getSelectedItem());
-				            }
-				            
+
 				            vendorele.setTextContent((String) key);
 				            InstallProgress(all, now+=1, installprogressBar);
 				            //保存xml
@@ -1162,6 +1130,7 @@ public class tool {
 							RestartAPP();
 							//Runtime.getRuntime().exec(command5);
 							installprogressBar.setValue(100);
+							JOptionPane.showMessageDialog(null, "更新运行配置完成！", "更新成功",JOptionPane.PLAIN_MESSAGE);
 						}
 				        catch(Exception e1){
 				        	e1.printStackTrace();
@@ -1209,6 +1178,7 @@ public class tool {
 	    		Thread t1 = new Thread(breaknetT);
 				if (mDataConnectionState) {
 		    		t1.start();
+		    		JOptionPane.showMessageDialog(null, "已关闭蜂窝网络", "关闭蜂窝网络",JOptionPane.PLAIN_MESSAGE);
 				}
 				else {
 					DataConnectionFlag = false;
@@ -1218,6 +1188,7 @@ public class tool {
 						Process p = Runtime.getRuntime().exec(command2);
 						p.waitFor();
 						p.destroy();
+						JOptionPane.showMessageDialog(null, "已开启蜂窝网络", "开启蜂窝网络",JOptionPane.PLAIN_MESSAGE);
 					} catch (IOException | InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -1260,6 +1231,7 @@ public class tool {
 	    		Thread t1 = new Thread(breaknetT);
 				if (mWifiConnectionState) {
 		    		t1.start();
+		    		JOptionPane.showMessageDialog(null, "已关闭Wi-Fi", "关闭Wi-Fi",JOptionPane.PLAIN_MESSAGE);
 				}
 				else {
 					WifiConnectionFlag = false;
@@ -1269,6 +1241,7 @@ public class tool {
 						Process p = Runtime.getRuntime().exec(command2);
 						p.waitFor();
 						p.destroy();
+						JOptionPane.showMessageDialog(null, "已打开Wi-Fi", "打开Wi-Fi",JOptionPane.PLAIN_MESSAGE);
 					} catch (IOException | InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -1312,8 +1285,7 @@ public class tool {
             	        Matcher m = p.matcher(configstring);
             			if(m.find()){
             				//System.out.print("\n包含中文");
-            				Component tip = null;
-							JOptionPane.showMessageDialog(tip, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
 							choosedappsArea.setText("");
                     }
             			else{
@@ -1388,66 +1360,43 @@ public class tool {
 						@Override
 						public void run() {
 							now = 0;
-							int all = 16;
 							installprogressBar.setValue(0);
 							Process p;
 							try {
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.videoplayer");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.smartvm");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.smartvm.theme");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vmcsettings");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vcs");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.ads");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.dms");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.game");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.inboxcore");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.payservice");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.slavevmcservice");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vmcservice");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inbox.vm.vmcplugservice");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.member.greenfortune");
-								p.waitFor();
-								p.destroy();
+								String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | grep inhand";
+								Process plist3inhandpackage = null;
+								try {
+									plist3inhandpackage = Runtime.getRuntime().exec(list3packagecommand);
+									plist3inhandpackage.waitFor();
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}
+								InputStream isplist3package = plist3inhandpackage.getInputStream();
+								InputStreamReader biplist3package = new InputStreamReader(isplist3package);
+								BufferedReader brlist3package = new BufferedReader(biplist3package);
+								List<String> packageList=new ArrayList<String>();
+								String line;
+								try {
+									while((line = brlist3package.readLine())!= null){
+										if (!line.equals("")) {
+											line.trim();
+											line = line.replace("package:", "");
+											packageList.add(line);
+										}
+									}
+								} catch (IOException e1) {
+									e1.printStackTrace();
+								}
+								System.out.println(packageList);
+								int all = packageList.size();
+								for(int i = 0;i<packageList.size();i++){
+									p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall "+packageList.get(i));
+									p.waitFor();
+									p.destroy();
+									InstallProgress(all, now+=1, installprogressBar);
+								}
 								installprogressBar.setValue(100);
+								JOptionPane.showMessageDialog(null, "卸载完成！", "卸载全部Inhand应用",JOptionPane.PLAIN_MESSAGE);
 							} catch (IOException | InterruptedException e) {
 								e.printStackTrace();
 							}
@@ -1455,37 +1404,18 @@ public class tool {
 						}
 						
 					}
-					uninstall uIt = new uninstall();
-					Thread t1 = new Thread(uIt);
-					t1.start();
+					int n = JOptionPane.showConfirmDialog(null, "是否要将Inhand APP全部卸载","全部卸载",JOptionPane.OK_CANCEL_OPTION);
+					if (n == 0) {
+						uninstall uIt = new uninstall();
+						Thread t1 = new Thread(uIt);
+						t1.start();
+					}
 				}
 			});
 		//仅安装
 		btnOnlyInstall.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-//				try {
-//					String batName = "./bat/OnlyInstall.bat";
-//					deleteFile(batName);
-//					creatNewFile(batName);
-////					for(int i = 0; i < Choosedapps.length; i++){
-////						//System.out.print(Choosedapps[i].getName()+"\n");
-////						writeFile(batName, "adb install " + Choosedapps[i].getAbsolutePath() + "\n");
-////					}
-//					for(String tmp:ChoosedappsStr){
-//			            //System.out.println(tmp);
-//			            writeFile(batName, "adb install -r " + tmp + "\n");
-//			        }
-//					readFile(batName);
-//					Process p = Runtime.getRuntime().exec(batName);
-//					if(p.waitFor()==0){
-//						Runtime.getRuntime().exec("cmd.exe /k adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
-//					}
-//					
-//					//deleteFile(batName);
-//				} catch (IOException | InterruptedException e1) {
-//					e1.printStackTrace();
-//				}
 				class onlyinstall implements Runnable{
 					@Override
 					public void run() {
@@ -1494,16 +1424,19 @@ public class tool {
 						all = all + ChoosedappsStr.size();
 						installprogressBar.setValue(0);
 						installprogressBar.setValue(0);
+						String dialogStr = "";
 						try{
 							for(String tmp:ChoosedappsStr){
 					            Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb install -r " + tmp);
 					            p1.waitFor();
 					            p1.destroy();
 					            InstallProgress(all, now+=1, installprogressBar);
+					            dialogStr += tmp + "\n";
 							}
 							RestartAPP();
 							//Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
 							installprogressBar.setValue(100);
+							JOptionPane.showMessageDialog(null, "安装\n"+dialogStr+"完成！", "安装成功",JOptionPane.PLAIN_MESSAGE);
 						}
 						catch(IOException | InterruptedException e1){
 							e1.printStackTrace();
@@ -1525,64 +1458,46 @@ public class tool {
 						public void run() {
 							try{
 								now = 0;
-								int all = 16;
+								int all = 0;
 								all = all + ChoosedappsStr.size() + 1;
 								installprogressBar.setValue(0);
-								Process p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.videoplayer");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.smartvm");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.smartvm.theme");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vmcsettings");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vcs");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.ads");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.dms");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.game");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.inboxcore");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.payservice");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.slavevmcservice");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.vmcservice");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inbox.vm.vmcplugservice");
-								p.waitFor();
-								p.destroy();
-								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall com.inhand.member.greenfortune");
-								p.waitFor();
-								p.destroy();
+								Process p;
+								try {
+									String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | grep inhand";
+									Process plist3inhandpackage = null;
+									try {
+										plist3inhandpackage = Runtime.getRuntime().exec(list3packagecommand);
+										plist3inhandpackage.waitFor();
+									} catch (Exception e1) {
+										e1.printStackTrace();
+									}
+									InputStream isplist3package = plist3inhandpackage.getInputStream();
+									InputStreamReader biplist3package = new InputStreamReader(isplist3package);
+									BufferedReader brlist3package = new BufferedReader(biplist3package);
+									List<String> packageList=new ArrayList<String>();
+									String line;
+									try {
+										while((line = brlist3package.readLine())!= null){
+											if (!line.equals("")) {
+												line.trim();
+												line = line.replace("package:", "");
+												packageList.add(line);
+											}
+										}
+									} catch (IOException e1) {
+										e1.printStackTrace();
+									}
+									System.out.println(packageList);
+									all = all + packageList.size();
+									for(int i = 0;i<packageList.size();i++){
+										p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall "+packageList.get(i));
+										p.waitFor();
+										p.destroy();
+										InstallProgress(all, now+=1, installprogressBar);
+									}
+								} catch (IOException | InterruptedException e) {
+									e.printStackTrace();
+								}
 								InstallProgress(all, now+=1, installprogressBar);
 								p = Runtime.getRuntime().exec("cmd.exe /c adb shell rm -rf sdcard/inbox/apps");
 								p.waitFor();
@@ -1592,17 +1507,20 @@ public class tool {
 								p.waitFor();
 								p.destroy();
 								InstallProgress(all, now+=1, installprogressBar);
+								String dialogStr = "";
 								for(String tmp:ChoosedappsStr){
 						            Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb push \"" + tmp + "\" sdcard/inbox/apps\n");
 						            p1.waitFor();
 						            p1.destroy();
 						            InstallProgress(all, now+=1, installprogressBar);
+						            dialogStr += tmp + "\n";
 								}
 								
 								p = Runtime.getRuntime().exec("cmd.exe /c adb shell am start com.inhand.install/.InstallActivity");
 								p.waitFor();
 								p.destroy();
 								installprogressBar.setValue(100);
+								JOptionPane.showMessageDialog(null, "推送\n"+dialogStr+"完成！并执行Install安装", "卸载并安装",JOptionPane.PLAIN_MESSAGE);
 							}
 							catch(IOException | InterruptedException e1){
 								e1.printStackTrace();
@@ -1611,9 +1529,17 @@ public class tool {
 						}
 					
 					}
-					Install It = new Install();
-					Thread t1 = new Thread(It);
-					t1.start();
+					if (ChoosedappsStr.isEmpty()) {
+						JOptionPane.showMessageDialog(null, "请添加需要安装的安装包", "提示",JOptionPane.CANCEL_OPTION);
+					}
+					else {
+						int n = JOptionPane.showConfirmDialog(null, "是否要全部卸载，并安装APP","卸载并安装",JOptionPane.OK_CANCEL_OPTION);
+						if (n == 0) {
+							Install It = new Install();
+							Thread t1 = new Thread(It);
+							t1.start();
+						}
+					}
 			}
 		});
 	//保存崩溃日志
@@ -1625,34 +1551,36 @@ public class tool {
 			});
 		//保存日志
 			btnStartSaveLog.addMouseListener(new MouseAdapter() {
+
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					btnStartSaveLog.setEnabled(false);
 					btnStopSaveLog.setEnabled(true);
-					String formatTime = getFormatTime();
+					save_log_formatTime = getFormatTime();
 					String command0 = "cmd.exe /c adb logcat -c";
 					String command1 = "cmd.exe /c adb logcat -v time ";
 					String command2 = "cmd.exe /c start ";
 					//String machineid = getMachineId();
-					String savepath = logSavePathField.getText();
-					File file =new File(savepath);
+					log_savepath = logSavePathField.getText();
+					File file =new File(log_savepath);
 					String tag = saveLogTagField.getText();
 					if(!file.exists()){
-						newfolder(savepath);
+						newfolder(log_savepath);
 					}
 					if (SaveLogTag) {
-						command1 = command1 + "-s " + tag + " >" + savepath + "\\log" +formatTime + ".log";
+						command1 = command1 + "-s " + tag + " >" + log_savepath + "\\log" +save_log_formatTime + ".log";
 					}
 					else{
-						command1 = command1 + ">" + savepath + "\\log" +formatTime + ".log";	
+						command1 = command1 + ">" + log_savepath + "\\log" +save_log_formatTime + ".log";	
 					}
 					System.out.print(command1);
 					try {
 						SaveLogProcess = Runtime.getRuntime().exec(command0);
 						//Thread.sleep(200);
 						SaveLogProcess = Runtime.getRuntime().exec(command1);
-						command2 = command2 + savepath;
-						SaveLogProcess = Runtime.getRuntime().exec(command2);
+						command2 = command2 + log_savepath;
+						//SaveLogProcess = Runtime.getRuntime().exec(command2);
+						JOptionPane.showMessageDialog(null, "正在保存日志……\n日志保存目录：\n"+log_savepath+"\n日志名称：log" +save_log_formatTime + ".log", "保存日志",JOptionPane.PLAIN_MESSAGE);
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
@@ -1670,6 +1598,7 @@ public class tool {
 						Process p = Runtime.getRuntime().exec(command1);
 						p.waitFor();
 						p.destroy();
+						JOptionPane.showMessageDialog(null, "保存成功！\n"+log_savepath+"\n日志名称：log" +save_log_formatTime + ".log", "停止保存日志",JOptionPane.PLAIN_MESSAGE);
 					} catch (IOException | InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -1711,7 +1640,6 @@ public class tool {
 					public void mouseClicked(MouseEvent e) {
 						String machine_id_path = getNowPath()+"/machine_id.txt";
 						String commandpush = "cmd.exe /c adb push "+machine_id_path+" sdcard/inbox/config";
-						//String commandrestart = "cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
 						FileOutputStream fos = null;
 						try {
 							fos = new FileOutputStream(machine_id_path);
@@ -1720,10 +1648,8 @@ public class tool {
 				            fos.close();
 				            p = Runtime.getRuntime().exec(commandpush);
 				            p.waitFor();
-//				            p = Runtime.getRuntime().exec(commandrestart);
-//				            p.waitFor();
-//				            p.destroy();
 				            RestartAPP();
+				            JOptionPane.showMessageDialog(null, "已更改售货机编号为"+MachineId.getText(), "更改售货机编号",JOptionPane.PLAIN_MESSAGE);
 				            deleteFile(machine_id_path);
 				            frame2.dispose();
 				            
@@ -1791,6 +1717,7 @@ public class tool {
 					e1.printStackTrace();
 				}
 				datespinner.setValue(new Date());
+				JOptionPane.showMessageDialog(null, "Andriod时间已设置为当前时间", "设置时间",JOptionPane.PLAIN_MESSAGE);
 			}
 		});
 		//设置Android时间
@@ -1808,6 +1735,7 @@ public class tool {
 							p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + time2);
 							p.waitFor();
 							p.destroy();
+							JOptionPane.showMessageDialog(null, "Andriod时间修改成功", "设置时间",JOptionPane.PLAIN_MESSAGE);
 					} catch (IOException | InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -1820,11 +1748,10 @@ public class tool {
 		btnToolUpdate.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				JOptionPane.showMessageDialog(null, "更新服务器挂掉了……\n请联系陈少","工具更新",JOptionPane.PLAIN_MESSAGE);
 				try {
 					UpgradeTool u = new UpgradeTool(filepath, updateHost);
 					u.setVisible(true);
-//					Thread.sleep(2000);
-//					System.exit(0);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -1940,8 +1867,7 @@ public class tool {
 							    System.out.println(i);
 							    insatlled3app.addItem(i);
 							}
-							Component tip = null;
-							JOptionPane.showMessageDialog(tip, uninstallPackageName+"\n已卸载", "卸载完成",JOptionPane.OK_CANCEL_OPTION);
+							JOptionPane.showMessageDialog(null, uninstallPackageName+"\n已卸载", "卸载完成",JOptionPane.OK_CANCEL_OPTION);
 						}
 						catch(IOException | InterruptedException e1){
 							e1.printStackTrace();
@@ -1954,8 +1880,7 @@ public class tool {
 					t1.start();
 				}
 				else {
-					Component tip = null;
-					JOptionPane.showMessageDialog(tip, "请选择需要卸载的包", "提示",JOptionPane.CANCEL_OPTION);
+					JOptionPane.showMessageDialog(null, "请选择需要卸载的包", "提示",JOptionPane.CANCEL_OPTION);
 				}
 			}
 		});
@@ -2021,8 +1946,7 @@ public class tool {
 						e1.printStackTrace();
 					}
 				}
-				Component tip = null;
-				JOptionPane.showMessageDialog(tip, sb, "APP版本",JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null, sb, "APP版本",JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -2105,6 +2029,7 @@ public class tool {
 					public void mouseClicked(MouseEvent e) {
 						//String command = "cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
 						RestartAPP();
+						JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
 						frame2.dispose();
 					}
 				});
@@ -2119,6 +2044,7 @@ public class tool {
 							Process p = Runtime.getRuntime().exec(command);
 							p.waitFor();
 							p.destroy();
+							JOptionPane.showMessageDialog(null, "已重启系统", "重启系统",JOptionPane.PLAIN_MESSAGE);
 							frame2.dispose();
 						} catch (IOException | InterruptedException e1) {
 							e1.printStackTrace();
@@ -2169,9 +2095,6 @@ public class tool {
 									flag = true;
 								}
 							}
-//							if(p1.waitFor()==0)
-//								System.out.print("截图完成");;
-							//Thread.sleep(3000);
 							newfolder("C:\\inhandTool\\Screenshots");
 							Thread.sleep(100);
 							Process p1 = Runtime.getRuntime().exec(command2);
@@ -2180,8 +2103,12 @@ public class tool {
 							Process p2 = Runtime.getRuntime().exec(command3);
 							PrtScTip.setText("完成！");
 							PrtScTip.setForeground(Color.green);
-							Process p3 = Runtime.getRuntime().exec(command4);
-							Thread.sleep(5000);
+							Process p3 = null;
+							int n = JOptionPane.showConfirmDialog(null, "是否立即查看截图？","截图完成",JOptionPane.OK_CANCEL_OPTION);
+							if (n == 0) {
+								p3 = Runtime.getRuntime().exec(command4);
+							}
+							Thread.sleep(1000);
 							p1.destroy();
 							p2.destroy();
 							p3.destroy();
@@ -2213,7 +2140,7 @@ public class tool {
 						robot = new Robot();
 						try {
 							Thread.currentThread();
-							Thread.sleep(1000);
+							Thread.sleep(300);
 						} catch (InterruptedException e1) {
 							e1.printStackTrace();
 						}
@@ -2248,7 +2175,7 @@ public class tool {
 						robot = new Robot();
 						try {
 							Thread.currentThread();
-							Thread.sleep(1000);
+							Thread.sleep(300);
 						} catch (InterruptedException e1) {
 							e1.printStackTrace();
 						}
@@ -2266,22 +2193,6 @@ public class tool {
 				}
 			}
 		});
-		//选择apks
-//		btnChooseApps.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				Choosedapps = null;
-//				Choosedapps = FileChooser.multipathApkChooser();
-//				choosedappsArea.setText("");
-//				for(int i = 0; i < Choosedapps.length; i++){
-//					//System.out.print(Choosedapps[i].getAbsolutePath()+"\n");
-//					//System.out.print(Choosedapps[i].getName()+"\n");
-//					ChoosedappsStr.add(Choosedapps[i].getAbsolutePath());
-//					choosedappsArea.append(Choosedapps[i].getAbsolutePath()+"\n");
-//				}
-//				//System.out.print(path);
-//			}
-//		});
 		//目录选择器
 		chooseSavelogPathbtn.addMouseListener(new MouseAdapter() {
 			@Override
@@ -2305,6 +2216,16 @@ public class tool {
 				}
 			}
 		});
+	}
+	public static org.dom4j.Document load(String filename) {
+		org.dom4j.Document document = null;
+		try {
+			SAXReader saxReader = new SAXReader();
+			document = saxReader.read(new File(filename));  //读取XML文件,获得document对象
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return document;
 	}
 	private void getCrashLog(){
 		boolean IsExsit = crashLogIsExsit();
@@ -2438,30 +2359,6 @@ public class tool {
 		p1.destroy();
 		p2.destroy();
 		p.destroy();
-		
-//		String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
-//		Process plist3package = Runtime.getRuntime().exec(list3packagecommand);
-//		try {
-//			plist3package.waitFor();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		InputStream isplist3package = plist3package.getInputStream();
-//		InputStreamReader biplist3package = new InputStreamReader(isplist3package);
-//		BufferedReader brlist3package = new BufferedReader(biplist3package);
-//		List<String> packageList=new ArrayList<String>();
-//		String line;
-//		while((line = brlist3package.readLine())!= null){
-//			line = line.replace("package:", "");
-//			//System.out.println(line);
-//			packageList.add(line);
-//		}
-//		Iterator<String> iterator = packageList.iterator();
-//		while(iterator.hasNext()){
-//		    String i = iterator.next();
-//		    System.out.println(i);
-//		}
-		
 	}
 	public String getConfigs(){
 		String command2 = "cmd.exe /c adb pull sdcard/inbox/config C:\\inhandTool\\config";
@@ -2570,8 +2467,8 @@ public class tool {
 					orgName.setSelectedItem(orgNameele.getTextContent());
 					serverAddresseditor.setItem(serveraddressele.getTextContent());
 					serverAddress.setSelectedItem(serveraddressele.getTextContent());
-					serialPorteditor.setItem(serialele.getAttribute("serial"));
-					serialPort.setSelectedItem(serialele.getAttribute("serial"));
+					master_serialPorteditor.setItem(serialele.getAttribute("serial"));
+					master_serialPort.setSelectedItem(serialele.getAttribute("serial"));
 					p.destroy();
 			} catch (Exception e) {
 			}
@@ -2582,7 +2479,7 @@ public class tool {
 	{
 		Timer timer = new Timer();
 		int delay = 2000;//ms
-		int period = 60000;//ms
+		int period = 10000;//ms
 		timer.schedule(new TimerTask() {    
 	       public void run(){
 	    	   boolean IsExsit = crashLogIsExsit();
@@ -2593,13 +2490,18 @@ public class tool {
 	    	   else{
 	    		   newfolder("C:\\inhandTool\\crash_log\\temp");
 		    	   deleteFile("C:\\inhandTool\\crash_log\\temp\\crash_log.txt");
-		    	   String command = "cmd.exe /c adb pull sdcard/inbox/log/crash_log.txt C:\\inhandTool\\crash_log\\temp";
+		    	   String command = "cmd.exe /c adb shell md5 /sdcard/inbox/log/crash_log.txt";
 		    	   try {
 						Process p = Runtime.getRuntime().exec(command);
 						p.waitFor();
+						InputStream is = p.getInputStream();
+						InputStreamReader bi = new InputStreamReader(is);
+						BufferedReader br = new BufferedReader(bi);
+						String message = br.readLine();
+						message = message.split("  ")[0];
+//						System.out.println(message);
 						p.destroy();
-						//Thread.sleep(3000);
-						String tempCrashMd5 = FileMD5.MD5encode("C:\\inhandTool\\crash_log\\temp\\crash_log.txt");
+						String tempCrashMd5 = message;
 						String machineid = getMachineId();
 						String nowCrashMd5 = FileMD5.MD5encode("C:\\inhandTool\\crash_log\\"+machineid+"\\crash_log.txt");
 					if(!tempCrashMd5.equals(nowCrashMd5) && nowCrashMd5 != null){
@@ -2624,9 +2526,9 @@ public class tool {
 					e.printStackTrace();
 				}
 	    	   }
-		   		Check checkup = new Check(updateFlagIcon,updateHost);
-				Thread tcheck = new Thread(checkup);
-				tcheck.start();
+//		   		Check checkup = new Check(updateFlagIcon,updateHost);
+//				Thread tcheck = new Thread(checkup);
+//				tcheck.start();
 	       }  
 	   }, delay, period);  
 	}

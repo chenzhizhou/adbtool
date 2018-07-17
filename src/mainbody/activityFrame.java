@@ -1,7 +1,6 @@
 package mainbody;
 
 
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 
@@ -89,8 +88,7 @@ public class activityFrame extends JFrame {
 					p.waitFor();
 					p.destroy();
 				} catch (Exception e) {
-					Component tip = null;
-					JOptionPane.showMessageDialog(tip, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
+					JOptionPane.showMessageDialog(null, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
 					e.printStackTrace();
 				}
 			}
@@ -698,6 +696,7 @@ public class activityFrame extends JFrame {
 					p.waitFor();
 					p.destroy();
 					RestartAPP();
+					JOptionPane.showMessageDialog(null, "优惠打折配置下发成功", "下发优惠打折配置",JOptionPane.PLAIN_MESSAGE);
 				}
 				catch (IOException | InterruptedException e1) {
 					e1.printStackTrace();
