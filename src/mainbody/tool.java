@@ -188,6 +188,7 @@ public class tool {
 		
 		customize.initCFGxml();
 		frame = new JFrame();
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(tool.class.getResource("/com/sun/javafx/scene/web/skin/IncreaseIndent_16x16_JFX.png")));
 		//frame.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/toolIcon/logo.png")));
 		frame.setBounds(100, 100, 832, 610);
 		frame.getContentPane().setLayout(null);
