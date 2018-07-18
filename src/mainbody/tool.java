@@ -98,7 +98,7 @@ import javax.swing.SwingConstants;
 
 public class tool {
 
-	final static String AppVersion = "v.1.4.1";
+	final static String AppVersion = "v.1.4.2";
 	private JFrame frame;
 	JLabel ConTip;
 	JLabel PrtScTip;
@@ -216,14 +216,14 @@ public class tool {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					activityFrame frame = new activityFrame();
-					frame.setVisible(true);
 					newfolder("C:\\inhandTool\\temp\\activity");
 					deleteFile("C:\\inhandTool\\temp\\activity\\channel_cfg.xml");
 					String command1 = "cmd.exe /c adb pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\temp\\activity";
 					Process p = Runtime.getRuntime().exec(command1);
 					p.waitFor();
 					p.destroy();
+					activityFrame frame = new activityFrame();
+					frame.setVisible(true);
 				} catch (Exception e1) {
 					JOptionPane.showMessageDialog(null, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
 					e1.printStackTrace();
@@ -1364,7 +1364,7 @@ public class tool {
 							installprogressBar.setValue(0);
 							Process p;
 							try {
-								String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | grep inhand";
+								String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | findstr inhand";
 								Process plist3inhandpackage = null;
 								try {
 									plist3inhandpackage = Runtime.getRuntime().exec(list3packagecommand);
@@ -1464,7 +1464,7 @@ public class tool {
 								installprogressBar.setValue(0);
 								Process p;
 								try {
-									String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | grep inhand";
+									String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | findstr inhand";
 									Process plist3inhandpackage = null;
 									try {
 										plist3inhandpackage = Runtime.getRuntime().exec(list3packagecommand);
@@ -1929,7 +1929,7 @@ public class tool {
 				while(iterator.hasNext()){
 				    String packagename = iterator.next();
 				    //System.out.println(packagename);
-				    String getVersioncmd = "cmd.exe /c adb shell dumpsys package "+packagename+" | grep versionName";
+				    String getVersioncmd = "cmd.exe /c adb shell dumpsys package "+packagename+" | findstr versionName";
 				    //System.out.println(getVersioncmd);
 				    try {
 						Process p = Runtime.getRuntime().exec(getVersioncmd);
@@ -2289,7 +2289,7 @@ public class tool {
 			ConTip.setVisible(false);
 		}
 		adbdevicesArea.append("\nMachineID:"+getMachineId());
-		String command1 = "cmd.exe /c adb shell dumpsys telephony.registry | grep mDataConnectionState";
+		String command1 = "cmd.exe /c adb shell dumpsys telephony.registry | findstr mDataConnectionState";
 		Process p1 = Runtime.getRuntime().exec(command1);
 		try {
 			p1.waitFor();
@@ -2326,7 +2326,7 @@ public class tool {
 			btn_mDataConnectionState.setEnabled(false);
 		}
 		
-		String command2 = "cmd.exe /c adb shell dumpsys wifi | grep \"Wi-Fi is\"";
+		String command2 = "cmd.exe /c adb shell dumpsys wifi | findstr \"Wi-Fi is\"";
 		Process p2 = Runtime.getRuntime().exec(command2);
 		try {
 			p2.waitFor();
@@ -2337,6 +2337,7 @@ public class tool {
 		InputStreamReader bi2 = new InputStreamReader(is2);
 		BufferedReader br2 = new BufferedReader(bi2);
 		String message2 = br2.readLine();
+		System.out.println(message2);
 		while(message2 != null && !"".equals(message2)){
 			//System.out.print(message1);
 			response2 = message2;
@@ -2570,7 +2571,7 @@ public class tool {
 		}
 	}
 	public boolean crashLogIsExsit(){
-		String command = "cmd.exe /c adb shell ls sdcard/inbox/log | grep crash_log.txt";
+		String command = "cmd.exe /c adb shell ls sdcard/inbox/log | findstr crash_log.txt";
 		Process p = null;
 		String response = null;
 		boolean crashLogEmpty = true;
