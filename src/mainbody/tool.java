@@ -98,7 +98,7 @@ import javax.swing.SwingConstants;
 
 public class tool {
 
-	final static String AppVersion = "v.1.4.2";
+	final static String AppVersion = "v.1.4.3";
 	private JFrame frame;
 	JLabel ConTip;
 	JLabel PrtScTip;
@@ -2337,7 +2337,7 @@ public class tool {
 		InputStreamReader bi2 = new InputStreamReader(is2);
 		BufferedReader br2 = new BufferedReader(bi2);
 		String message2 = br2.readLine();
-		System.out.println(message2);
+//		System.out.println(message2);
 		while(message2 != null && !"".equals(message2)){
 			//System.out.print(message1);
 			response2 = message2;

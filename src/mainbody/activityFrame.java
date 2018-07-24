@@ -130,7 +130,7 @@ public class activityFrame extends JFrame {
 		contentPane.add(unitLabel);
 		
 		JLabel unitLabe2 = new JLabel("折/分");
-		unitLabe2.setBounds(151, 246, 54, 15);
+		unitLabe2.setBounds(49, 251, 35, 15);
 		contentPane.add(unitLabe2);
 		
 		reset = new JButton("重置");
@@ -252,7 +252,7 @@ public class activityFrame extends JFrame {
 		
 		discountNum_textField = new JTextField();
 		discountNum_textField.setText("5");
-		discountNum_textField.setBounds(10, 235, 131, 37);
+		discountNum_textField.setBounds(10, 246, 41, 26);
 		contentPane.add(discountNum_textField);
 		discountNum_textField.setColumns(10);
 		
@@ -736,6 +736,27 @@ public class activityFrame extends JFrame {
 		label_5.setBounds(10, 86, 182, 15);
 		contentPane.add(label_5);
 		
+		JButton clear_button = new JButton("清空配置");
+		clear_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String command3 = "cmd.exe /c adb shell rm /sdcard/inbox/game/*";
+		        Process p;
+				try {
+					p = Runtime.getRuntime().exec(command3);
+					p.waitFor();
+					p.destroy();
+					RestartAPP();
+				} catch (IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				JOptionPane.showMessageDialog(null, "清空配置成功", "清空配置",JOptionPane.CANCEL_OPTION);
+			}
+		});
+		clear_button.setBounds(92, 249, 100, 23);
+		contentPane.add(clear_button);
+		
 		reset.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -745,6 +766,7 @@ public class activityFrame extends JFrame {
 				separate_time_view.setText("优惠时间段：");
 				reset.setVisible(false);
 				add_time_Button.setVisible(true);
+				JOptionPane.showMessageDialog(null, "重置时间段成功", "重置",JOptionPane.CANCEL_OPTION);
 			}
 		});
 		
