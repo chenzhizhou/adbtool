@@ -132,6 +132,79 @@ public class tool {
 	private JComboBox<String> insatlled3app;
 	private String log_savepath;
 	protected String save_log_formatTime;
+	private JLabel versionBottom;
+	private JTextArea adbdevicesArea;
+	private JScrollPane adbdevicesAreascrollPane;
+	private JButton activity_cfg_Button;
+	private JPanel panel_1ogcat;
+	private JButton logcatvtime;
+	private JButton logcatvtimetags;
+	private Label label;
+	private Label label_1;
+	private JTextField tagsField;
+	private Label label_2;
+	private JButton clearbeforeLog;
+	private JButton addLogTag;
+	private JLabel lblNewLabel_3;
+	private JPanel panel_save1ogcat;
+	private JTextField saveLogTagField;
+	private JTextField logSavePathField;
+	private FileSystemView fsv;
+	private JButton pullHistoryLogbtn;
+	private JButton chooseSavelogPathbtn;
+	private JCheckBox checkboxLogTag;
+	private Label label_3;
+	private JButton btnStopSaveLog;
+	private JButton btnStartSaveLog;
+	private JButton btnRestart;
+	private JButton btnScreenshot;
+	private JTextArea pushConfigArea;
+	private JScrollPane pushConfigscrollPane;
+	private JPanel configPanel;
+	private JButton btnPushingConfig;
+	private JButton clearconfig;
+	private SpinnerDateModel datemodel;
+	private JButton btnPullConfig;
+	private JButton btnPullGameCfg;
+	private JButton btnchannelcfg;
+	private JPanel inhandApp;
+	private JPanel CloudSetup;
+	private JButton btnUpdateCloudConfig;
+	private JLabel labelorgName;
+	private JLabel labelServerAddress;
+	private JLabel labelVMCport;
+	private JButton btnGetCloudConfig;
+	private JLabel lblNewLabel_1;
+	private JButton addOrg;
+	private JButton addAddress;
+	private JCheckBox only_matser_serial_chckbxNewCheckBox;
+	private JButton btn_mDataConnectionState;
+	private JButton btn_mWifiConnectionState;
+	private JTextArea choosedappsArea;
+	private JScrollPane choosedappsScrollPane;
+	private JButton btnclearApps;
+	private JButton btnInstallAll;
+	private JButton btnOnlyInstall;
+	private JButton btnUninstallAll;
+	private JButton changeMachineId;
+	private JPanel simKeyEventPanel;
+	private JButton btnSimKeyHome;
+	private JButton btnSimKeyBack;
+	private JButton btnSimKeyMenu;
+	private JButton btnSimKeyMode;
+	private JSpinner datespinner;
+	private JButton btnSetTime;
+	private JButton btnRevertTime;
+	private JButton btnToolUpdate;
+	private JPanel panel;
+	private JButton btn_getInstalled3;
+	private JButton uninstallapp;
+	private JButton btnInstalled;
+	private JLabel lblNewLabel_2;
+	private crashLogUpdateThread clut;
+	private CloudConfigThread cct;
+	private Thread clutT;
+	private Thread cctT;
 	static JComboBox<String> commonTagscomboBox;
 	
 	
@@ -143,25 +216,25 @@ public class tool {
 
 			
 
-			public void run() {
-				try {
-					
-					tool window = new tool();
-					window.frame.setVisible(true);
-					//filepath = getNowPath();
-					newfolder(filepath);
-					deleteFile(filepath+"ver.txt");
-					creatNewFile(filepath+"ver.txt");
-					writeFile(filepath+"ver.txt",AppVersion);
+		public void run() {
+			try {
+				
+				tool window = new tool();
+				window.frame.setVisible(true);
+				//filepath = getNowPath();
+				newfolder(filepath);
+				deleteFile(filepath+"ver.txt");
+				creatNewFile(filepath+"ver.txt");
+				writeFile(filepath+"ver.txt",AppVersion);
 //					InputStream inStream = new FileInputStream(new File(filepath+"config.properties"));
 //					Properties prop = new Properties();  
 //					prop.load(inStream);
 //					updateHost = prop.getProperty("updateHost");
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+		}
 		});
 	}
 
@@ -194,24 +267,24 @@ public class tool {
 		frame.getContentPane().setLayout(null);
 		String Title = AppVersion+"——By.chenzhiz@inhand.com.cn";
 		frame.setTitle("adb工具"+AppVersion);
-		JLabel versionBottom = new JLabel(Title);
+		versionBottom = new JLabel(Title);
 		versionBottom.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 10));
 		versionBottom.setBounds(622, 556, 194, 15);
 		frame.getContentPane().add(versionBottom);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JTextArea adbdevicesArea = new JTextArea();
+		adbdevicesArea = new JTextArea();
 		adbdevicesArea.setLineWrap(true);
 		adbdevicesArea.setEditable(false);
 		adbdevicesArea.setBounds(10, 10, 132, 63);
 		frame.getContentPane().add(adbdevicesArea);
-		JScrollPane adbdevicesAreascrollPane = new JScrollPane(adbdevicesArea);
+		adbdevicesAreascrollPane = new JScrollPane(adbdevicesArea);
 		adbdevicesAreascrollPane.setVerticalScrollBarPolicy(
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);//滚动条总是出现
 		adbdevicesAreascrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		adbdevicesAreascrollPane.setBounds(10, 10, 171, 63);
 		frame.getContentPane().add(adbdevicesAreascrollPane);
 		
-		JButton activity_cfg_Button = new JButton("优惠打折快速配置");
+		activity_cfg_Button = new JButton("优惠打折快速配置");
 		activity_cfg_Button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -233,37 +306,37 @@ public class tool {
 		activity_cfg_Button.setBounds(590, 382, 216, 49);
 		frame.getContentPane().add(activity_cfg_Button);
 		
-		JPanel panel_1ogcat = new JPanel();
+		panel_1ogcat = new JPanel();
 		panel_1ogcat.setBackground(Color.WHITE);
 		panel_1ogcat.setBorder(BorderFactory.createTitledBorder("打印日志"));
 		panel_1ogcat.setBounds(10, 116, 280, 169);
 		frame.getContentPane().add(panel_1ogcat);
 		panel_1ogcat.setLayout(null);
-		JButton logcatvtime = new JButton("<html>打印<br>所有日志</html>");
+		logcatvtime = new JButton("<html>打印<br>所有日志</html>");
 		logcatvtime.setBounds(177, 10, 93, 39);
 		panel_1ogcat.add(logcatvtime);
-		JButton logcatvtimetags = new JButton("<html>打印<br>过滤日志</html>");
+		logcatvtimetags = new JButton("<html>打印<br>过滤日志</html>");
 		logcatvtimetags.setBounds(177, 59, 93, 39);
 		panel_1ogcat.add(logcatvtimetags);
 		
-		Label label = new Label("adb logcat -v time ");
+		label = new Label("adb logcat -v time ");
 		label.setBounds(10, 27, 118, 23);
 		panel_1ogcat.add(label);
 		
-		Label label_1 = new Label("adb logcat -v time -s ");
+		label_1 = new Label("adb logcat -v time -s ");
 		label_1.setBounds(10, 56, 118, 23);
 		panel_1ogcat.add(label_1);
 		
-		JTextField tagsField = new JTextField();
+		tagsField = new JTextField();
 		tagsField.setBounds(49, 111, 118, 21);
 		panel_1ogcat.add(tagsField);
 		tagsField.setColumns(10);
 		
-		Label label_2 = new Label("Tags:");
+		label_2 = new Label("Tags:");
 		label_2.setBounds(10, 97, 33, 23);
 		panel_1ogcat.add(label_2);
 		
-		JButton clearbeforeLog = new JButton("<html>清空<br>日志缓存</html>");
+		clearbeforeLog = new JButton("<html>清空<br>日志缓存</html>");
 		clearbeforeLog.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -296,7 +369,7 @@ public class tool {
 		customize.addressRead(commonTagscomboBox,"log_tag");
 		panel_1ogcat.add(commonTagscomboBox);
 		
-		JButton addLogTag = new JButton("+");
+		addLogTag = new JButton("+");
 		addLogTag.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -308,31 +381,31 @@ public class tool {
 		addLogTag.setBounds(93, 139, 40, 22);
 		panel_1ogcat.add(addLogTag);
 		
-		JLabel lblNewLabel_3 = new JLabel("添加常用Tag：");
+		lblNewLabel_3 = new JLabel("添加常用Tag：");
 		lblNewLabel_3.setBounds(10, 143, 93, 15);
 		panel_1ogcat.add(lblNewLabel_3);
 		
-		JPanel panel_save1ogcat = new JPanel();
+		panel_save1ogcat = new JPanel();
 		panel_save1ogcat.setBackground(Color.WHITE);
 		panel_save1ogcat.setBorder(BorderFactory.createTitledBorder("实时保存日志"));
 		panel_save1ogcat.setBounds(10, 295, 280, 223);
 		frame.getContentPane().add(panel_save1ogcat);
 		panel_save1ogcat.setLayout(null);
 		
-		JTextField saveLogTagField = new JTextField();
+		saveLogTagField = new JTextField();
 		saveLogTagField.setEditable(false);
 		saveLogTagField.setBounds(49, 49, 221, 21);
 		panel_save1ogcat.add(saveLogTagField);
 		saveLogTagField.setColumns(10);
 		
-		JTextField logSavePathField = new JTextField();
-		FileSystemView fsv = FileSystemView.getFileSystemView();
+		logSavePathField = new JTextField();
+		fsv = FileSystemView.getFileSystemView();
 		logSavePathField.setColumns(10);
 		logSavePathField.setBounds(10, 129, 260, 30);
 		logSavePathField.setText(fsv.getHomeDirectory().toString());
 		panel_save1ogcat.add(logSavePathField);
 		
-		JButton pullHistoryLogbtn = new JButton("导出主日志");
+		pullHistoryLogbtn = new JButton("导出主日志");
 		pullHistoryLogbtn.addMouseListener(new MouseAdapter() {
 			private Process p;
 			@Override
@@ -415,25 +488,25 @@ public class tool {
 		pullHistoryLogbtn.setBounds(143, 173, 114, 23);
 		panel_save1ogcat.add(pullHistoryLogbtn);
 		
-		JButton chooseSavelogPathbtn = new JButton("<html>选择日志<br>保存路径</html>");
+		chooseSavelogPathbtn = new JButton("<html>选择日志<br>保存路径</html>");
 		
 		chooseSavelogPathbtn.setBounds(10, 80, 93, 39);
 		panel_save1ogcat.add(chooseSavelogPathbtn);
 		
 		
-		JCheckBox checkboxLogTag = new JCheckBox("tag过滤");
+		checkboxLogTag = new JCheckBox("tag过滤");
 		checkboxLogTag.setBackground(Color.WHITE);
 		checkboxLogTag.setBounds(10, 20, 103, 23);
 		panel_save1ogcat.add(checkboxLogTag);
 		
 
 		
-		Label label_3 = new Label("Tags:");
+		label_3 = new Label("Tags:");
 		label_3.setBounds(10, 49, 33, 23);
 		panel_save1ogcat.add(label_3);
 		
 		//停止保存日志
-		JButton btnStopSaveLog = new JButton("Stop");
+		btnStopSaveLog = new JButton("Stop");
 		btnStopSaveLog.setFont(new Font("宋体", Font.PLAIN, 10));
 		//btnStopSaveLog.setIcon(new ImageIcon("./toolIcon/stop.png"));
 		//btnStopSaveLog.setIcon(new ImageIcon(getClass().getResource("/toolIcon/stop.png")));
@@ -442,7 +515,7 @@ public class tool {
 		btnStopSaveLog.setEnabled(false);
 		
 		//开始保存日志
-		JButton btnStartSaveLog = new JButton();
+		btnStartSaveLog = new JButton();
 		btnStartSaveLog.setFont(new Font("宋体", Font.PLAIN, 10));
 		btnStartSaveLog.setText("Start");
 		//btnStartSaveLog.setIcon(new ImageIcon(getClass().getResource("/toolIcon/start.png")));
@@ -450,12 +523,12 @@ public class tool {
 		panel_save1ogcat.add(btnStartSaveLog);
 		
 		//重启按钮
-		JButton btnRestart = new JButton("重启");
+		btnRestart = new JButton("重启");
 		btnRestart.setBounds(191, 11, 93, 36);
 		frame.getContentPane().add(btnRestart);
 		
 		//设备截图
-		JButton btnScreenshot = new JButton("设备截图");
+		btnScreenshot = new JButton("设备截图");
 		btnScreenshot.setBounds(191, 57, 93, 49);
 		frame.getContentPane().add(btnScreenshot);
 		PrtScTip = new JLabel("");
@@ -474,7 +547,7 @@ public class tool {
 		crashLogUpdateTip.setVisible(false);
 		
 		//推送配置文件框
-		JTextArea pushConfigArea = new JTextArea("请将需要下发的配置文件拖拽至此\n文件路径不能包含中文和空格\n");
+		pushConfigArea = new JTextArea("请将需要下发的配置文件拖拽至此\n文件路径不能包含中文和空格\n");
 		pushConfigArea.setLineWrap(true);
 		pushConfigArea.setEditable(false);
 		pushConfigArea.setTransferHandler(new TransferHandler(){
@@ -531,12 +604,12 @@ public class tool {
         });
 
 		
-		JScrollPane pushConfigscrollPane = new JScrollPane(pushConfigArea);
+		pushConfigscrollPane = new JScrollPane(pushConfigArea);
 		pushConfigscrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		pushConfigscrollPane.setBounds(126, 20, 144, 106);
 		pushConfigscrollPane.setViewportView(pushConfigArea);
 		
-		JPanel configPanel = new JPanel();
+		configPanel = new JPanel();
 		configPanel.setLayout(null);
 		configPanel.setBorder(BorderFactory.createTitledBorder("运行配置"));
 		configPanel.setBackground(Color.WHITE);
@@ -546,7 +619,7 @@ public class tool {
 		
 		
 		//下发config
-		JButton btnPushingConfig = new JButton("下发");
+		btnPushingConfig = new JButton("下发");
 		btnPushingConfig.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -594,7 +667,7 @@ public class tool {
 		configPanel.add(btnPushingConfig);
 		
 		//清空config
-		JButton clearconfig = new JButton();
+		clearconfig = new JButton();
 		clearconfig.setToolTipText("\u6E05\u7A7A");
 		clearconfig.addMouseListener(new MouseAdapter() {
 			@Override
@@ -610,9 +683,9 @@ public class tool {
 		configPanel.add(clearconfig);
 		
 		//时间选择器
-		SpinnerDateModel datemodel = new SpinnerDateModel();
+		datemodel = new SpinnerDateModel();
 		
-		JButton btnPullConfig = new JButton("获取运行配置");
+		btnPullConfig = new JButton("获取运行配置");
 		btnPullConfig.setBounds(10, 20, 112, 43);
 		configPanel.add(btnPullConfig);
 		//获取运行配置
@@ -623,7 +696,7 @@ public class tool {
 				}
 		});
 		
-		JButton btnPullGameCfg = new JButton("获取活动配置");
+		btnPullGameCfg = new JButton("获取活动配置");
 		btnPullGameCfg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -656,7 +729,7 @@ public class tool {
 		btnPullGameCfg.setBounds(10, 73, 112, 23);
 		configPanel.add(btnPullGameCfg);
 		
-		JButton btnchannelcfg = new JButton("货道快速配置");
+		btnchannelcfg = new JButton("货道快速配置");
 		btnchannelcfg.setBounds(10, 125, 112, 34);
 		configPanel.add(btnchannelcfg);
 		btnchannelcfg.addMouseListener(new MouseAdapter() {
@@ -668,7 +741,7 @@ public class tool {
 		});
 
 		
-		JPanel inhandApp = new JPanel();
+		inhandApp = new JPanel();
 		inhandApp.setLayout(null);
 		inhandApp.setBorder(BorderFactory.createTitledBorder("Inhand应用"));
 		inhandApp.setBackground(Color.WHITE);
@@ -848,7 +921,7 @@ public class tool {
 		label_refundEndTime.setBounds(176, 70, 93, 15);
 		channelSetup.add(label_refundEndTime);
 */	
-		JPanel CloudSetup = new JPanel();
+		CloudSetup = new JPanel();
 		CloudSetup.setLayout(null);
 		CloudSetup.setBorder(BorderFactory.createTitledBorder("连接平台配置"));
 		CloudSetup.setBackground(Color.WHITE);
@@ -856,7 +929,7 @@ public class tool {
 		frame.getContentPane().add(CloudSetup);
 
 		
-		JButton btnUpdateCloudConfig = new JButton("更新配置");
+		btnUpdateCloudConfig = new JButton("更新配置");
 		btnUpdateCloudConfig.setBounds(184, 146, 86, 23);
 		CloudSetup.add(btnUpdateCloudConfig);
 		
@@ -893,19 +966,19 @@ public class tool {
 		CloudSetup.add(master_serialPort);
 		
 		
-		JLabel labelorgName = new JLabel("机构名：");
+		labelorgName = new JLabel("机构名：");
 		labelorgName.setBounds(10, 27, 54, 15);
 		CloudSetup.add(labelorgName);
 		
-		JLabel labelServerAddress = new JLabel("平台地址：");
+		labelServerAddress = new JLabel("平台地址：");
 		labelServerAddress.setBounds(10, 58, 68, 15);
 		CloudSetup.add(labelServerAddress);
 		
-		JLabel labelVMCport = new JLabel("VMC串口：");
+		labelVMCport = new JLabel("VMC串口：");
 		labelVMCport.setBounds(10, 91, 68, 15);
 		CloudSetup.add(labelVMCport);
 		
-		JButton btnGetCloudConfig = new JButton("刷新");
+		btnGetCloudConfig = new JButton("刷新");
 		btnGetCloudConfig.addMouseListener(new MouseAdapter() {
 			private Process p;
 			@Override
@@ -981,7 +1054,7 @@ public class tool {
 		btnGetCloudConfig.setBounds(10, 146, 86, 23);
 		CloudSetup.add(btnGetCloudConfig);
 		
-		JLabel lblNewLabel_1 = new JLabel("当前厂家：");
+		lblNewLabel_1 = new JLabel("当前厂家：");
 		lblNewLabel_1.setBounds(10, 119, 68, 15);
 		CloudSetup.add(lblNewLabel_1);
 		
@@ -990,7 +1063,7 @@ public class tool {
 		nowVendor.setBounds(74, 119, 118, 21);
 		CloudSetup.add(nowVendor);
 		
-		JButton addOrg = new JButton("ADD");
+		addOrg = new JButton("ADD");
 		addOrg.setToolTipText("新增机构");
 		addOrg.setFont(new Font("宋体", Font.PLAIN, 12));
 		addOrg.setBounds(202, 23, 54, 23);
@@ -1003,13 +1076,13 @@ public class tool {
 			}
 		});
 		
-		JButton addAddress = new JButton("ADD");
+		addAddress = new JButton("ADD");
 		addAddress.setToolTipText("新增平台地址");
 		addAddress.setFont(new Font("宋体", Font.PLAIN, 12));
 		addAddress.setBounds(202, 54, 54, 23);
 		CloudSetup.add(addAddress);
 		
-		JCheckBox only_matser_serial_chckbxNewCheckBox = new JCheckBox("只修改主柜串口");
+		only_matser_serial_chckbxNewCheckBox = new JCheckBox("只修改主柜串口");
 		only_matser_serial_chckbxNewCheckBox.setBounds(134, 87, 122, 23);
 		CloudSetup.add(only_matser_serial_chckbxNewCheckBox);
 		addAddress.addMouseListener(new MouseAdapter() {
@@ -1149,7 +1222,7 @@ public class tool {
 //		JLabel label_Switch_mdata = new JLabel("New label");
 //		label_Switch_mdata.setBounds(590, 65, 54, 15);
 //		frame.getContentPane().add(label_Switch_mdata);
-		JButton btn_mDataConnectionState = new JButton("<html>蜂窝网络<br>状态:UNKNOWN</html>");
+		btn_mDataConnectionState = new JButton("<html>蜂窝网络<br>状态:UNKNOWN</html>");
 		btn_mDataConnectionState.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -1202,7 +1275,7 @@ public class tool {
 		btn_mDataConnectionState.setBounds(590, 507, 92, 43);
 		frame.getContentPane().add(btn_mDataConnectionState);
 		
-		JButton btn_mWifiConnectionState = new JButton("<html>WIFI网络<br>状态:UNKNOWN</html>");
+		btn_mWifiConnectionState = new JButton("<html>WIFI网络<br>状态:UNKNOWN</html>");
 		btn_mWifiConnectionState.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -1257,7 +1330,7 @@ public class tool {
 		
 		
 		//已选APK框
-		JTextArea choosedappsArea = new JTextArea("将需要安装的APK文件拖拽至此\n文件路径不能包含中文和空格\n");
+		choosedappsArea = new JTextArea("将需要安装的APK文件拖拽至此\n文件路径不能包含中文和空格\n");
 		choosedappsArea.setLineWrap(true);
 		choosedappsArea.setEditable(false);
 		choosedappsArea.setBounds(10, 21, 171, 63);
@@ -1316,13 +1389,13 @@ public class tool {
             }
         });
 		
-		JScrollPane choosedappsScrollPane = new JScrollPane(choosedappsArea);
+		choosedappsScrollPane = new JScrollPane(choosedappsArea);
 		choosedappsScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		choosedappsScrollPane.setBounds(10, 21, 177, 105);
 		inhandApp.add(choosedappsScrollPane);
 		
 		//清空apps
-		JButton btnclearApps = new JButton("清空");
+		btnclearApps = new JButton("清空");
 		btnclearApps.setToolTipText("\u6E05\u7A7A");
 		btnclearApps.addMouseListener(new MouseAdapter() {
 			@Override
@@ -1336,11 +1409,11 @@ public class tool {
 		btnclearApps.setBounds(112, 128, 75, 23);
 		inhandApp.add(btnclearApps);
 		
-		JButton btnInstallAll = new JButton("<html>卸载<br>全部<br>并安装</html>");
+		btnInstallAll = new JButton("<html>卸载<br>全部<br>并安装</html>");
 		btnInstallAll.setBounds(197, 21, 73, 59);
 		inhandApp.add(btnInstallAll);
 		
-		JButton btnOnlyInstall = new JButton("仅安装");
+		btnOnlyInstall = new JButton("仅安装");
 		btnOnlyInstall.setBounds(197, 116, 73, 35);
 		inhandApp.add(btnOnlyInstall);
 		
@@ -1348,71 +1421,71 @@ public class tool {
 		installprogressBar.setStringPainted(true);
 		installprogressBar.setBounds(10, 154, 260, 14);
 		inhandApp.add(installprogressBar);
+	
+		btnUninstallAll = new JButton("全部卸载");
+		btnUninstallAll.setBounds(10, 127, 92, 23);
+		inhandApp.add(btnUninstallAll);
 		
-			JButton btnUninstallAll = new JButton("全部卸载");
-			btnUninstallAll.setBounds(10, 127, 92, 23);
-			inhandApp.add(btnUninstallAll);
-			
-			//卸载ALLApk
-			btnUninstallAll.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					class uninstall implements Runnable{
-						@Override
-						public void run() {
-							now = 0;
-							installprogressBar.setValue(0);
-							Process p;
+		//卸载ALLApk
+		btnUninstallAll.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				class uninstall implements Runnable{
+					@Override
+					public void run() {
+						now = 0;
+						installprogressBar.setValue(0);
+						Process p;
+						try {
+							String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | findstr inhand";
+							Process plist3inhandpackage = null;
 							try {
-								String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | findstr inhand";
-								Process plist3inhandpackage = null;
-								try {
-									plist3inhandpackage = Runtime.getRuntime().exec(list3packagecommand);
-									plist3inhandpackage.waitFor();
-								} catch (Exception e1) {
-									e1.printStackTrace();
-								}
-								InputStream isplist3package = plist3inhandpackage.getInputStream();
-								InputStreamReader biplist3package = new InputStreamReader(isplist3package);
-								BufferedReader brlist3package = new BufferedReader(biplist3package);
-								List<String> packageList=new ArrayList<String>();
-								String line;
-								try {
-									while((line = brlist3package.readLine())!= null){
-										if (!line.equals("")) {
-											line.trim();
-											line = line.replace("package:", "");
-											packageList.add(line);
-										}
-									}
-								} catch (IOException e1) {
-									e1.printStackTrace();
-								}
-								System.out.println(packageList);
-								int all = packageList.size();
-								for(int i = 0;i<packageList.size();i++){
-									p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall "+packageList.get(i));
-									p.waitFor();
-									p.destroy();
-									InstallProgress(all, now+=1, installprogressBar);
-								}
-								installprogressBar.setValue(100);
-								JOptionPane.showMessageDialog(null, "卸载完成！", "卸载全部Inhand应用",JOptionPane.PLAIN_MESSAGE);
-							} catch (IOException | InterruptedException e) {
-								e.printStackTrace();
+								plist3inhandpackage = Runtime.getRuntime().exec(list3packagecommand);
+								plist3inhandpackage.waitFor();
+							} catch (Exception e1) {
+								e1.printStackTrace();
 							}
-							
+							InputStream isplist3package = plist3inhandpackage.getInputStream();
+							InputStreamReader biplist3package = new InputStreamReader(isplist3package);
+							BufferedReader brlist3package = new BufferedReader(biplist3package);
+							List<String> packageList=new ArrayList<String>();
+							String line;
+							try {
+								while((line = brlist3package.readLine())!= null){
+									if (!line.equals("")) {
+										line.trim();
+										line = line.replace("package:", "");
+										packageList.add(line);
+									}
+								}
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+							System.out.println(packageList);
+							int all = packageList.size();
+							for(int i = 0;i<packageList.size();i++){
+								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall "+packageList.get(i));
+								p.waitFor();
+								p.destroy();
+								InstallProgress(all, now+=1, installprogressBar);
+							}
+							installprogressBar.setValue(100);
+							JOptionPane.showMessageDialog(null, "卸载完成！", "卸载全部Inhand应用",JOptionPane.PLAIN_MESSAGE);
+						} catch (IOException | InterruptedException e) {
+							e.printStackTrace();
 						}
 						
 					}
-					int n = JOptionPane.showConfirmDialog(null, "是否要将Inhand APP全部卸载","全部卸载",JOptionPane.OK_CANCEL_OPTION);
-					if (n == 0) {
-						uninstall uIt = new uninstall();
-						Thread t1 = new Thread(uIt);
-						t1.start();
-					}
+					
 				}
-			});
+				int n = JOptionPane.showConfirmDialog(null, "是否要将Inhand APP全部卸载","全部卸载",JOptionPane.OK_CANCEL_OPTION);
+				if (n == 0) {
+					uninstall uIt = new uninstall();
+					Thread t1 = new Thread(uIt);
+					t1.start();
+				}
+			}
+		});
 		//仅安装
 		btnOnlyInstall.addMouseListener(new MouseAdapter() {
 			@Override
@@ -1543,68 +1616,68 @@ public class tool {
 					}
 			}
 		});
-	//保存崩溃日志
-			btnCrashlog.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					getCrashLog();
-				}
-			});
+		//保存崩溃日志
+		btnCrashlog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				getCrashLog();
+			}
+		});
 		//保存日志
-			btnStartSaveLog.addMouseListener(new MouseAdapter() {
-
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					btnStartSaveLog.setEnabled(false);
-					btnStopSaveLog.setEnabled(true);
-					save_log_formatTime = getFormatTime();
-					String command0 = "cmd.exe /c adb logcat -c";
-					String command1 = "cmd.exe /c adb logcat -v time ";
-					String command2 = "cmd.exe /c start ";
-					//String machineid = getMachineId();
-					log_savepath = logSavePathField.getText();
-					File file =new File(log_savepath);
-					String tag = saveLogTagField.getText();
-					if(!file.exists()){
-						newfolder(log_savepath);
-					}
-					if (SaveLogTag) {
-						command1 = command1 + "-s " + tag + " >" + log_savepath + "\\log" +save_log_formatTime + ".log";
-					}
-					else{
-						command1 = command1 + ">" + log_savepath + "\\log" +save_log_formatTime + ".log";	
-					}
-					System.out.print(command1);
-					try {
-						SaveLogProcess = Runtime.getRuntime().exec(command0);
-						//Thread.sleep(200);
-						SaveLogProcess = Runtime.getRuntime().exec(command1);
-						command2 = command2 + log_savepath;
-						//SaveLogProcess = Runtime.getRuntime().exec(command2);
-						JOptionPane.showMessageDialog(null, "正在保存日志……\n日志保存目录：\n"+log_savepath+"\n日志名称：log" +save_log_formatTime + ".log", "保存日志",JOptionPane.PLAIN_MESSAGE);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
+		btnStartSaveLog.addMouseListener(new MouseAdapter() {
+		
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				btnStartSaveLog.setEnabled(false);
+				btnStopSaveLog.setEnabled(true);
+				save_log_formatTime = getFormatTime();
+				String command0 = "cmd.exe /c adb logcat -c";
+				String command1 = "cmd.exe /c adb logcat -v time ";
+				String command2 = "cmd.exe /c start ";
+				//String machineid = getMachineId();
+				log_savepath = logSavePathField.getText();
+				File file =new File(log_savepath);
+				String tag = saveLogTagField.getText();
+				if(!file.exists()){
+					newfolder(log_savepath);
 				}
-			});
-			//停止保存日志
-			btnStopSaveLog.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					btnStartSaveLog.setEnabled(true);
-					btnStopSaveLog.setEnabled(false);
-					SaveLogProcess.destroy();
-					String command1 = "cmd.exe /c TASKKILL /F /IM adb.exe";
-					try {
-						Process p = Runtime.getRuntime().exec(command1);
-						p.waitFor();
-						p.destroy();
-						JOptionPane.showMessageDialog(null, "保存成功！\n"+log_savepath+"\n日志名称：log" +save_log_formatTime + ".log", "停止保存日志",JOptionPane.PLAIN_MESSAGE);
-					} catch (IOException | InterruptedException e1) {
-						e1.printStackTrace();
-					}
+				if (SaveLogTag) {
+					command1 = command1 + "-s " + tag + " >" + log_savepath + "\\log" +save_log_formatTime + ".log";
 				}
-			});
+				else{
+					command1 = command1 + ">" + log_savepath + "\\log" +save_log_formatTime + ".log";	
+				}
+				System.out.print(command1);
+				try {
+					SaveLogProcess = Runtime.getRuntime().exec(command0);
+					//Thread.sleep(200);
+					SaveLogProcess = Runtime.getRuntime().exec(command1);
+					command2 = command2 + log_savepath;
+					//SaveLogProcess = Runtime.getRuntime().exec(command2);
+					JOptionPane.showMessageDialog(null, "正在保存日志……\n日志保存目录：\n"+log_savepath+"\n日志名称：log" +save_log_formatTime + ".log", "保存日志",JOptionPane.PLAIN_MESSAGE);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		//停止保存日志
+		btnStopSaveLog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				btnStartSaveLog.setEnabled(true);
+				btnStopSaveLog.setEnabled(false);
+				SaveLogProcess.destroy();
+				String command1 = "cmd.exe /c TASKKILL /F /IM adb.exe";
+				try {
+					Process p = Runtime.getRuntime().exec(command1);
+					p.waitFor();
+					p.destroy();
+					JOptionPane.showMessageDialog(null, "保存成功！\n"+log_savepath+"\n日志名称：log" +save_log_formatTime + ".log", "停止保存日志",JOptionPane.PLAIN_MESSAGE);
+				} catch (IOException | InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 		//轮询已连接设备
 		adbdevicesTimerDemo(adbdevicesArea,btn_mDataConnectionState,btn_mWifiConnectionState);
 		
@@ -1615,7 +1688,7 @@ public class tool {
 		ConTip.setForeground(Color.RED);
 		
 		
-		JButton changeMachineId = new JButton("更改售货机编号");
+		changeMachineId = new JButton("更改售货机编号");
 		changeMachineId.setBounds(10, 528, 142, 23);
 		frame.getContentPane().add(changeMachineId);
 		//更改售货机编号
@@ -1663,29 +1736,29 @@ public class tool {
 			}
 		});
 		
-		JPanel simKeyEventPanel = new JPanel();
+		simKeyEventPanel = new JPanel();
 		simKeyEventPanel.setBackground(Color.WHITE);
 		simKeyEventPanel.setLayout(null);
 		simKeyEventPanel.setBorder(BorderFactory.createTitledBorder("模拟按键、时间"));
 		simKeyEventPanel.setBounds(590, 15, 216, 169);
 		frame.getContentPane().add(simKeyEventPanel);
 		
-		JButton btnSimKeyHome = new JButton("HOME");
+		btnSimKeyHome = new JButton("HOME");
 		btnSimKeyHome.setBounds(10, 24, 68, 23);
 		simKeyEventPanel.add(btnSimKeyHome);
 		
-		JButton btnSimKeyBack = new JButton("BACK");
+		btnSimKeyBack = new JButton("BACK");
 		btnSimKeyBack.setBounds(10, 56, 68, 23);
 		simKeyEventPanel.add(btnSimKeyBack);
 		
-		JButton btnSimKeyMenu = new JButton("MENU");
+		btnSimKeyMenu = new JButton("MENU");
 		btnSimKeyMenu.setBounds(10, 89, 68, 23);
 		simKeyEventPanel.add(btnSimKeyMenu);
 		
-		JButton btnSimKeyMode = new JButton("MODE");
+		btnSimKeyMode = new JButton("MODE");
 		btnSimKeyMode.setBounds(10, 122, 68, 37);
 		simKeyEventPanel.add(btnSimKeyMode);
-		JSpinner datespinner = new JSpinner(datemodel);
+		datespinner = new JSpinner(datemodel);
 		datespinner.setBounds(88, 17, 124, 77);
 		simKeyEventPanel.add(datespinner);
 		datespinner.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 11));
@@ -1693,11 +1766,11 @@ public class tool {
 		JSpinner.DateEditor editor = new JSpinner.DateEditor(datespinner,"yyyy-MM-dd HH:mm:ss");
 		datespinner.setEditor(editor);
 		
-		JButton btnSetTime = new JButton("设置时间");
+		btnSetTime = new JButton("设置时间");
 		btnSetTime.setBounds(88, 103, 124, 23);
 		simKeyEventPanel.add(btnSetTime);
 		
-		JButton btnRevertTime = new JButton("还原当前时间");
+		btnRevertTime = new JButton("还原当前时间");
 		btnRevertTime.setBounds(88, 136, 124, 23);
 		simKeyEventPanel.add(btnRevertTime);
 		//还原Android时间
@@ -1722,28 +1795,28 @@ public class tool {
 			}
 		});
 		//设置Android时间
-			btnSetTime.addMouseListener(new MouseAdapter() {
-				private Process p;
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					Object time = datespinner.getValue();
-					SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
-					String time2 = formatter.format(time);
-					System.out.print(time2);
-					try {
-						p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s\"yymmdd.hhmmss\"");
-						if(p.waitFor()==0)
-							p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + time2);
-							p.waitFor();
-							p.destroy();
-							JOptionPane.showMessageDialog(null, "Andriod时间修改成功", "设置时间",JOptionPane.PLAIN_MESSAGE);
-					} catch (IOException | InterruptedException e1) {
-						e1.printStackTrace();
-					}
+		btnSetTime.addMouseListener(new MouseAdapter() {
+			private Process p;
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Object time = datespinner.getValue();
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
+				String time2 = formatter.format(time);
+				System.out.print(time2);
+				try {
+					p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s\"yymmdd.hhmmss\"");
+					if(p.waitFor()==0)
+						p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + time2);
+						p.waitFor();
+						p.destroy();
+						JOptionPane.showMessageDialog(null, "Andriod时间修改成功", "设置时间",JOptionPane.PLAIN_MESSAGE);
+				} catch (IOException | InterruptedException e1) {
+					e1.printStackTrace();
 				}
-			});
+			}
+		});
 		
-		JButton btnToolUpdate = new JButton("工具更新");
+		btnToolUpdate = new JButton("工具更新");
 		btnToolUpdate.setBounds(191, 528, 99, 23);
 		frame.getContentPane().add(btnToolUpdate);
 		btnToolUpdate.addMouseListener(new MouseAdapter() {
@@ -1764,7 +1837,7 @@ public class tool {
 		updateFlagIcon.setBounds(191, 551, 99, 23);
 		frame.getContentPane().add(updateFlagIcon);
 		
-		JPanel panel = new JPanel();
+		panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBorder(BorderFactory.createTitledBorder("卸载应用"));
 		panel.setBackground(Color.WHITE);
@@ -1777,7 +1850,7 @@ public class tool {
 		insatlled3app.addItem("刷新获取已安装应用");
 		
 		//已安装的第三方应用
-		JButton btn_getInstalled3 = new JButton("刷新");
+		btn_getInstalled3 = new JButton("刷新");
 		btn_getInstalled3.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -1818,7 +1891,7 @@ public class tool {
 		btn_getInstalled3.setBounds(10, 21, 80, 36);
 		panel.add(btn_getInstalled3);
 		
-		JButton uninstallapp = new JButton("卸载");
+		uninstallapp = new JButton("卸载");
 		uninstallapp.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -1888,11 +1961,11 @@ public class tool {
 		uninstallapp.setBounds(113, 136, 93, 32);
 		panel.add(uninstallapp);
 		
-		JButton btnInstalled = new JButton("<html>当前<br>版本号</html>");
+		btnInstalled = new JButton("<html>当前<br>版本号</html>");
 		btnInstalled.setBounds(100, 21, 100, 36);
 		panel.add(btnInstalled);
 		
-		JLabel lblNewLabel_2 = new JLabel("选择需要删除的应用：");
+		lblNewLabel_2 = new JLabel("选择需要删除的应用：");
 		lblNewLabel_2.setBounds(10, 67, 196, 15);
 		panel.add(lblNewLabel_2);
 		
@@ -2005,12 +2078,12 @@ public class tool {
 		ConTip.setVisible(false);
 		
 		
-		crashLogUpdateThread clut = new crashLogUpdateThread();
-		Thread t1 = new Thread(clut);
-		t1.start();
-		CloudConfigThread cct = new CloudConfigThread();
-		Thread t2 = new Thread(cct);
-		t2.start();
+		clut = new crashLogUpdateThread();
+		clutT = new Thread(clut);
+		clutT.start();
+		cct = new CloudConfigThread();
+		cctT = new Thread(cct);
+		cctT.start();
 		
 
 	
