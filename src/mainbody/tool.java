@@ -90,6 +90,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuEvent;
 
 
 
@@ -98,8 +100,9 @@ import javax.swing.SwingConstants;
 
 public class tool {
 
-	final static String AppVersion = "v.1.4.3";
+	final static String AppVersion = "v.1.4.4";
 	private JFrame frame;
+	Timer devicesinfotimer = new Timer();
 	JLabel ConTip;
 	JLabel PrtScTip;
 	JLabel crashLogUpdateTip;
@@ -133,8 +136,6 @@ public class tool {
 	private String log_savepath;
 	protected String save_log_formatTime;
 	private JLabel versionBottom;
-	private JTextArea adbdevicesArea;
-	private JScrollPane adbdevicesAreascrollPane;
 	private JButton activity_cfg_Button;
 	private JPanel panel_1ogcat;
 	private JButton logcatvtime;
@@ -197,7 +198,6 @@ public class tool {
 	private JButton btnRevertTime;
 	private JButton btnToolUpdate;
 	private JPanel panel;
-	private JButton btn_getInstalled3;
 	private JButton uninstallapp;
 	private JButton btnInstalled;
 	private JLabel lblNewLabel_2;
@@ -205,6 +205,8 @@ public class tool {
 	private CloudConfigThread cct;
 	private Thread clutT;
 	private Thread cctT;
+	private JTextArea adbdevicesArea;
+	private JScrollPane adbdevicesAreascrollPane;
 	static JComboBox<String> commonTagscomboBox;
 	
 	
@@ -1845,15 +1847,12 @@ public class tool {
 		frame.getContentPane().add(panel);
 		
 		insatlled3app = new JComboBox<String>();
-		insatlled3app.setBounds(10, 82, 196, 32);
-		panel.add(insatlled3app);
-		insatlled3app.addItem("刷新获取已安装应用");
-		
-		//已安装的第三方应用
-		btn_getInstalled3 = new JButton("刷新");
-		btn_getInstalled3.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
+		insatlled3app.addPopupMenuListener(new PopupMenuListener() {
+			public void popupMenuCanceled(PopupMenuEvent e) {
+			}
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			}
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 				String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
 				insatlled3app.removeAllItems();
 				Process plist3package = null;
@@ -1888,9 +1887,11 @@ public class tool {
 				}
 			}
 		});
-		btn_getInstalled3.setBounds(10, 21, 80, 36);
-		panel.add(btn_getInstalled3);
+		insatlled3app.setBounds(10, 82, 196, 32);
+		panel.add(insatlled3app);
+		insatlled3app.addItem("选择要删除的应用");
 		
+		//卸载已安装的第三方应用
 		uninstallapp = new JButton("卸载");
 		uninstallapp.addMouseListener(new MouseAdapter() {
 			@Override
@@ -1962,7 +1963,7 @@ public class tool {
 		panel.add(uninstallapp);
 		
 		btnInstalled = new JButton("<html>当前<br>版本号</html>");
-		btnInstalled.setBounds(100, 21, 100, 36);
+		btnInstalled.setBounds(10, 21, 100, 36);
 		panel.add(btnInstalled);
 		
 		lblNewLabel_2 = new JLabel("选择需要删除的应用：");
@@ -2399,7 +2400,7 @@ public class tool {
 			btn_mDataConnectionState.setEnabled(false);
 		}
 		
-		String command2 = "cmd.exe /c adb shell dumpsys wifi | findstr \"Wi-Fi is\"";
+		String command2 = "cmd.exe /c adb shell dumpsys wifi | findstr Wi-Fi";
 		Process p2 = Runtime.getRuntime().exec(command2);
 		try {
 			p2.waitFor();
@@ -2410,9 +2411,7 @@ public class tool {
 		InputStreamReader bi2 = new InputStreamReader(is2);
 		BufferedReader br2 = new BufferedReader(bi2);
 		String message2 = br2.readLine();
-//		System.out.println(message2);
 		while(message2 != null && !"".equals(message2)){
-			//System.out.print(message1);
 			response2 = message2;
 			message2 = br2.readLine();
 		}
@@ -2465,19 +2464,19 @@ public class tool {
 
 	public void adbdevicesTimerDemo(JTextArea adbdevicesArea,JButton mDataConnectionState,JButton mWifiConnectionState)
 	{
-	Timer timer = new Timer();
+//	Timer timer = new Timer();
 	int delay = 0;//ms
 	int period = 5000;//ms
-	   timer.schedule(new TimerTask() {    
-	       public void run() {  
+	devicesinfotimer.schedule(new TimerTask() {    
+	       public void run(){
 	    	   try{
 	    		   getdevices(adbdevicesArea,mDataConnectionState,mWifiConnectionState);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	           
-	       }  
-	   }, delay, period);  
+	    	   } 
+	    	   catch (Exception e){
+	    		   e.printStackTrace();
+	    	   }
+	       }
+	   }, delay, period);
 	}
 	public void CloudConfigTimerDemo() {
 		Timer timer = new Timer();
