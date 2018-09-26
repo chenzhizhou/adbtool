@@ -4,6 +4,7 @@ package mainbody;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -49,7 +50,7 @@ public class channelFrame extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					chacfg();
+//					chacfg();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -57,15 +58,16 @@ public class channelFrame extends JFrame {
 		});
 		
 	}
-	public static void chacfg() {
-		channelFrame frame = new channelFrame();
-		frame.setVisible(true);
-	}
+//	public static void chacfg() {
+//		channelFrame frame = new channelFrame();
+//		frame.setVisible(true);
+//	}
 
 	/**
 	 * Create the frame.
+	 * @param devices_comboBox 
 	 */
-	public channelFrame() {
+	public channelFrame(JComboBox<String> devices_comboBox) {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(300, 300, 200, 300);
 		contentPane = new JPanel();
@@ -91,7 +93,7 @@ public class channelFrame extends JFrame {
 		           if( !isNum.matches() ){
 		        	   priceFiled.setText("100");
 		           }
-		        String command1 = "cmd.exe /c adb pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\config\\channeltemp";
+		        String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\config\\channeltemp";
 		        
 				try {
 					p = Runtime.getRuntime().exec(command1);
@@ -130,11 +132,11 @@ public class channelFrame extends JFrame {
 			        
 			        //3.关闭流
 			        writer.close();
-			        String command2 = "cmd.exe /c adb push C:\\inhandTool\\config\\channeltemp\\channel_cfg.xml sdcard/inbox/config";
+			        String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " push C:\\inhandTool\\config\\channeltemp\\channel_cfg.xml sdcard/inbox/config";
 			        p = Runtime.getRuntime().exec(command2);
 					p.waitFor();
 					p.destroy();
-					RestartAPP();
+					RestartAPP(devices_comboBox);
 				} catch (IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
@@ -150,8 +152,8 @@ public class channelFrame extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				newfolder("C:\\inhandTool\\config\\channeltemp");
-				String command1 = "cmd.exe /c adb pull sdcard/inbox/config/smartvm_cfg.xml C:\\inhandTool\\config\\channeltemp";
-				String command2 = "cmd.exe /c adb pull sdcard/inbox/config/goods_info.xml C:\\inhandTool\\config\\channeltemp";
+				String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/smartvm_cfg.xml C:\\inhandTool\\config\\channeltemp";
+				String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/goods_info.xml C:\\inhandTool\\config\\channeltemp";
 				try {
 					p = Runtime.getRuntime().exec(command1);
 					p.waitFor();
@@ -222,11 +224,11 @@ public class channelFrame extends JFrame {
 			        
 			        //3.关闭流
 			        writer.close();
-			        String command3 = "cmd.exe /c adb push C:\\inhandTool\\config\\channeltemp\\channel_cfg.xml sdcard/inbox/config";
+			        String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " push C:\\inhandTool\\config\\channeltemp\\channel_cfg.xml sdcard/inbox/config";
 			        p = Runtime.getRuntime().exec(command3);
 					p.waitFor();
 					p.destroy();
-					RestartAPP();
+					RestartAPP(devices_comboBox);
 				} catch (IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
@@ -275,11 +277,11 @@ public class channelFrame extends JFrame {
 			        
 			        //3.关闭流
 			        writer.close();
-			        String command3 = "cmd.exe /c adb push C:\\inhandTool\\config\\channeltemp\\channel_cfg.xml sdcard/inbox/config";
+			        String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " push C:\\inhandTool\\config\\channeltemp\\channel_cfg.xml sdcard/inbox/config";
 			        p = Runtime.getRuntime().exec(command3);
 					p.waitFor();
 					p.destroy();
-					RestartAPP();
+					RestartAPP(devices_comboBox);
 				} catch (IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
@@ -320,10 +322,10 @@ public class channelFrame extends JFrame {
             
         }
 	}
-    public static void RestartAPP(){
+    public static void RestartAPP(JComboBox<String> devices_comboBox){
     	Process p;
     	try {
-			p = Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
+			p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
 			p.waitFor();
 			p.destroy();
 		} catch (IOException | InterruptedException e) {

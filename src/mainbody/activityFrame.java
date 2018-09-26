@@ -76,29 +76,41 @@ public class activityFrame extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					activityFrame frame = new activityFrame();
-					frame.setVisible(true);
-					newfolder("C:\\inhandTool\\temp\\activity");
-					deleteFile("C:\\inhandTool\\temp\\activity\\channel_cfg.xml");
-					String command1 = "cmd.exe /c adb pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\temp\\activity";
-					Process p = Runtime.getRuntime().exec(command1);
-					p.waitFor();
-					p.destroy();
-				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
-					e.printStackTrace();
-				}
-			}
-		});
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+////				try {
+////					activityFrame frame = new activityFrame();
+////					frame.setVisible(true);
+////					newfolder("C:\\inhandTool\\temp\\activity");
+////					deleteFile("C:\\inhandTool\\temp\\activity\\channel_cfg.xml");
+////					String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\temp\\activity";
+////					Process p = Runtime.getRuntime().exec(command1);
+////					p.waitFor();
+////					p.destroy();
+////				} catch (Exception e) {
+////					JOptionPane.showMessageDialog(null, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
+////					e.printStackTrace();
+////				}
+////			}
+//		});
 	}
 
 	/**
 	 * Create the frame.
 	 */
-	public activityFrame() {
+	public activityFrame(JComboBox<String> devices_comboBox) {
+		try{
+			newfolder("C:\\inhandTool\\temp\\activity");
+			deleteFile("C:\\inhandTool\\temp\\activity\\channel_cfg.xml");
+			String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\temp\\activity";
+			Process p = Runtime.getRuntime().exec(command1);
+			p.waitFor();
+			p.destroy();
+			}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
+			e.printStackTrace();
+			}
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(500, 200, 451, 319);
 		setTitle("优惠活动快速配置");
@@ -692,11 +704,11 @@ public class activityFrame extends JFrame {
 			        XMLWriter writer=new XMLWriter(out,format);
 			        writer.write(doc);
 			        writer.close();
-			        String command3 = "cmd.exe /c adb push C:\\inhandTool\\temp\\activity\\promotion.xml sdcard/inbox/game";
+			        String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " push C:\\inhandTool\\temp\\activity\\promotion.xml sdcard/inbox/game";
 			        Process p = Runtime.getRuntime().exec(command3);
 					p.waitFor();
 					p.destroy();
-					RestartAPP();
+					RestartAPP(devices_comboBox);
 					JOptionPane.showMessageDialog(null, "优惠打折配置下发成功", "下发优惠打折配置",JOptionPane.PLAIN_MESSAGE);
 				}
 				catch (IOException | InterruptedException e1) {
@@ -741,13 +753,13 @@ public class activityFrame extends JFrame {
 		clear_button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String command3 = "cmd.exe /c adb shell rm /sdcard/inbox/game/*";
+				String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell rm /sdcard/inbox/game/*";
 		        Process p;
 				try {
 					p = Runtime.getRuntime().exec(command3);
 					p.waitFor();
 					p.destroy();
-					RestartAPP();
+					RestartAPP(devices_comboBox);
 				} catch (IOException | InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -820,10 +832,10 @@ public class activityFrame extends JFrame {
 		}
 		return document;
 	} 
-    public static void RestartAPP(){
+    public static void RestartAPP(JComboBox<String> devices_comboBox){
     	Process p;
     	try {
-			p = Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
+			p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
 			p.waitFor();
 			p.destroy();
 		} catch (IOException | InterruptedException e) {

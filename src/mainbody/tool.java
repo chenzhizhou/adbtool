@@ -287,7 +287,7 @@ public class tool {
 		adbdevicesAreascrollPane.setBounds(10, 10, 171, 36);
 		frame.getContentPane().add(adbdevicesAreascrollPane);
 		
-		activity_cfg_Button = new JButton("优惠打折快速配置");
+		activity_cfg_Button = new JButton("优惠打折快速配置（旧）");
 		activity_cfg_Button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -298,7 +298,7 @@ public class tool {
 					Process p = Runtime.getRuntime().exec(command1);
 					p.waitFor();
 					p.destroy();
-					activityFrame frame = new activityFrame();
+					activityFrame frame = new activityFrame(devices_comboBox);
 					frame.setVisible(true);
 				} catch (Exception e1) {
 					JOptionPane.showMessageDialog(null, "初始化失败", "初始化失败",JOptionPane.CANCEL_OPTION);
@@ -738,7 +738,7 @@ public class tool {
 		btnchannelcfg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				channelFrame c = new channelFrame();
+				channelFrame c = new channelFrame(devices_comboBox);
 				c.setVisible(true);
 			}
 		});
