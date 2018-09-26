@@ -638,13 +638,13 @@ public class tool {
 						try{
 							for(String tmp:ChoosedConfigsstr){
 								if (tmp.contains("game") || tmp.contains("promotion")) {
-									Process p1 = Runtime.getRuntime().exec("adb push " + tmp + " sdcard/inbox/game");
+									Process p1 = Runtime.getRuntime().exec("adb -s " + devices_comboBox.getSelectedItem().toString() + " push " + tmp + " sdcard/inbox/game");
 						            p1.waitFor();
 						            p1.destroy();
 						            dialogStr += tmp + "\n";
 								}
 								else {
-									Process p1 = Runtime.getRuntime().exec("adb push " + tmp + " sdcard/inbox/config");
+									Process p1 = Runtime.getRuntime().exec("adb -s " + devices_comboBox.getSelectedItem().toString() + " push " + tmp + " sdcard/inbox/config");
 						            p1.waitFor();
 						            p1.destroy();
 						            InstallProgress(all, now+=1, installprogressBar);
@@ -1237,7 +1237,7 @@ public class tool {
 						btn_mDataConnectionState.setEnabled(true);
 						mDataConnectionState = false;
 						DataConnectionFlag = true;
-						String command_off = "adb shell su 0 svc data disable";
+						String command_off = "adb -s " + devices_comboBox.getSelectedItem().toString() + " shell su 0 svc data disable";
 						try {
 							while(DataConnectionFlag){
 								Process p = Runtime.getRuntime().exec(command_off);
@@ -2217,7 +2217,7 @@ public class tool {
 					p.waitFor();
 					p.destroy();
 					Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			        clipboard.setContents(new StringSelection("adb logcat -v time"), null);
+			        clipboard.setContents(new StringSelection("adb -s " + devices_comboBox.getSelectedItem().toString() + " logcat -v time"), null);
 					try {
 				        Robot robot;
 						robot = new Robot();
@@ -2252,7 +2252,7 @@ public class tool {
 					p.waitFor();
 					p.destroy();
 					Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			        clipboard.setContents(new StringSelection("adb logcat -v time -s "+tag), null);
+			        clipboard.setContents(new StringSelection("adb -s " + devices_comboBox.getSelectedItem().toString() + " logcat -v time -s "+tag), null);
 					try {
 				        Robot robot;
 						robot = new Robot();
@@ -2377,7 +2377,9 @@ public class tool {
 				e1.printStackTrace();
 			}
 		}
-//		System.out.println(response);
+//		System.out.println("response:"+response);
+		response = response.replace(" ", "");
+		response = response.replace("Listofdevicesattached", "");
 		String comobox_content = "";
 		if(response.indexOf("offline") != -1){
 			response = response.replace("offline", "device");
@@ -2386,9 +2388,13 @@ public class tool {
 			comobox_content += devices_comboBox.getItemAt(i);
 		}
 //		System.out.println("comobox_content:"+comobox_content);
-		if(!"List of devices attached ".equals(response)){
-			response = response.split("List of devices attached ")[1];
-			int now_count = response.split("device").length;
+		if(!"".equals(response)){
+			int now_count = 0;
+			try {
+				now_count = response.split("device").length;
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
 			for (String retval: response.split("device")) {
 //		        System.out.println(retval);
 				if(comobox_content.indexOf(retval) == -1){
@@ -2403,84 +2409,155 @@ public class tool {
 		else{
 			devices_comboBox.removeAllItems();
 		}
-		if("List of devices attached ".equals(response)){
+		if("".equals(response) && devices_comboBox.getItemCount() == 0){
 			ConTip.setVisible(true);
-//			adbdevicesArea.setText("error: device not found\n- waiting for device -");
+			adbdevicesArea.setText("error: device not found\n- waiting for device -");
 		}
 		else{
 			ConTip.setVisible(false);
+			adbdevicesArea.setText("\nMachineID:"+getMachineId());
+			String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys telephony.registry | findstr mDataConnectionState";
+			Process p1 = Runtime.getRuntime().exec(command1);
+			try {
+				p1.waitFor();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			InputStream is1 = p1.getInputStream();
+			InputStreamReader bi1 = new InputStreamReader(is1);
+			BufferedReader br1 = new BufferedReader(bi1);
+			String message1 = br1.readLine();
+			while(message1 != null && !"".equals(message1)){
+				//System.out.print(message1);
+				response1 = message1;
+				message1 = br1.readLine();
+			}
+			if (response1 != null){
+				response1 = response1.trim();
+			}
+			if("mDataConnectionState=2".equals(response1) && response1 != null){
+				btn_mDataConnectionState.setBackground(new Color(0, 250, 154));
+				btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:ON</html>");
+				btn_mDataConnectionState.setEnabled(true);
+				mDataConnectionState = true;
+			}
+			else if("mDataConnectionState=0".equals(response1) && response1 != null){
+				btn_mDataConnectionState.setBackground(new Color(255, 160, 122));
+				btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:OFF</html>");
+				btn_mDataConnectionState.setEnabled(true);
+				mDataConnectionState = false;
+			}
+			else {
+				btn_mDataConnectionState.setBackground(new Color(192, 192, 192));
+				btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:UNKNOWN</html>");
+				btn_mDataConnectionState.setEnabled(false);
+			}
+			
+			String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys wifi | findstr Wi-Fi";
+			Process p2 = Runtime.getRuntime().exec(command2);
+			try {
+				p2.waitFor();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			InputStream is2 = p2.getInputStream();
+			InputStreamReader bi2 = new InputStreamReader(is2);
+			BufferedReader br2 = new BufferedReader(bi2);
+			String message2 = br2.readLine();
+			while(message2 != null && !"".equals(message2)){
+				response2 = message2;
+				message2 = br2.readLine();
+			}
+			if (response2 != null){
+				response2 = response2.trim();
+			}
+			if("Wi-Fi is enabled".equals(response2) && response2 != null){
+				btn_mWifiConnectionState.setBackground(new Color(0, 250, 154));
+				btn_mWifiConnectionState.setText("<html>WIFIÍøÂç<br>×´Ì¬:ON</html>");
+				btn_mWifiConnectionState.setEnabled(true);
+				mWifiConnectionState = true;
+			}
+			else{
+				btn_mWifiConnectionState.setBackground(new Color(255, 160, 122));
+				btn_mWifiConnectionState.setText("<html>WIFIÍøÂç<br>×´Ì¬:OFF</html>");
+				btn_mWifiConnectionState.setEnabled(true);
+				mWifiConnectionState = false;
+			}
+			p1.destroy();
+			p2.destroy();
+			p.destroy();
 		}
-		adbdevicesArea.setText("\nMachineID:"+getMachineId());
-		String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys telephony.registry | findstr mDataConnectionState";
-		Process p1 = Runtime.getRuntime().exec(command1);
-		try {
-			p1.waitFor();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		InputStream is1 = p1.getInputStream();
-		InputStreamReader bi1 = new InputStreamReader(is1);
-		BufferedReader br1 = new BufferedReader(bi1);
-		String message1 = br1.readLine();
-		while(message1 != null && !"".equals(message1)){
-			//System.out.print(message1);
-			response1 = message1;
-			message1 = br1.readLine();
-		}
-		if (response1 != null){
-			response1 = response1.trim();
-		}
-		if("mDataConnectionState=2".equals(response1) && response1 != null){
-			btn_mDataConnectionState.setBackground(new Color(0, 250, 154));
-			btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:ON</html>");
-			btn_mDataConnectionState.setEnabled(true);
-			mDataConnectionState = true;
-		}
-		else if("mDataConnectionState=0".equals(response1) && response1 != null){
-			btn_mDataConnectionState.setBackground(new Color(255, 160, 122));
-			btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:OFF</html>");
-			btn_mDataConnectionState.setEnabled(true);
-			mDataConnectionState = false;
-		}
-		else {
-			btn_mDataConnectionState.setBackground(new Color(192, 192, 192));
-			btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:UNKNOWN</html>");
-			btn_mDataConnectionState.setEnabled(false);
-		}
-		
-		String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys wifi | findstr Wi-Fi";
-		Process p2 = Runtime.getRuntime().exec(command2);
-		try {
-			p2.waitFor();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		InputStream is2 = p2.getInputStream();
-		InputStreamReader bi2 = new InputStreamReader(is2);
-		BufferedReader br2 = new BufferedReader(bi2);
-		String message2 = br2.readLine();
-		while(message2 != null && !"".equals(message2)){
-			response2 = message2;
-			message2 = br2.readLine();
-		}
-		if (response2 != null){
-			response2 = response2.trim();
-		}
-		if("Wi-Fi is enabled".equals(response2) && response2 != null){
-			btn_mWifiConnectionState.setBackground(new Color(0, 250, 154));
-			btn_mWifiConnectionState.setText("<html>WIFIÍøÂç<br>×´Ì¬:ON</html>");
-			btn_mWifiConnectionState.setEnabled(true);
-			mWifiConnectionState = true;
-		}
-		else{
-			btn_mWifiConnectionState.setBackground(new Color(255, 160, 122));
-			btn_mWifiConnectionState.setText("<html>WIFIÍøÂç<br>×´Ì¬:OFF</html>");
-			btn_mWifiConnectionState.setEnabled(true);
-			mWifiConnectionState = false;
-		}
-		p1.destroy();
-		p2.destroy();
-		p.destroy();
+//		adbdevicesArea.setText("\nMachineID:"+getMachineId());
+//		String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys telephony.registry | findstr mDataConnectionState";
+//		Process p1 = Runtime.getRuntime().exec(command1);
+//		try {
+//			p1.waitFor();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		InputStream is1 = p1.getInputStream();
+//		InputStreamReader bi1 = new InputStreamReader(is1);
+//		BufferedReader br1 = new BufferedReader(bi1);
+//		String message1 = br1.readLine();
+//		while(message1 != null && !"".equals(message1)){
+//			//System.out.print(message1);
+//			response1 = message1;
+//			message1 = br1.readLine();
+//		}
+//		if (response1 != null){
+//			response1 = response1.trim();
+//		}
+//		if("mDataConnectionState=2".equals(response1) && response1 != null){
+//			btn_mDataConnectionState.setBackground(new Color(0, 250, 154));
+//			btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:ON</html>");
+//			btn_mDataConnectionState.setEnabled(true);
+//			mDataConnectionState = true;
+//		}
+//		else if("mDataConnectionState=0".equals(response1) && response1 != null){
+//			btn_mDataConnectionState.setBackground(new Color(255, 160, 122));
+//			btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:OFF</html>");
+//			btn_mDataConnectionState.setEnabled(true);
+//			mDataConnectionState = false;
+//		}
+//		else {
+//			btn_mDataConnectionState.setBackground(new Color(192, 192, 192));
+//			btn_mDataConnectionState.setText("<html>·äÎÑÍøÂç<br>×´Ì¬:UNKNOWN</html>");
+//			btn_mDataConnectionState.setEnabled(false);
+//		}
+//		
+//		String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys wifi | findstr Wi-Fi";
+//		Process p2 = Runtime.getRuntime().exec(command2);
+//		try {
+//			p2.waitFor();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		InputStream is2 = p2.getInputStream();
+//		InputStreamReader bi2 = new InputStreamReader(is2);
+//		BufferedReader br2 = new BufferedReader(bi2);
+//		String message2 = br2.readLine();
+//		while(message2 != null && !"".equals(message2)){
+//			response2 = message2;
+//			message2 = br2.readLine();
+//		}
+//		if (response2 != null){
+//			response2 = response2.trim();
+//		}
+//		if("Wi-Fi is enabled".equals(response2) && response2 != null){
+//			btn_mWifiConnectionState.setBackground(new Color(0, 250, 154));
+//			btn_mWifiConnectionState.setText("<html>WIFIÍøÂç<br>×´Ì¬:ON</html>");
+//			btn_mWifiConnectionState.setEnabled(true);
+//			mWifiConnectionState = true;
+//		}
+//		else{
+//			btn_mWifiConnectionState.setBackground(new Color(255, 160, 122));
+//			btn_mWifiConnectionState.setText("<html>WIFIÍøÂç<br>×´Ì¬:OFF</html>");
+//			btn_mWifiConnectionState.setEnabled(true);
+//			mWifiConnectionState = false;
+//		}
+//		p1.destroy();
+//		p2.destroy();
+//		p.destroy();
 	}
 	public String getConfigs(){
 		String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config C:\\inhandTool\\config";
@@ -2604,7 +2681,10 @@ public class tool {
 		int period = 10000;//ms
 		timer.schedule(new TimerTask() {    
 	       public void run(){
-	    	   boolean IsExsit = crashLogIsExsit();
+	    	   boolean IsExsit = false;
+	    	   if (devices_comboBox.getItemCount() != 0) {
+	    		   IsExsit = crashLogIsExsit();
+			}
 	    	   if (!IsExsit){
 	    		   crashLogUpdateTip.setText("crash_log.txt²»´æÔÚ");
 	    		   crashLogUpdateTip.setForeground(Color.GREEN);
