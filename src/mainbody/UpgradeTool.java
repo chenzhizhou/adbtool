@@ -227,11 +227,12 @@ public class UpgradeTool extends JFrame {
     		String localPath = filepath + "temp/";
     		String fileName = "ver.txt";
             try {
-            	//FtpUtil.downloadSftpFile(ftpHost, ftpUserName, ftpPassword, ftpPort, ftpPath, localPath, fileName); 
+            	FtpUtil.downloadSftpFile(ftpHost, ftpUserName, ftpPassword, ftpPort, ftpPath, localPath, fileName); 
             	netVerStr = getNowVer(filepath+"temp/ver.txt");
 			} catch (Exception e) {
 				title.setText("检查更新出现错误！");
 				title.setForeground(Color.RED);
+				JOptionPane.showMessageDialog(null, "无法连接至16网段的服务器……\n请联系陈少","工具更新",JOptionPane.PLAIN_MESSAGE);
 				e.printStackTrace();
 			}
             finally {

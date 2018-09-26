@@ -1825,7 +1825,6 @@ public class tool {
 		btnToolUpdate.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				JOptionPane.showMessageDialog(null, "更新服务器挂掉了……\n请联系陈少","工具更新",JOptionPane.PLAIN_MESSAGE);
 				try {
 					UpgradeTool u = new UpgradeTool(filepath, updateHost);
 					u.setVisible(true);
