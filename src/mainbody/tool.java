@@ -100,7 +100,7 @@ import javax.swing.event.PopupMenuEvent;
 
 public class tool {
 
-	final static String AppVersion = "v.1.4.4";
+	final static String AppVersion = "v.1.4.5";
 	private JFrame frame;
 	Timer devicesinfotimer = new Timer();
 	JLabel ConTip;
@@ -207,6 +207,7 @@ public class tool {
 	private Thread cctT;
 	private JTextArea adbdevicesArea;
 	private JScrollPane adbdevicesAreascrollPane;
+	private static JComboBox<String> devices_comboBox;
 	static JComboBox<String> commonTagscomboBox;
 	
 	
@@ -277,13 +278,13 @@ public class tool {
 		adbdevicesArea = new JTextArea();
 		adbdevicesArea.setLineWrap(true);
 		adbdevicesArea.setEditable(false);
-		adbdevicesArea.setBounds(10, 10, 132, 63);
+		adbdevicesArea.setBounds(1, 1, 152, 36);
 		frame.getContentPane().add(adbdevicesArea);
 		adbdevicesAreascrollPane = new JScrollPane(adbdevicesArea);
 		adbdevicesAreascrollPane.setVerticalScrollBarPolicy(
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);//滚动条总是出现
 		adbdevicesAreascrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		adbdevicesAreascrollPane.setBounds(10, 10, 171, 63);
+		adbdevicesAreascrollPane.setBounds(10, 10, 171, 36);
 		frame.getContentPane().add(adbdevicesAreascrollPane);
 		
 		activity_cfg_Button = new JButton("优惠打折快速配置");
@@ -293,7 +294,7 @@ public class tool {
 				try {
 					newfolder("C:\\inhandTool\\temp\\activity");
 					deleteFile("C:\\inhandTool\\temp\\activity\\channel_cfg.xml");
-					String command1 = "cmd.exe /c adb pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\temp\\activity";
+					String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/channel_cfg.xml C:\\inhandTool\\temp\\activity";
 					Process p = Runtime.getRuntime().exec(command1);
 					p.waitFor();
 					p.destroy();
@@ -342,7 +343,7 @@ public class tool {
 		clearbeforeLog.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String command = "cmd.exe /c adb logcat -c";
+				String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " logcat -c";
 				try {
 					Process p = Runtime.getRuntime().exec(command);
 					p.waitFor();
@@ -435,12 +436,12 @@ public class tool {
 					@Override
 					public void run() {
 						progress.setText("正在导出……");
-						String command = "cmd.exe /c adb pull sdcard/inbox/log/logcat_main.log "+savepath;
-					    String command1 = "cmd.exe /c adb pull sdcard/inbox/log/logcat_main.log.1 "+savepath;
-					    String command2 = "cmd.exe /c adb pull sdcard/inbox/log/logcat_main.log.2 "+savepath;
-					    String command3 = "cmd.exe /c adb pull sdcard/inbox/log/logcat_main.log.3 "+savepath;
-					    String command4 = "cmd.exe /c adb pull sdcard/inbox/log/logcat_main.log.4 "+savepath;
-					    String command5 = "cmd.exe /c adb pull sdcard/inbox/log/crash_log.txt "+savepath;
+						String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/log/logcat_main.log "+savepath;
+					    String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/log/logcat_main.log.1 "+savepath;
+					    String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/log/logcat_main.log.2 "+savepath;
+					    String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/log/logcat_main.log.3 "+savepath;
+					    String command4 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/log/logcat_main.log.4 "+savepath;
+					    String command5 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/log/crash_log.txt "+savepath;
 						try {
 							progress2.setText("进度1/6,logcat_main.log");
 							p = Runtime.getRuntime().exec(command);
@@ -534,7 +535,7 @@ public class tool {
 		btnScreenshot.setBounds(191, 57, 93, 49);
 		frame.getContentPane().add(btnScreenshot);
 		PrtScTip = new JLabel("");
-		PrtScTip.setBounds(20, 83, 114, 15);
+		PrtScTip.setBounds(10, 91, 114, 15);
 		frame.getContentPane().add(PrtScTip);
 		PrtScTip.setForeground(Color.ORANGE);
 		
@@ -651,7 +652,7 @@ public class tool {
 								}
 							}
 							RestartAPP();
-							//Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
+							//Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
 							installprogressBar.setValue(100);
 							JOptionPane.showMessageDialog(null, "下发\n"+dialogStr+"完成！", "下发配置成功",JOptionPane.PLAIN_MESSAGE);
 						}
@@ -702,7 +703,7 @@ public class tool {
 		btnPullGameCfg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String command2 = "cmd.exe /c adb pull sdcard/inbox/game C:\\inhandTool\\config";
+				String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/game C:\\inhandTool\\config";
 				String command3 = "cmd.exe /c start C:\\inhandTool\\config\\";
 				String response = getMachineId();
 				String MachineID = response;
@@ -989,8 +990,8 @@ public class tool {
 					newfolder("C:\\inhandTool\\config\\temp");
 					deleteFile("C:\\inhandTool\\config\\temp\\config.xml");
 					deleteFile("C:\\inhandTool\\config\\temp\\smartvm_cfg.xml");
-					String command1 = "cmd.exe /c adb pull sdcard/inbox/config/config.xml C:\\inhandTool\\config\\temp";
-					String command2 = "cmd.exe /c adb pull sdcard/inbox/config/smartvm_cfg.xml C:\\inhandTool\\config\\temp";
+					String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/config.xml C:\\inhandTool\\config\\temp";
+					String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/smartvm_cfg.xml C:\\inhandTool\\config\\temp";
 					p = Runtime.getRuntime().exec(command1);
 					p.waitFor();
 					p.destroy();
@@ -1112,11 +1113,11 @@ public class tool {
 							deleteFile("C:\\inhandTool\\config\\temp\\config.xml");
 							deleteFile("C:\\inhandTool\\config\\temp\\smartvm_cfg.xml");
 							InstallProgress(all, now+=1, installprogressBar);
-							String command1 = "cmd.exe /c adb pull sdcard/inbox/config/config.xml C:\\inhandTool\\config\\temp";
-							String command2 = "cmd.exe /c adb pull sdcard/inbox/config/smartvm_cfg.xml C:\\inhandTool\\config\\temp";
-							String command3 = "cmd.exe /c adb push C:\\inhandTool\\config\\temp\\smartvm_cfg.xml sdcard/inbox/config";
-							String command4 = "cmd.exe /c adb push C:\\inhandTool\\config\\temp\\config.xml sdcard/inbox/config";
-							//String command5 = "cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
+							String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/config.xml C:\\inhandTool\\config\\temp";
+							String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/smartvm_cfg.xml C:\\inhandTool\\config\\temp";
+							String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " push C:\\inhandTool\\config\\temp\\smartvm_cfg.xml sdcard/inbox/config";
+							String command4 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " push C:\\inhandTool\\config\\temp\\config.xml sdcard/inbox/config";
+							//String command5 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
 							p = Runtime.getRuntime().exec(command1);
 							p.waitFor();
 							p.destroy();
@@ -1259,7 +1260,7 @@ public class tool {
 				else {
 					DataConnectionFlag = false;
 					t1.interrupt();
-					String command2 = "cmd.exe /c adb shell su 0 svc data enable";
+					String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell su 0 svc data enable";
 					try {
 						Process p = Runtime.getRuntime().exec(command2);
 						p.waitFor();
@@ -1289,7 +1290,7 @@ public class tool {
 						btn_mWifiConnectionState.setEnabled(true);
 						mWifiConnectionState = false;
 						WifiConnectionFlag = true;
-						String command_off = "cmd.exe /c adb shell su 0 svc wifi disable";
+						String command_off = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell su 0 svc wifi disable";
 						try {
 							while(WifiConnectionFlag){
 								Process p = Runtime.getRuntime().exec(command_off);
@@ -1312,7 +1313,7 @@ public class tool {
 				else {
 					WifiConnectionFlag = false;
 					t1.interrupt();
-					String command2 = "cmd.exe /c adb shell su 0 svc wifi enable";
+					String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell su 0 svc wifi enable";
 					try {
 						Process p = Runtime.getRuntime().exec(command2);
 						p.waitFor();
@@ -1439,7 +1440,7 @@ public class tool {
 						installprogressBar.setValue(0);
 						Process p;
 						try {
-							String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | findstr inhand";
+							String list3packagecommand = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell pm list package -3 | findstr inhand";
 							Process plist3inhandpackage = null;
 							try {
 								plist3inhandpackage = Runtime.getRuntime().exec(list3packagecommand);
@@ -1466,7 +1467,7 @@ public class tool {
 							System.out.println(packageList);
 							int all = packageList.size();
 							for(int i = 0;i<packageList.size();i++){
-								p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall "+packageList.get(i));
+								p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " uninstall "+packageList.get(i));
 								p.waitFor();
 								p.destroy();
 								InstallProgress(all, now+=1, installprogressBar);
@@ -1503,14 +1504,14 @@ public class tool {
 						String dialogStr = "";
 						try{
 							for(String tmp:ChoosedappsStr){
-					            Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb install -r " + tmp);
+					            Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " install -r " + tmp);
 					            p1.waitFor();
 					            p1.destroy();
 					            InstallProgress(all, now+=1, installprogressBar);
 					            dialogStr += tmp + "\n";
 							}
 							RestartAPP();
-							//Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
+							//Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
 							installprogressBar.setValue(100);
 							JOptionPane.showMessageDialog(null, "安装\n"+dialogStr+"完成！", "安装成功",JOptionPane.PLAIN_MESSAGE);
 						}
@@ -1539,7 +1540,7 @@ public class tool {
 								installprogressBar.setValue(0);
 								Process p;
 								try {
-									String list3packagecommand = "cmd.exe /c adb shell pm list package -3 | findstr inhand";
+									String list3packagecommand = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell pm list package -3 | findstr inhand";
 									Process plist3inhandpackage = null;
 									try {
 										plist3inhandpackage = Runtime.getRuntime().exec(list3packagecommand);
@@ -1566,7 +1567,7 @@ public class tool {
 									System.out.println(packageList);
 									all = all + packageList.size();
 									for(int i = 0;i<packageList.size();i++){
-										p = Runtime.getRuntime().exec("cmd.exe /c adb uninstall "+packageList.get(i));
+										p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " uninstall "+packageList.get(i));
 										p.waitFor();
 										p.destroy();
 										InstallProgress(all, now+=1, installprogressBar);
@@ -1575,24 +1576,24 @@ public class tool {
 									e.printStackTrace();
 								}
 								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb shell rm -rf sdcard/inbox/apps");
+								p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell rm -rf sdcard/inbox/apps");
 								p.waitFor();
 								p.destroy();
 								InstallProgress(all, now+=1, installprogressBar);
-								p = Runtime.getRuntime().exec("cmd.exe /c adb shell mkdir sdcard/inbox/apps");
+								p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell mkdir sdcard/inbox/apps");
 								p.waitFor();
 								p.destroy();
 								InstallProgress(all, now+=1, installprogressBar);
 								String dialogStr = "";
 								for(String tmp:ChoosedappsStr){
-						            Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb push \"" + tmp + "\" sdcard/inbox/apps\n");
+						            Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " push \"" + tmp + "\" sdcard/inbox/apps\n");
 						            p1.waitFor();
 						            p1.destroy();
 						            InstallProgress(all, now+=1, installprogressBar);
 						            dialogStr += tmp + "\n";
 								}
 								
-								p = Runtime.getRuntime().exec("cmd.exe /c adb shell am start com.inhand.install/.InstallActivity");
+								p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am start com.inhand.install/.InstallActivity");
 								p.waitFor();
 								p.destroy();
 								installprogressBar.setValue(100);
@@ -1633,8 +1634,8 @@ public class tool {
 				btnStartSaveLog.setEnabled(false);
 				btnStopSaveLog.setEnabled(true);
 				save_log_formatTime = getFormatTime();
-				String command0 = "cmd.exe /c adb logcat -c";
-				String command1 = "cmd.exe /c adb logcat -v time ";
+				String command0 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " logcat -c";
+				String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " logcat -v time ";
 				String command2 = "cmd.exe /c start ";
 				//String machineid = getMachineId();
 				log_savepath = logSavePathField.getText();
@@ -1685,7 +1686,7 @@ public class tool {
 		
 		//连接断开提示
 		ConTip = new JLabel("Device Disconnect");
-		ConTip.setBounds(20, 83, 114, 15);
+		ConTip.setBounds(10, 91, 114, 15);
 		frame.getContentPane().add(ConTip);
 		ConTip.setForeground(Color.RED);
 		
@@ -1715,7 +1716,7 @@ public class tool {
 					@Override
 					public void mouseClicked(MouseEvent e) {
 						String machine_id_path = getNowPath()+"/machine_id.txt";
-						String commandpush = "cmd.exe /c adb push "+machine_id_path+" sdcard/inbox/config";
+						String commandpush = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " push "+machine_id_path+" sdcard/inbox/config";
 						FileOutputStream fos = null;
 						try {
 							fos = new FileOutputStream(machine_id_path);
@@ -1784,9 +1785,9 @@ public class tool {
 				String nowtime = formatter.format(new Date());
 				System.out.print(nowtime);
 				try {
-					p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s\"yymmdd.hhmmss\"");
+					p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell date -s\"yymmdd.hhmmss\"");
 					if(p.waitFor()==0)
-						p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + nowtime);
+						p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell date -s " + nowtime);
 						p.waitFor();
 						p.destroy();
 				} catch (IOException | InterruptedException e1) {
@@ -1806,9 +1807,9 @@ public class tool {
 				String time2 = formatter.format(time);
 				System.out.print(time2);
 				try {
-					p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s\"yymmdd.hhmmss\"");
+					p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell date -s\"yymmdd.hhmmss\"");
 					if(p.waitFor()==0)
-						p = Runtime.getRuntime().exec("cmd.exe /c adb shell date -s " + time2);
+						p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell date -s " + time2);
 						p.waitFor();
 						p.destroy();
 						JOptionPane.showMessageDialog(null, "Andriod时间修改成功", "设置时间",JOptionPane.PLAIN_MESSAGE);
@@ -1853,7 +1854,7 @@ public class tool {
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
 			}
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-				String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
+				String list3packagecommand = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell pm list package -3";
 				insatlled3app.removeAllItems();
 				Process plist3package = null;
 				try {
@@ -1904,13 +1905,13 @@ public class tool {
 						int all = 1;
 						installprogressBar.setValue(0);
 						try{
-							Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb uninstall "+uninstallPackageName);
+							Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " uninstall "+uninstallPackageName);
 				            p1.waitFor();
 				            p1.destroy();
 				            InstallProgress(all, now+=1, installprogressBar);
 							installprogressBar.setValue(100);
 							//刷新
-							String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
+							String list3packagecommand = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell pm list package -3";
 							insatlled3app.removeAllItems();
 							Process plist3package = null;
 							try {
@@ -1970,11 +1971,19 @@ public class tool {
 		lblNewLabel_2.setBounds(10, 67, 196, 15);
 		panel.add(lblNewLabel_2);
 		
+		devices_comboBox = new JComboBox<String>();
+		devices_comboBox.setBounds(10, 71, 171, 21);
+		frame.getContentPane().add(devices_comboBox);
+		
+		JLabel lblNewLabel = new JLabel("选择设备：");
+		lblNewLabel.setBounds(10, 53, 93, 15);
+		frame.getContentPane().add(lblNewLabel);
+		
 		btnInstalled.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				Process plist3package = null;
-				String list3packagecommand = "cmd.exe /c adb shell pm list package -3";
+				String list3packagecommand = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell pm list package -3";
 				try {
 					
 					plist3package = Runtime.getRuntime().exec(list3packagecommand);
@@ -2003,7 +2012,7 @@ public class tool {
 				while(iterator.hasNext()){
 				    String packagename = iterator.next();
 				    //System.out.println(packagename);
-				    String getVersioncmd = "cmd.exe /c adb shell dumpsys package "+packagename+" | findstr versionName";
+				    String getVersioncmd = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys package "+packagename+" | findstr versionName";
 				    //System.out.println(getVersioncmd);
 				    try {
 						Process p = Runtime.getRuntime().exec(getVersioncmd);
@@ -2031,7 +2040,7 @@ public class tool {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					Process p = Runtime.getRuntime().exec("cmd.exe /c adb shell input keyevent 3");
+					Process p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell input keyevent 3");
 					p.waitFor();
 					p.destroy();
 				} catch (IOException | InterruptedException e1) {
@@ -2043,7 +2052,7 @@ public class tool {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					Process p = Runtime.getRuntime().exec("cmd.exe /c adb shell input keyevent 4");
+					Process p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell input keyevent 4");
 					p.waitFor();
 					p.destroy();
 				} catch (IOException | InterruptedException e1) {
@@ -2055,7 +2064,7 @@ public class tool {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					Process p = Runtime.getRuntime().exec("cmd.exe /c adb shell input keyevent 82");
+					Process p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell input keyevent 82");
 					p.waitFor();
 					p.destroy();
 				} catch (IOException | InterruptedException e1) {
@@ -2067,7 +2076,7 @@ public class tool {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					Process p = Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a android.intent.action.ENG_MODE_SWITCH");
+					Process p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a android.intent.action.ENG_MODE_SWITCH");
 					p.waitFor();
 					p.destroy();
 				} catch (IOException | InterruptedException e1) {
@@ -2102,7 +2111,7 @@ public class tool {
 				btnrestartapp.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
-						//String command = "cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
+						//String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
 						RestartAPP();
 						JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
 						frame2.dispose();
@@ -2114,7 +2123,7 @@ public class tool {
 				btnreboot.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
-						String command = "cmd.exe /c adb reboot";
+						String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " reboot";
 						try {
 							Process p = Runtime.getRuntime().exec(command);
 							p.waitFor();
@@ -2136,9 +2145,9 @@ public class tool {
 					@Override
 					public void run() {
 						String formatTime = getFormatTime();
-						String command1 = "cmd.exe /c adb shell /system/bin/screencap -p /sdcard/sc123456.png";
-						String command2 = "cmd.exe /c adb pull /sdcard/sc123456.png c:\\inhandTool\\Screenshots\\sc"+formatTime+".png";
-						String command3 = "cmd.exe /c adb shell rm -rf /sdcard/sc123456.png";
+						String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell /system/bin/screencap -p /sdcard/sc123456.png";
+						String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull /sdcard/sc123456.png c:\\inhandTool\\Screenshots\\sc"+formatTime+".png";
+						String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell rm -rf /sdcard/sc123456.png";
 						String command4 = "cmd.exe /c start C:\\inhandTool\\Screenshots";
 						try {
 							PrtScTip.setVisible(true);
@@ -2150,7 +2159,7 @@ public class tool {
 							p.destroy();
 							while(!flag){
 								Thread.sleep(1000);
-								Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb shell du -k sdcard/sc123456.png");
+								Process p1 = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell du -k sdcard/sc123456.png");
 								p1.waitFor();
 								p1.destroy();
 								InputStream is = p.getInputStream();
@@ -2310,7 +2319,7 @@ public class tool {
 			btnCrashlog.setBackground(new Color(240, 240, 240));
 		}
 		else{
-			String command2 = "cmd.exe /c adb pull sdcard/inbox/log/crash_log.txt C:\\inhandTool\\crash_log";
+			String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/log/crash_log.txt C:\\inhandTool\\crash_log";
 			String command3 = "cmd.exe /c start C:\\inhandTool\\crash_log\\";
 			String response = getMachineId();
 				if(response == null){
@@ -2337,33 +2346,73 @@ public class tool {
 	}
 	private void getdevices(JTextArea adbdevicesArea,JButton btn_mDataConnectionState,JButton btn_mWifiConnectionState) throws IOException {
 		String command = "cmd.exe /c adb devices";
-		String response = null;
+		String response = "";
 		String response1 = null;
 		String response2 = null;
-		Process p = Runtime.getRuntime().exec(command);
+		Process p = null;
+		try {
+			p = Runtime.getRuntime().exec(command);
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
 		try {
 			p.waitFor();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
 		}
 		InputStream is = p.getInputStream();
 		InputStreamReader bi = new InputStreamReader(is);
 		BufferedReader br = new BufferedReader(bi);
-		String message = br.readLine();
-		while(message != null && !"".equals(message)){
-			adbdevicesArea.setText(message);
-			response = message;
+		String message = null;
+		try {
 			message = br.readLine();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		while(message != null && !"".equals(message)){
+//			adbdevicesArea.setText(message);
+			response += message;
+			try {
+				message = br.readLine();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+//		System.out.println(response);
+		String comobox_content = "";
+		if(response.indexOf("offline") != -1){
+			response = response.replace("offline", "device");
+		}
+		for(int i = 0; i<devices_comboBox.getItemCount(); i++){
+			comobox_content += devices_comboBox.getItemAt(i);
+		}
+//		System.out.println("comobox_content:"+comobox_content);
+		if(!"List of devices attached ".equals(response)){
+			response = response.split("List of devices attached ")[1];
+			int now_count = response.split("device").length;
+			for (String retval: response.split("device")) {
+//		        System.out.println(retval);
+				if(comobox_content.indexOf(retval) == -1){
+					devices_comboBox.addItem(retval);
+				}
+				if(devices_comboBox.getItemCount() != now_count){
+					devices_comboBox.removeAllItems();
+					devices_comboBox.addItem(retval);
+				}
+		      }
+		}
+		else{
+			devices_comboBox.removeAllItems();
 		}
 		if("List of devices attached ".equals(response)){
 			ConTip.setVisible(true);
-			adbdevicesArea.setText("error: device not found\n- waiting for device -");
+//			adbdevicesArea.setText("error: device not found\n- waiting for device -");
 		}
 		else{
 			ConTip.setVisible(false);
 		}
-		adbdevicesArea.append("\nMachineID:"+getMachineId());
-		String command1 = "cmd.exe /c adb shell dumpsys telephony.registry | findstr mDataConnectionState";
+		adbdevicesArea.setText("\nMachineID:"+getMachineId());
+		String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys telephony.registry | findstr mDataConnectionState";
 		Process p1 = Runtime.getRuntime().exec(command1);
 		try {
 			p1.waitFor();
@@ -2400,7 +2449,7 @@ public class tool {
 			btn_mDataConnectionState.setEnabled(false);
 		}
 		
-		String command2 = "cmd.exe /c adb shell dumpsys wifi | findstr Wi-Fi";
+		String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell dumpsys wifi | findstr Wi-Fi";
 		Process p2 = Runtime.getRuntime().exec(command2);
 		try {
 			p2.waitFor();
@@ -2435,7 +2484,7 @@ public class tool {
 		p.destroy();
 	}
 	public String getConfigs(){
-		String command2 = "cmd.exe /c adb pull sdcard/inbox/config C:\\inhandTool\\config";
+		String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config C:\\inhandTool\\config";
 		String command3 = "cmd.exe /c start C:\\inhandTool\\config\\";
 		String response = getMachineId();
 		String MachineID = response;
@@ -2466,7 +2515,7 @@ public class tool {
 	{
 //	Timer timer = new Timer();
 	int delay = 0;//ms
-	int period = 5000;//ms
+	int period = 2000;//ms
 	devicesinfotimer.schedule(new TimerTask() {    
 	       public void run(){
 	    	   try{
@@ -2488,8 +2537,8 @@ public class tool {
 					newfolder("C:\\inhandTool\\config\\temp");
 					deleteFile("C:\\inhandTool\\config\\temp\\config.xml");
 					deleteFile("C:\\inhandTool\\config\\temp\\smartvm_cfg.xml");
-					String command1 = "cmd.exe /c adb pull sdcard/inbox/config/config.xml C:\\inhandTool\\config\\temp";
-					String command2 = "cmd.exe /c adb pull sdcard/inbox/config/smartvm_cfg.xml C:\\inhandTool\\config\\temp";
+					String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/config.xml C:\\inhandTool\\config\\temp";
+					String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config/smartvm_cfg.xml C:\\inhandTool\\config\\temp";
 					Process p = Runtime.getRuntime().exec(command1);
 					p.waitFor();
 					p.destroy();
@@ -2564,7 +2613,7 @@ public class tool {
 	    	   else{
 	    		   newfolder("C:\\inhandTool\\crash_log\\temp");
 		    	   deleteFile("C:\\inhandTool\\crash_log\\temp\\crash_log.txt");
-		    	   String command = "cmd.exe /c adb shell md5 /sdcard/inbox/log/crash_log.txt";
+		    	   String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell md5 /sdcard/inbox/log/crash_log.txt";
 		    	   try {
 						Process p = Runtime.getRuntime().exec(command);
 						p.waitFor();
@@ -2643,7 +2692,7 @@ public class tool {
 		}
 	}
 	public boolean crashLogIsExsit(){
-		String command = "cmd.exe /c adb shell ls sdcard/inbox/log | findstr crash_log.txt";
+		String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell ls sdcard/inbox/log | findstr crash_log.txt";
 		Process p = null;
 		String response = null;
 		boolean crashLogEmpty = true;
@@ -2673,7 +2722,7 @@ public class tool {
 		return crashLogEmpty;
 	}
 	public String getMachineId(){
-		String command1 = "cmd.exe /c adb shell cat sdcard/inbox/config/machine_id.txt";
+		String command1 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell cat sdcard/inbox/config/machine_id.txt";
 		Process p = null;
 		String response = null;
 		try {
@@ -2816,7 +2865,7 @@ public class tool {
     public static void RestartAPP(){
     	Process p;
     	try {
-			p = Runtime.getRuntime().exec("cmd.exe /c adb shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
+			p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP");
 			p.waitFor();
 			p.destroy();
 		} catch (IOException | InterruptedException e) {

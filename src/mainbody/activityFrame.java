@@ -654,6 +654,7 @@ public class activityFrame extends JFrame {
 				        	Pattern p = Pattern.compile(regEx);
 				        	Matcher m = p.matcher(channel_view_textArea.getText().trim());
 				        	String plb = m.replaceAll("").trim();
+				        	System.out.print("\n"+plb);
 				        	plbint = Integer.parseInt(plb);
 						} catch (Exception e2) {
 							plbint = 30;
