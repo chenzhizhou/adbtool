@@ -100,7 +100,7 @@ import javax.swing.event.PopupMenuEvent;
 
 public class tool {
 
-	final static String AppVersion = "v.1.4.5";
+	final static String AppVersion = "v.1.4.6";
 	private JFrame frame;
 	Timer devicesinfotimer = new Timer();
 	JLabel ConTip;
@@ -207,6 +207,7 @@ public class tool {
 	private Thread cctT;
 	private JTextArea adbdevicesArea;
 	private JScrollPane adbdevicesAreascrollPane;
+	private JCheckBox crash_log_monitor_CheckBox;
 	private static JComboBox<String> devices_comboBox;
 	static JComboBox<String> commonTagscomboBox;
 	
@@ -544,9 +545,13 @@ public class tool {
 		panel_save1ogcat.add(btnCrashlog);
 		
 		crashLogUpdateTip = new JLabel("CrashLog.txt有更新！");
-		crashLogUpdateTip.setBounds(10, 198, 157, 15);
+		crashLogUpdateTip.setBounds(123, 200, 157, 15);
 		panel_save1ogcat.add(crashLogUpdateTip);
 		crashLogUpdateTip.setForeground(Color.RED);
+		
+		crash_log_monitor_CheckBox = new JCheckBox("崩溃监控开关");
+		crash_log_monitor_CheckBox.setBounds(10, 196, 103, 23);
+		panel_save1ogcat.add(crash_log_monitor_CheckBox);
 		crashLogUpdateTip.setVisible(false);
 		
 		//推送配置文件框
@@ -1835,8 +1840,9 @@ public class tool {
 		});
 		
 		updateFlagIcon = new JLabel("...");
+		updateFlagIcon.setFont(new Font("宋体", Font.PLAIN, 10));
 		updateFlagIcon.setHorizontalAlignment(SwingConstants.CENTER);
-		updateFlagIcon.setBounds(191, 551, 99, 23);
+		updateFlagIcon.setBounds(560, 552, 82, 23);
 		frame.getContentPane().add(updateFlagIcon);
 		
 		panel = new JPanel();
@@ -2674,20 +2680,27 @@ public class tool {
 	       }  
 	   }, delay, period); 
 	}
-	public void CrashLogUpdateTimerDemo(JLabel crashLogUpdateTip, JButton btnCrashLog2)
+	public void CrashLogUpdateTimerDemo(JLabel crashLogUpdateTip, JButton btnCrashLog2, JCheckBox crash_log_monitor_CheckBox)
 	{
 		Timer timer = new Timer();
 		int delay = 2000;//ms
-		int period = 10000;//ms
+		int period = 8000;//ms
 		timer.schedule(new TimerTask() {    
 	       public void run(){
 	    	   boolean IsExsit = false;
-	    	   if (devices_comboBox.getItemCount() != 0) {
+	    	   if (devices_comboBox.getItemCount() != 0 && crash_log_monitor_CheckBox.isSelected()) {
 	    		   IsExsit = crashLogIsExsit();
 			}
 	    	   if (!IsExsit){
-	    		   crashLogUpdateTip.setText("crash_log.txt不存在");
-	    		   crashLogUpdateTip.setForeground(Color.GREEN);
+	    		   if (!crash_log_monitor_CheckBox.isSelected()){
+	    			   crashLogUpdateTip.setVisible(false);
+	    		   }
+	    		   else {
+	    			   crashLogUpdateTip.setVisible(true);
+		    		   crashLogUpdateTip.setText("crash_log.txt不存在");
+		    		   crashLogUpdateTip.setForeground(Color.GREEN);
+	    		   }
+	    		   
 	    	   }
 	    	   else{
 	    		   newfolder("C:\\inhandTool\\crash_log\\temp");
@@ -2728,9 +2741,9 @@ public class tool {
 					e.printStackTrace();
 				}
 	    	   }
-//		   		Check checkup = new Check(updateFlagIcon,updateHost);
-//				Thread tcheck = new Thread(checkup);
-//				tcheck.start();
+		   		Check checkup = new Check(updateFlagIcon,updateHost);
+				Thread tcheck = new Thread(checkup);
+				tcheck.start();
 	       }  
 	   }, delay, period);  
 	}
@@ -2881,7 +2894,7 @@ public class tool {
 
 		@Override
 		public void run() {
-			CrashLogUpdateTimerDemo(crashLogUpdateTip,btnCrashlog);
+			CrashLogUpdateTimerDemo(crashLogUpdateTip,btnCrashlog,crash_log_monitor_CheckBox);
 		}
 	}
 	public class CloudConfigThread implements Runnable{
@@ -2983,8 +2996,8 @@ public class tool {
             	netVerStr = getNowVer(localPath+"/ver.txt");
                 if(netVerStr.equals(AppVersion)){
                 	//System.out.print("no need update");
-                	FlagIcon.setText("...");
-                	FlagIcon.setForeground(Color.BLACK);
+                	FlagIcon.setText("已是最新");
+                	FlagIcon.setForeground(Color.GRAY);
                 	//FlagIcon.setIcon(new ImageIcon(getClass().getResource("/toolIcon/success.png")));
                 }
                 else{
