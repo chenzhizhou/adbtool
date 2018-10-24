@@ -100,7 +100,7 @@ import javax.swing.event.PopupMenuEvent;
 
 public class tool {
 
-	final static String AppVersion = "v.1.4.6";
+	final static String AppVersion = "v.1.4.7";
 	private JFrame frame;
 	Timer devicesinfotimer = new Timer();
 	JLabel ConTip;

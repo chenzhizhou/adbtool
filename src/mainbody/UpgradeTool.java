@@ -275,11 +275,11 @@ public class UpgradeTool extends JFrame {
     		newfolder(filepath+"temp/");
     		//String localPath = filepath + "temp/";
     		String localPath = downloadpath+"\\";
-    		String fileName = "adbtool.jar";
+    		String fileName = "adbTools.exe";
 	    	//本地需要被更新的文件  
-	        File oldFile = new File(filepath+"adbtool.jar");  
+	        File oldFile = new File(filepath+"adbTools.exe");  
 	        //缓存网络上下载的文件  
-	        File newFile = new File(filepath+"temp/adbtool.jar");
+	        File newFile = new File(filepath+"temp/adbTools.exe");
             try {
 				FtpUtil.downloadSftpFile(ftpHost, ftpUserName, ftpPassword, ftpPort, ftpPath, localPath, fileName);
 			} catch (JSchException e) {

@@ -753,7 +753,7 @@ public class activityFrame extends JFrame {
 		clear_button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell rm /sdcard/inbox/game/*";
+				String command3 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell rm -rf /sdcard/inbox/game/*";
 		        Process p;
 				try {
 					p = Runtime.getRuntime().exec(command3);
