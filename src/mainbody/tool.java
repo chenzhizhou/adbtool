@@ -100,7 +100,7 @@ import javax.swing.event.PopupMenuEvent;
 
 public class tool {
 
-	final static String AppVersion = "v.1.4.7";
+	final static String AppVersion = "v.1.4.9";
 	private JFrame frame;
 	Timer devicesinfotimer = new Timer();
 	JLabel ConTip;
@@ -157,7 +157,6 @@ public class tool {
 	private Label label_3;
 	private JButton btnStopSaveLog;
 	private JButton btnStartSaveLog;
-	private JButton btnRestart;
 	private JButton btnScreenshot;
 	private JTextArea pushConfigArea;
 	private JScrollPane pushConfigscrollPane;
@@ -208,8 +207,10 @@ public class tool {
 	private JTextArea adbdevicesArea;
 	private JScrollPane adbdevicesAreascrollPane;
 	private JCheckBox crash_log_monitor_CheckBox;
+	private JCheckBox set_time_and_restart_checkbox;
 	private static JComboBox<String> devices_comboBox;
 	static JComboBox<String> commonTagscomboBox;
+	private int version_check_count = 0;
 	
 	
 	/**
@@ -265,6 +266,7 @@ public class tool {
 		
 		customize.initCFGxml();
 		frame = new JFrame();
+		frame.setResizable(false);
 		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(tool.class.getResource("/com/sun/javafx/scene/web/skin/IncreaseIndent_16x16_JFX.png")));
 		//frame.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/toolIcon/logo.png")));
 		frame.setBounds(100, 100, 832, 610);
@@ -307,7 +309,7 @@ public class tool {
 				}
 			}
 		});
-		activity_cfg_Button.setBounds(590, 382, 216, 49);
+		activity_cfg_Button.setBounds(590, 382, 226, 49);
 		frame.getContentPane().add(activity_cfg_Button);
 		
 		panel_1ogcat = new JPanel();
@@ -527,9 +529,17 @@ public class tool {
 		panel_save1ogcat.add(btnStartSaveLog);
 		
 		//重启按钮
-		btnRestart = new JButton("重启");
-		btnRestart.setBounds(191, 11, 93, 36);
-		frame.getContentPane().add(btnRestart);
+		JButton btnrestartapp = new JButton("重启应用");
+	    btnrestartapp.setBounds(191, 11, 93, 36);
+		frame.getContentPane().add(btnrestartapp);
+		btnrestartapp.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				//String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
+				RestartAPP();
+				JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
+			}
+		});
 		
 		//设备截图
 		btnScreenshot = new JButton("设备截图");
@@ -1333,7 +1343,7 @@ public class tool {
 				}
 			}
 		});
-		btn_mWifiConnectionState.setBounds(714, 507, 92, 43);
+		btn_mWifiConnectionState.setBounds(724, 503, 92, 43);
 		frame.getContentPane().add(btn_mWifiConnectionState);
 		
 		
@@ -1469,6 +1479,7 @@ public class tool {
 							} catch (IOException e1) {
 								e1.printStackTrace();
 							}
+							packageList.add("com.inhand.inboxcore");
 							System.out.println(packageList);
 							int all = packageList.size();
 							for(int i = 0;i<packageList.size();i++){
@@ -1569,6 +1580,7 @@ public class tool {
 									} catch (IOException e1) {
 										e1.printStackTrace();
 									}
+									packageList.add("com.inhand.inboxcore");
 									System.out.println(packageList);
 									all = all + packageList.size();
 									for(int i = 0;i<packageList.size();i++){
@@ -1748,7 +1760,7 @@ public class tool {
 		simKeyEventPanel.setBackground(Color.WHITE);
 		simKeyEventPanel.setLayout(null);
 		simKeyEventPanel.setBorder(BorderFactory.createTitledBorder("模拟按键、时间"));
-		simKeyEventPanel.setBounds(590, 15, 216, 169);
+		simKeyEventPanel.setBounds(590, 15, 226, 169);
 		frame.getContentPane().add(simKeyEventPanel);
 		
 		btnSimKeyHome = new JButton("HOME");
@@ -1767,7 +1779,7 @@ public class tool {
 		btnSimKeyMode.setBounds(10, 122, 68, 37);
 		simKeyEventPanel.add(btnSimKeyMode);
 		datespinner = new JSpinner(datemodel);
-		datespinner.setBounds(88, 17, 124, 77);
+		datespinner.setBounds(88, 17, 132, 77);
 		simKeyEventPanel.add(datespinner);
 		datespinner.setFont(new Font("Microsoft YaHei UI", Font.PLAIN, 11));
 		datespinner.setValue(new Date());
@@ -1775,12 +1787,16 @@ public class tool {
 		datespinner.setEditor(editor);
 		
 		btnSetTime = new JButton("设置时间");
-		btnSetTime.setBounds(88, 103, 124, 23);
+		btnSetTime.setBounds(88, 103, 88, 23);
 		simKeyEventPanel.add(btnSetTime);
 		
-		btnRevertTime = new JButton("还原当前时间");
-		btnRevertTime.setBounds(88, 136, 124, 23);
+		btnRevertTime = new JButton("还原时间");
+		btnRevertTime.setBounds(88, 136, 88, 23);
 		simKeyEventPanel.add(btnRevertTime);
+		
+		set_time_and_restart_checkbox = new JCheckBox("<html><br>重启</html>");
+		set_time_and_restart_checkbox.setBounds(177, 100, 43, 59);
+		simKeyEventPanel.add(set_time_and_restart_checkbox);
 		//还原Android时间
 		btnRevertTime.addMouseListener(new MouseAdapter() {
 			private Process p;
@@ -1799,6 +1815,9 @@ public class tool {
 					e1.printStackTrace();
 				}
 				datespinner.setValue(new Date());
+				if(set_time_and_restart_checkbox.isSelected()){
+					RestartAPP();
+				}
 				JOptionPane.showMessageDialog(null, "Andriod时间已设置为当前时间", "设置时间",JOptionPane.PLAIN_MESSAGE);
 			}
 		});
@@ -1817,6 +1836,9 @@ public class tool {
 						p = Runtime.getRuntime().exec("cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell date -s " + time2);
 						p.waitFor();
 						p.destroy();
+						if(set_time_and_restart_checkbox.isSelected()){
+							RestartAPP();
+						}
 						JOptionPane.showMessageDialog(null, "Andriod时间修改成功", "设置时间",JOptionPane.PLAIN_MESSAGE);
 				} catch (IOException | InterruptedException e1) {
 					e1.printStackTrace();
@@ -1849,7 +1871,7 @@ public class tool {
 		panel.setLayout(null);
 		panel.setBorder(BorderFactory.createTitledBorder("卸载应用"));
 		panel.setBackground(Color.WHITE);
-		panel.setBounds(590, 194, 216, 178);
+		panel.setBounds(590, 194, 226, 178);
 		frame.getContentPane().add(panel);
 		
 		insatlled3app = new JComboBox<String>();
@@ -1859,6 +1881,7 @@ public class tool {
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
 			}
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+				insatlled3app.setEnabled(false);
 				String list3packagecommand = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell pm list package -3";
 				insatlled3app.removeAllItems();
 				Process plist3package = null;
@@ -1891,6 +1914,8 @@ public class tool {
 				    System.out.println(i);
 				    insatlled3app.addItem(i);
 				}
+				insatlled3app.addItem("com.inhand.inboxcore");
+				insatlled3app.setEnabled(true);
 			}
 		});
 		insatlled3app.setBounds(10, 82, 196, 32);
@@ -1948,6 +1973,7 @@ public class tool {
 							    System.out.println(i);
 							    insatlled3app.addItem(i);
 							}
+							insatlled3app.addItem("com.inhand.inboxcore");
 							JOptionPane.showMessageDialog(null, uninstallPackageName+"\n已卸载", "卸载完成",JOptionPane.OK_CANCEL_OPTION);
 						}
 						catch(IOException | InterruptedException e1){
@@ -2102,46 +2128,46 @@ public class tool {
 		
 
 	
-		//重启按钮
-		btnRestart.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				JFrame frame2 = new JFrame("重启");
-			    frame2.getContentPane().setLayout(null);
-			    frame2.setBounds(300, 300, 300, 200);
-			    frame2.setVisible(true);
-			    JButton btnrestartapp = new JButton("重启应用");
-			    btnrestartapp.setBounds(80, 10, 120, 30);
-				frame2.getContentPane().add(btnrestartapp);
-				btnrestartapp.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						//String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
-						RestartAPP();
-						JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
-						frame2.dispose();
-					}
-				});
-				JButton btnreboot = new JButton("重启设备");
-				btnreboot.setBounds(80, 80, 120, 30);
-				frame2.getContentPane().add(btnreboot);
-				btnreboot.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " reboot";
-						try {
-							Process p = Runtime.getRuntime().exec(command);
-							p.waitFor();
-							p.destroy();
-							JOptionPane.showMessageDialog(null, "已重启系统", "重启系统",JOptionPane.PLAIN_MESSAGE);
-							frame2.dispose();
-						} catch (IOException | InterruptedException e1) {
-							e1.printStackTrace();
-						}
-					}
-				});
-			}
-		});
+//		//重启按钮
+//		btnRestart.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				JFrame frame2 = new JFrame("重启");
+//			    frame2.getContentPane().setLayout(null);
+//			    frame2.setBounds(300, 300, 300, 200);
+//			    frame2.setVisible(true);
+//			    JButton btnrestartapp = new JButton("重启应用");
+//			    btnrestartapp.setBounds(80, 10, 120, 30);
+//				frame2.getContentPane().add(btnrestartapp);
+//				btnrestartapp.addMouseListener(new MouseAdapter() {
+//					@Override
+//					public void mouseClicked(MouseEvent e) {
+//						//String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
+//						RestartAPP();
+//						JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
+//						frame2.dispose();
+//					}
+//				});
+//				JButton btnreboot = new JButton("重启设备");
+//				btnreboot.setBounds(80, 80, 120, 30);
+//				frame2.getContentPane().add(btnreboot);
+//				btnreboot.addMouseListener(new MouseAdapter() {
+//					@Override
+//					public void mouseClicked(MouseEvent e) {
+//						String command = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " reboot";
+//						try {
+//							Process p = Runtime.getRuntime().exec(command);
+//							p.waitFor();
+//							p.destroy();
+//							JOptionPane.showMessageDialog(null, "已重启系统", "重启系统",JOptionPane.PLAIN_MESSAGE);
+//							frame2.dispose();
+//						} catch (IOException | InterruptedException e1) {
+//							e1.printStackTrace();
+//						}
+//					}
+//				});
+//			}
+//		});
 		//设备截图
 		btnScreenshot.addMouseListener(new MouseAdapter() {
 			@Override
@@ -2741,9 +2767,11 @@ public class tool {
 					e.printStackTrace();
 				}
 	    	   }
-		   		Check checkup = new Check(updateFlagIcon,updateHost);
-				Thread tcheck = new Thread(checkup);
-				tcheck.start();
+	    	    if(version_check_count<=3) {
+	    	    	Check checkup = new Check(updateFlagIcon,updateHost);
+					Thread tcheck = new Thread(checkup);
+					tcheck.start();
+				}
 	       }  
 	   }, delay, period);  
 	}
@@ -2989,7 +3017,6 @@ public class tool {
     		String localPath = filepath + "temp/";
     		newfolder(localPath);
     		String fileName = "ver.txt";
-    		
             //更新文件版本标识URL
             try {
             	FtpUtil.downloadSftpFile(ftpHost, ftpUserName, ftpPassword, ftpPort, ftpPath, localPath, fileName); 
@@ -3010,6 +3037,7 @@ public class tool {
 			} catch (Exception e) {
 				FlagIcon.setIcon(new ImageIcon());
 				e.printStackTrace();
+				version_check_count += 1;
 			}
 
     }
