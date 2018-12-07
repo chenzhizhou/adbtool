@@ -588,18 +588,27 @@ public class tool {
                     String[] strs = filepath.split(", ");
             		String regexstr = "[\u4e00-\u9fa5\u0020]";
             		Pattern p = Pattern.compile(regexstr);
+            		ArrayList<String> illegal_configs = new ArrayList<String>();
             		for (String configstring : strs) {
             			Matcher m = p.matcher(configstring);
             			if(m.find()){
             				//System.out.print("\n包含中文");
-							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+//							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
 							pushConfigArea.setText("");
+							illegal_configs.add(configstring);
             			}
             			else{
             				ChoosedConfigsstr.add(configstring);
             				pushConfigArea.setText("");
             			}
             		}
+            		if (illegal_configs.size() != 0) {
+            			String dialog_str = ""; 
+            			for (String config : illegal_configs){
+            				dialog_str += config + "\n"; 
+            			}
+            			JOptionPane.showMessageDialog(null, dialog_str+"\n包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+					}
             		for (String ChoosedConfigstring : ChoosedConfigsstr) {
             			pushConfigArea.append(ChoosedConfigstring+"\n");
             		}
@@ -1371,20 +1380,28 @@ public class tool {
                     }
                     String[] strs = filepath.split(", ");
                     String regexstr = "[\u4e00-\u9fa5\u0020]";
-            		Pattern p = Pattern.compile(regexstr);
+                    Pattern p = Pattern.compile(regexstr);
+            		ArrayList<String> illegal_configs = new ArrayList<String>();
             		for (String configstring : strs) {
-            			//System.out.println(configstring);
-            	        Matcher m = p.matcher(configstring);
+            			Matcher m = p.matcher(configstring);
             			if(m.find()){
             				//System.out.print("\n包含中文");
-							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
-							choosedappsArea.setText("");
-                    }
+//							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+            				choosedappsArea.setText("");
+							illegal_configs.add(configstring);
+            			}
             			else{
             				ChoosedappsStr.add(configstring);
             				choosedappsArea.setText("");
             			}
             		}
+            		if (illegal_configs.size() != 0) {
+            			String dialog_str = ""; 
+            			for (String config : illegal_configs){
+            				dialog_str += config + "\n"; 
+            			}
+            			JOptionPane.showMessageDialog(null, dialog_str+"\n包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+					}
             		for (String ChoosedConfigstring : ChoosedappsStr) {
             			choosedappsArea.append(ChoosedConfigstring+"\n");
             		}
