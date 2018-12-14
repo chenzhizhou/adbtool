@@ -201,12 +201,12 @@ public class channelFrame extends JFrame {
 //			            goodsIdList[i2] = ((Element) goodslist.get(i2)).attributeValue("id").toString();
 //			            goodsPriceList[i2] = ((Element) goodslist.get(i2)).attributeValue("price").toString();
 					}
-					if (cursor>=goodscount) {
-						cursor = 0;
-					}
+//					if (cursor>=goodscount) {
+//						cursor = 0;
+//					}
 					insertGoods(cabinetsElem,vmnumber,goodsIdList,vmType,channelList,goodsPriceList,cursor);
 					cursor += channelNumber;
-					if(channelNumber>=goodscount){
+					if(cursor>=goodscount){
 						break;
 					}
 				}
