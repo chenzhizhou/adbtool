@@ -100,7 +100,7 @@ import javax.swing.event.PopupMenuEvent;
 
 public class tool {
 
-	final static String AppVersion = "v.1.4.9";
+	final static String AppVersion = "v.1.4.10";
 	private JFrame frame;
 	Timer devicesinfotimer = new Timer();
 	JLabel ConTip;
@@ -2609,7 +2609,7 @@ public class tool {
 //		p.destroy();
 	}
 	public String getConfigs(){
-		String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config C:\\inhandTool\\config";
+		String command2 = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " pull sdcard/inbox/config C:\\inhandTool\\config\\";
 		String command3 = "cmd.exe /c start C:\\inhandTool\\config\\";
 		String response = getMachineId();
 		String MachineID = response;
@@ -2618,7 +2618,6 @@ public class tool {
 			}
 			else{
 				ConTip.setVisible(false);
-				command2 = command2 + "\\" + response;
 				newfolder("C:\\inhandTool\\config\\"+response);
 				try {
 					Process p;
@@ -2626,7 +2625,7 @@ public class tool {
 					p.waitFor();
 					p.destroy();
 					//System.out.println(command2);
-					p = Runtime.getRuntime().exec(command2);
+					p = Runtime.getRuntime().exec(command2+response);
 					p.waitFor();
 					p.destroy();
 				} catch (IOException | InterruptedException e1) {

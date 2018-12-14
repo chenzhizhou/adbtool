@@ -206,6 +206,9 @@ public class channelFrame extends JFrame {
 					}
 					insertGoods(cabinetsElem,vmnumber,goodsIdList,vmType,channelList,goodsPriceList,cursor);
 					cursor += channelNumber;
+					if(channelNumber>=goodscount){
+						break;
+					}
 				}
 				//指定文件输出的位置
 		        FileOutputStream out;
