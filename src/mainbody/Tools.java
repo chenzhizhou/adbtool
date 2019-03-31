@@ -1,5 +1,6 @@
 package mainbody;
 
+import mainbody.CommonCommands;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -11,15 +12,30 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import java.awt.GridLayout;
 import java.awt.Label;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -29,13 +45,37 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerDateModel;
+import javax.swing.filechooser.FileSystemView;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.dom4j.Node;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import java.awt.Component;
 import javax.swing.Box;
+import javax.swing.ComboBoxEditor;
 
 public class Tools {
 
+	public String root_path;
+	static String adb_path = "/Users/chenzhizhou/LibraryForWork/android-sdk/platform-tools/adb ";
 	private JFrame frame;
-
+	Execute_command ec;
+	Action_handler ach;
+	Timing_task tt;
+	CommonCommands cc;
+	
+	//UI公用
+	JComboBox<String> device_selection_box;
+	JTextArea device_display_area;
 
 	/**
 	 * Launch the application.
@@ -57,6 +97,11 @@ public class Tools {
 	 * Create the application.
 	 */
 	public Tools() {
+		root_path = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + File.separator + "inhand-adbtool";
+		ec = new Execute_command();
+		ach = new Action_handler();
+		cc = new CommonCommands();
+		tt = new Timing_task();
 		initialize();
 	}
 
@@ -69,46 +114,28 @@ public class Tools {
 		frame.setBounds(100, 100, 950, 650);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new GridLayout(3, 3, 10, 10));
+		init_UI();
+	}
+	private void init_UI() {
 		devices_info_module();
 		device_config_module();	
 		device_simulate_and_timeset_module();
 		show_log_module();
 		app_install_module();
-		
-		
-		
-		
-
-		
-		JPanel panel6 = new JPanel();
-		panel6.setBackground(Color.WHITE);
-		panel6.setBorder(BorderFactory.createTitledBorder("功能模块6"));
-		frame.getContentPane().add(panel6);
-		
-		JPanel panel7 = new JPanel();
-		panel7.setBackground(Color.WHITE);
-		panel7.setBorder(BorderFactory.createTitledBorder("功能模块7"));
-		frame.getContentPane().add(panel7);
-		
-		JPanel panel8 = new JPanel();
-		panel8.setBackground(Color.WHITE);
-		panel8.setBorder(BorderFactory.createTitledBorder("功能模块8"));
-		frame.getContentPane().add(panel8);
-		
-		JPanel panel9 = new JPanel();
-		panel9.setBackground(Color.WHITE);
-		panel9.setBorder(BorderFactory.createTitledBorder("功能模块9"));
-		frame.getContentPane().add(panel9);
+		app_manager_module();
+		save_log_module();
+		base_config_module();
+		module9();
 	}
 	private void devices_info_module() {
-		//功能模块1
+		//设备信息模块
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBackground(Color.WHITE);
-		panel.setBorder(BorderFactory.createTitledBorder("功能模块1"));
+		panel.setBorder(BorderFactory.createTitledBorder("设备信息"));
 		frame.getContentPane().add(panel);
 		//售货机编号显示区
-		JTextArea device_display_area = new JTextArea();
+		device_display_area = new JTextArea();
 		device_display_area.setLineWrap(true);
 		device_display_area.setEditable(false);
 		device_display_area.setBounds(20, 36, 152, 36);
@@ -122,6 +149,12 @@ public class Tools {
 		JButton restart_application_button = new JButton("重启应用");
 	    restart_application_button.setBounds(193, 20, 100, 50);
 	    panel.add(restart_application_button);
+	    restart_application_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				ach.restart_APP();//点击重启应用
+			}
+		});
 		//设备截图
 	    JButton devices_screenshot_button = new JButton("设备截图");
 		devices_screenshot_button.setBounds(193, 79, 100, 50);
@@ -130,24 +163,23 @@ public class Tools {
 		JLabel label_1 = new JLabel("选择连接的设备：");
 		label_1.setBounds(10, 103, 161, 15);
 		panel.add(label_1);
-		JComboBox<String> device_selection_box = new JComboBox<String>();
-		device_selection_box.setBounds(10, 130, 170, 30);
+		device_selection_box = new JComboBox<String>();
+		device_selection_box.setBounds(6, 130, 177, 30);
 		panel.add(device_selection_box);
-		//设备连接提示
-		JLabel label_2 = new JLabel("此处显示设备连接状态");
-		label_2.setBounds(10, 172, 161, 15);
-		panel.add(label_2);
 		//截图信息提示
 		JLabel label_3 = new JLabel("此处显示截图信息");
 		label_3.setBounds(193, 141, 111, 15);
 		panel.add(label_3);
+		//轮询devices_info
+		tt.adbdevicesTimerDemo();
+		
 	}
 	private void device_config_module() {
-		//功能模块2
+		//配置文件模块
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBackground(Color.WHITE);
-		panel.setBorder(BorderFactory.createTitledBorder("功能模块2"));
+		panel.setBorder(BorderFactory.createTitledBorder("配置文件"));
 		frame.getContentPane().add(panel);
 		//获取运行配置
 		JButton get_running_configure_button = new JButton("获取运行配置");
@@ -190,11 +222,11 @@ public class Tools {
 		
 	}
 	private void device_simulate_and_timeset_module() {
-		//功能模块3
+		//按键模拟、时间修改
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBackground(Color.WHITE);
-		panel.setBorder(BorderFactory.createTitledBorder("功能模块3"));
+		panel.setBorder(BorderFactory.createTitledBorder("按键模拟、时间修改"));
 		frame.getContentPane().add(panel);
 		//修改Android系统时间
 		//时间选择器
@@ -236,11 +268,11 @@ public class Tools {
 		panel.add(mode_simulating_keyboard_events);
 	}
 	private void show_log_module() {
-		//功能模块4
+		//打印日志模块
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBackground(Color.WHITE);
-		panel.setBorder(BorderFactory.createTitledBorder("功能模块4"));
+		panel.setBorder(BorderFactory.createTitledBorder("打印日志"));
 		frame.getContentPane().add(panel);
 		//命令标签
 		JLabel label = new JLabel("adb logcat -v time ");
@@ -282,11 +314,11 @@ public class Tools {
 		panel.add(clear_log_buffer_button);
 	}
 	private void app_install_module() {
-		//功能模块5
+		//Inhand-app安装模块
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBackground(Color.WHITE);
-		panel.setBorder(BorderFactory.createTitledBorder("功能模块5"));
+		panel.setBorder(BorderFactory.createTitledBorder("Inhand-app安装"));
 		frame.getContentPane().add(panel);
 		//待安装app框
 		JTextArea push_apps_file_area = new JTextArea("将需要安装的APK文件拖拽至此\n文件路径不能包含中文和空格\n");
@@ -321,5 +353,290 @@ public class Tools {
 		install_progress_bar.setStringPainted(true);
 		install_progress_bar.setBounds(6, 176, 298, 20);
 		panel.add(install_progress_bar);
+	}
+	private void app_manager_module() {
+		//应用管理模块
+		JPanel panel = new JPanel();
+		panel.setLayout(null);
+		panel.setBackground(Color.WHITE);
+		panel.setBorder(BorderFactory.createTitledBorder("应用管理"));
+		frame.getContentPane().add(panel);
+		//已安装应用信息
+		JButton installed_application_information_button = new JButton("已安装app信息");
+		installed_application_information_button.setBounds(6, 21, 135, 36);
+		panel.add(installed_application_information_button);
+		//卸载应用
+		JLabel label = new JLabel("选择需要卸载的应用：");
+		label.setBounds(10, 67, 196, 15);
+		panel.add(label);
+		//已安装应用选择框
+		JComboBox<String> insatlled_app_box = new JComboBox<String>();
+		insatlled_app_box.setBounds(6, 82, 196, 32);
+		panel.add(insatlled_app_box);
+		//卸载按钮
+		JButton uninstall_app_button = new JButton("卸载");
+		uninstall_app_button.setBounds(90, 120, 117, 29);
+		panel.add(uninstall_app_button);
+	}
+	private void save_log_module() {
+		//日志保存模块
+		JPanel panel = new JPanel();
+		panel.setLayout(null);
+		panel.setBackground(Color.WHITE);
+		panel.setBorder(BorderFactory.createTitledBorder("日志保存"));
+		frame.getContentPane().add(panel);
+		//tag过滤选项
+		JCheckBox save_log_with_tag_checkbox = new JCheckBox("tag过滤");
+		save_log_with_tag_checkbox.setBackground(Color.WHITE);
+		save_log_with_tag_checkbox.setBounds(10, 20, 103, 23);
+		panel.add(save_log_with_tag_checkbox);
+		//日志tag选择框
+		JLabel label = new JLabel("Tags:");
+		label.setBounds(10, 46, 41, 23);
+		panel.add(label);
+		JComboBox<String> common_tags_combobox = new JComboBox<String>();
+		common_tags_combobox.setBounds(47, 47, 118, 22);
+		panel.add(common_tags_combobox);
+		//停止保存日志
+		JButton stop_save_log_button = new JButton("Stop");
+		stop_save_log_button.setFont(new Font("宋体", Font.PLAIN, 10));
+		stop_save_log_button.setBounds(223, 108, 69, 39);
+		panel.add(stop_save_log_button);
+		stop_save_log_button.setEnabled(false);
+		//开始保存日志
+		JButton start_save_log_button = new JButton();
+		start_save_log_button.setFont(new Font("宋体", Font.PLAIN, 10));
+		start_save_log_button.setText("Start");
+		start_save_log_button.setBounds(135, 108, 78, 39);
+		panel.add(start_save_log_button);
+		//选择日志保存路径
+		JButton select_log_save_path_button = new JButton("选择日志保存路径");
+		select_log_save_path_button.setBounds(10, 107, 118, 39);
+		panel.add(select_log_save_path_button);
+		//日志保存路径
+		JLabel label_1 = new JLabel("路径:");
+		label_1.setBounds(10, 81, 41, 23);
+		panel.add(label_1);
+		JTextField log_saved_path_field = new JTextField();
+		log_saved_path_field.setColumns(10);
+		log_saved_path_field.setBounds(47, 75, 260, 30);
+		panel.add(log_saved_path_field);
+		String log_saved_path = root_path + File.separator + "device-log";
+		log_saved_path_field.setText(log_saved_path);
+		//崩溃日志
+		//保存崩溃日志
+		JButton save_crash_log_button = new JButton("查看崩溃日志");
+		save_crash_log_button.setBounds(10, 158, 114, 38);
+		panel.add(save_crash_log_button);
+		//崩溃日志更新提示
+		JLabel crash_log_tip = new JLabel("CrashLog.txt有更新！");
+		crash_log_tip.setBounds(135, 158, 157, 15);
+		crash_log_tip.setForeground(Color.RED);
+		crash_log_tip.setVisible(false);
+		panel.add(crash_log_tip);
+		//崩溃监控开关
+		JCheckBox crash_log_monitor_checkbox = new JCheckBox("崩溃日志监控开关");
+		crash_log_monitor_checkbox.setBounds(135, 173, 136, 23);
+		panel.add(crash_log_monitor_checkbox);
+	}
+	private void base_config_module() {
+		//基础配置模块
+		JPanel panel = new JPanel();
+		panel.setLayout(null);
+		panel.setBackground(Color.WHITE);
+		panel.setBorder(BorderFactory.createTitledBorder("基础配置"));
+		frame.getContentPane().add(panel);
+		//配置显示与修改
+		//标签显示
+		JLabel labelorgName = new JLabel("机构名：");
+		labelorgName.setBounds(10, 27, 54, 15);
+		panel.add(labelorgName);		
+		JLabel labelServerAddress = new JLabel("平台地址：");
+		labelServerAddress.setBounds(10, 58, 68, 15);
+		panel.add(labelServerAddress);		
+		JLabel labelVMCport = new JLabel("VMC串口：");
+		labelVMCport.setBounds(10, 91, 68, 15);
+		panel.add(labelVMCport);		
+		JLabel lblNewLabel_1 = new JLabel("当前厂家：");
+		lblNewLabel_1.setBounds(10, 130, 68, 15);
+		panel.add(lblNewLabel_1);
+		//更新配置按钮
+		JButton update_configuration_button = new JButton("更新配置");
+		update_configuration_button.setBounds(72, 161, 86, 35);
+		panel.add(update_configuration_button);
+		//刷新配置按钮
+		JButton refresh_configuration_button = new JButton("刷新");
+		refresh_configuration_button.setBounds(6, 161, 54, 35);
+		panel.add(refresh_configuration_button);
+		//机构名称下拉框
+		JComboBox<String> org_name_combobox = new JComboBox<String>();
+		org_name_combobox.setBounds(74, 24, 174, 25);
+		org_name_combobox.addItem("");
+		org_name_combobox.setEditable(true);
+		ComboBoxEditor org_name_editor = org_name_combobox.getEditor();
+		panel.add(org_name_combobox);
+		//服务器地址下拉框
+		JComboBox<String> server_address_combobox = new JComboBox<String>();
+		server_address_combobox.setBounds(74, 55, 174, 25);
+		server_address_combobox.addItem("");
+		server_address_combobox.setEditable(true);
+		ComboBoxEditor server_addresseditor = server_address_combobox.getEditor();
+		panel.add(server_address_combobox);
+		//串口下拉框
+		JComboBox<String> serial_port_combobox = new JComboBox<String>();
+		serial_port_combobox.setBounds(74, 88, 105, 25);
+		serial_port_combobox.setEditable(true);
+		serial_port_combobox.addItem("");
+		serial_port_combobox.addItem("ttyO1");
+		serial_port_combobox.addItem("ttyO2");
+		serial_port_combobox.addItem("ttyO3");
+		serial_port_combobox.addItem("ttyO4");
+		serial_port_combobox.addItem("ttyO5");
+		serial_port_combobox.addItem("ttyO6");
+		serial_port_combobox.addItem("ttyO7");
+		serial_port_combobox.addItem("ttyO8");
+		ComboBoxEditor serial_port_combobox_editor = serial_port_combobox.getEditor();
+		panel.add(serial_port_combobox);
+		//当前厂家下拉框
+		JComboBox<String> current_manufacturer_combobox = new JComboBox<String>();
+		ComboBoxEditor nowVendoreditor = current_manufacturer_combobox.getEditor();
+		current_manufacturer_combobox.setBounds(74, 125, 164, 25);
+		panel.add(current_manufacturer_combobox);
+		//新增常用机构按钮
+		JButton add_common_organization = new JButton("ADD");
+		add_common_organization.setToolTipText("新增常用机构");
+		add_common_organization.setFont(new Font("宋体", Font.PLAIN, 12));
+		add_common_organization.setBounds(250, 23, 54, 25);
+		panel.add(add_common_organization);
+		//新增常用平台地址
+		JButton add_common_address = new JButton("ADD");
+		add_common_address.setToolTipText("新增常用平台地址");
+		add_common_address.setFont(new Font("宋体", Font.PLAIN, 12));
+		add_common_address.setBounds(250, 54, 54, 25);
+		panel.add(add_common_address);
+		//只修改主柜串口选择框
+		JCheckBox only_matser_serial_chckbx = new JCheckBox("只修改主柜串口");
+		only_matser_serial_chckbx.setBounds(181, 88, 123, 25);
+		panel.add(only_matser_serial_chckbx);
+		//修改售货机编号
+		JButton change_machine_id_button = new JButton("更改售货机编号");
+		change_machine_id_button.setBounds(162, 161, 142, 35);
+		panel.add(change_machine_id_button);
+	}
+	private void module9() {
+		//9模块
+		JPanel panel = new JPanel();
+		panel.setLayout(null);
+		panel.setBackground(Color.WHITE);
+		panel.setBorder(BorderFactory.createTitledBorder("模块9"));
+		frame.getContentPane().add(panel);
+	}
+	public class Execute_command{
+		public String adb_exec(String command) {
+			String device_name = "";
+			if (command.equals("devices")) {
+				device_name = "";
+			}else {
+				device_name =  "-s "+ device_selection_box.getSelectedItem().toString() + " ";
+			}
+			command = adb_path + device_name + command;
+	        String returnString = "";
+	        Process pro = null;
+	        Runtime runTime = Runtime.getRuntime();
+//	        System.out.print(command);
+	        if (runTime == null) {
+	            System.err.println("Create runtime false!");
+	        }
+	        try {
+	            pro = runTime.exec(command);
+	            BufferedReader input = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+	            PrintWriter output = new PrintWriter(new OutputStreamWriter(pro.getOutputStream()));
+	            String line;
+	            while ((line = input.readLine()) != null) {
+	                returnString = returnString + line + "\n";
+	            }
+	            input.close();
+	            output.close();
+	            pro.destroy();
+	        } catch (IOException ex) {
+	            //no
+	        }
+	        return returnString;
+	    }
+	}
+	class Action_handler{
+	    public void restart_APP(){
+//	    	String cmd = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
+			String cmd = cc.restart_app_command;
+    		ec.adb_exec(cmd);
+    		JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
+	    }
+	    public String get_machine_id() {
+	    	String cmd = cc.get_machine_id;
+	    	String response = ec.adb_exec(cmd);
+			return response;
+		}
+	    public void get_devices_info() {
+	    	String response = "";
+	    	response = ec.adb_exec(cc.get_devices_info_command);
+			response = response.replace(" ", "");
+			response = response.replace("Listofdevicesattached", "");
+			String comobox_content = "";
+			if(response.indexOf("offline") != -1){
+				response = response.replace("offline", "device");
+			}
+			for(int i = 0; i<device_selection_box.getItemCount(); i++){
+				comobox_content += device_selection_box.getItemAt(i);
+			}
+			if (device_selection_box.getItemCount() == 1) {
+				response = response.replace("\n", "");
+			}
+//			System.out.println("comobox_content:"+comobox_content);
+			if(!"".equals(response)){
+				int now_count = 0;
+				try {
+					now_count = response.split("device").length;
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				for (String retval: response.split("device")) {
+			        retval = retval.replace("	", " ");
+//			        System.out.println(retval);
+					if(comobox_content.indexOf(retval) == -1){
+						device_selection_box.addItem(retval);
+					}
+					if(device_selection_box.getItemCount() != now_count){
+						device_selection_box.removeAllItems();
+						device_selection_box.addItem(retval);
+					}
+			      }
+			}else{
+				device_selection_box.removeAllItems();
+			}
+			if("".equals(response) && device_selection_box.getItemCount() == 0){
+				device_display_area.setText("");
+				device_display_area.setText("error: device not found\n- waiting for device -");
+			}else {
+				device_display_area.setText("\n售货机编号:\n"+ach.get_machine_id());
+			}
+		}
+	}
+	class Timing_task{
+		public void adbdevicesTimerDemo()
+		{
+		int delay = 0;//ms
+		int period = 5000;//ms
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {    
+		       public void run(){
+		    	   try{
+		    		   ach.get_devices_info();
+		    	   } 
+		    	   catch (Exception e){
+		    		   e.printStackTrace();
+		    	   }
+		       }
+		   }, delay, period);
+		}
 	}
 }
