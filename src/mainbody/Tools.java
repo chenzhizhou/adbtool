@@ -65,8 +65,12 @@ import javax.swing.ComboBoxEditor;
 
 public class Tools {
 
+	String OS_type = "";
+	static String adb_path = "";
+	//目录
 	public String root_path;
-	static String adb_path = "/Users/chenzhizhou/LibraryForWork/android-sdk/platform-tools/adb ";
+	public String screenshot_path;
+	
 	private JFrame frame;
 	Execute_command ec;
 	Action_handler ach;
@@ -76,6 +80,8 @@ public class Tools {
 	//UI公用
 	JComboBox<String> device_selection_box;
 	JTextArea device_display_area;
+	JLabel screenshot_label;
+	private JButton select_adb_path_button;
 
 	/**
 	 * Launch the application.
@@ -95,9 +101,9 @@ public class Tools {
 
 	/**
 	 * Create the application.
+	 * @throws IOException 
 	 */
-	public Tools() {
-		root_path = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + File.separator + "inhand-adbtool";
+	public Tools() throws IOException {
 		ec = new Execute_command();
 		ach = new Action_handler();
 		cc = new CommonCommands();
@@ -105,17 +111,55 @@ public class Tools {
 		initialize();
 	}
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
+	private void initialize() throws IOException {
+		create_main_frame();
+		init_workspace();
+		init_UI();
+	}
+	private void create_main_frame() {
 		frame = new JFrame();
 		frame.setResizable(false);
 		frame.setBounds(100, 100, 950, 650);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new GridLayout(3, 3, 10, 10));
-		init_UI();
 	}
+	
+	private String get_os_type() {
+		String os_nameString = System.getProperty("os.name").toLowerCase();
+		if (os_nameString.indexOf("mac")>=0) {
+			return "mac";
+		}
+		else if (os_nameString.indexOf("windows")>=0) {
+			return "windows";
+		}
+		else {
+			return null;
+		}	
+	}
+	
+	private void init_workspace() throws IOException {
+		OS_type = get_os_type();
+		root_path = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + File.separator + "inhand-adbtool" + File.separator;
+		screenshot_path = root_path + "screenshot" + File.separator;
+		String adb_path_file_path = root_path + "adb_path";
+		CommonOperations.mkdir(root_path);
+		CommonOperations.mkdir(screenshot_path);
+		if (!new File(adb_path_file_path).exists()) {
+			if (OS_type.equals("mac")) {
+				adb_path = FileChooser.file_chooser() + " ";
+			}
+			else if (OS_type.equals("windows")) {
+				adb_path = "adb" + " ";
+			}
+			CommonOperations.create_new_file(adb_path_file_path);
+			CommonOperations.write_file(adb_path_file_path, adb_path);
+		}
+		else {
+			adb_path = CommonOperations.read_file(adb_path_file_path);
+		}
+	}
+
+
 	private void init_UI() {
 		devices_info_module();
 		device_config_module();	
@@ -159,6 +203,12 @@ public class Tools {
 	    JButton devices_screenshot_button = new JButton("设备截图");
 		devices_screenshot_button.setBounds(193, 79, 100, 50);
 		panel.add(devices_screenshot_button);
+		devices_screenshot_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				ach.devices_screenshot();//点击设备截图
+			}
+		});
 		//设备选择下拉框
 		JLabel label_1 = new JLabel("选择连接的设备：");
 		label_1.setBounds(10, 103, 161, 15);
@@ -167,9 +217,9 @@ public class Tools {
 		device_selection_box.setBounds(6, 130, 177, 30);
 		panel.add(device_selection_box);
 		//截图信息提示
-		JLabel label_3 = new JLabel("此处显示截图信息");
-		label_3.setBounds(193, 141, 111, 15);
-		panel.add(label_3);
+		screenshot_label = new JLabel("此处显示截图信息");
+		screenshot_label.setBounds(193, 141, 111, 15);
+		panel.add(screenshot_label);
 		//轮询devices_info
 		tt.adbdevicesTimerDemo();
 		
@@ -421,7 +471,7 @@ public class Tools {
 		log_saved_path_field.setColumns(10);
 		log_saved_path_field.setBounds(47, 75, 260, 30);
 		panel.add(log_saved_path_field);
-		String log_saved_path = root_path + File.separator + "device-log";
+		String log_saved_path = root_path + "device-log";
 		log_saved_path_field.setText(log_saved_path);
 		//崩溃日志
 		//保存崩溃日志
@@ -531,7 +581,7 @@ public class Tools {
 		panel.setBorder(BorderFactory.createTitledBorder("模块9"));
 		frame.getContentPane().add(panel);
 	}
-	public class Execute_command{
+	 class Execute_command{
 		public String adb_exec(String command) {
 			String device_name = "";
 			if (command.equals("devices")) {
@@ -563,19 +613,46 @@ public class Tools {
 	        }
 	        return returnString;
 	    }
+		public String shell_exec(String command) {
+	        String returnString = "";
+	        Process pro = null;
+	        Runtime runTime = Runtime.getRuntime();
+//	        System.out.print(command);
+	        if (runTime == null) {
+	            System.err.println("Create runtime false!");
+	        }
+	        try {
+	            pro = runTime.exec(command);
+	            BufferedReader input = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+	            PrintWriter output = new PrintWriter(new OutputStreamWriter(pro.getOutputStream()));
+	            String line;
+	            while ((line = input.readLine()) != null) {
+	                returnString = returnString + line + "\n";
+	            }
+	            input.close();
+	            output.close();
+	            pro.destroy();
+	        } catch (IOException ex) {
+	            //no
+	        }
+	        return returnString;
+	    }
 	}
 	class Action_handler{
+		//重启应用
 	    public void restart_APP(){
 //	    	String cmd = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
 			String cmd = cc.restart_app_command;
     		ec.adb_exec(cmd);
     		JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
 	    }
+	    //获取售货机编号
 	    public String get_machine_id() {
 	    	String cmd = cc.get_machine_id;
 	    	String response = ec.adb_exec(cmd);
 			return response;
 		}
+	    //获取adb devices
 	    public void get_devices_info() {
 	    	String response = "";
 	    	response = ec.adb_exec(cc.get_devices_info_command);
@@ -618,6 +695,60 @@ public class Tools {
 				device_display_area.setText("error: device not found\n- waiting for device -");
 			}else {
 				device_display_area.setText("\n售货机编号:\n"+ach.get_machine_id());
+			}
+		}
+	    //设备屏幕截图
+	    public void devices_screenshot() {
+	    	Screenshot_Thread prtscT = new Screenshot_Thread();
+    		Thread pt = new Thread(prtscT);
+    		pt.start();
+		}
+	}
+	class Screenshot_Thread implements Runnable{
+		@Override
+		public void run() {
+			String formatTime = CommonOperations.get_format_time();
+			String command1 = "shell /system/bin/screencap -p /sdcard/sc123456.png";
+			String command2 = "pull /sdcard/sc123456.png " + screenshot_path + "sc" + formatTime + ".png";
+			String command3 = "shell rm -rf /sdcard/sc123456.png";
+			String command4_windows = "cmd.exe /c start " + screenshot_path;
+			String command4_macosx = "open " + screenshot_path;
+			String command4 = "";
+			String command5 = "shell du -k sdcard/sc123456.png";
+			if (OS_type.equals("mac")) {
+				command4 = command4_macosx;
+			}
+			else if (OS_type.equals("windows")) {
+				command4 = command4_windows;
+			}
+			try {
+				screenshot_label.setVisible(true);
+				screenshot_label.setForeground(Color.ORANGE);
+				screenshot_label.setText("截图中……");
+				boolean flag = false;
+				ec.adb_exec(command1);
+				while(!flag){
+					Thread.sleep(1000);
+					String response = ec.adb_exec(command5);
+					String[] a = response.split("sdcard");
+					String picLength = a[0].trim();
+					if (!picLength.equals("0")) {
+						flag = true;
+					}
+				}
+				Thread.sleep(100);
+				ec.adb_exec(command2);
+				ec.adb_exec(command3);
+				screenshot_label.setText("完成！");
+				screenshot_label.setForeground(Color.green);
+				int n = JOptionPane.showConfirmDialog(null, "是否立即查看截图？","截图完成",JOptionPane.OK_CANCEL_OPTION);
+				if (n == 0) {
+					ec.shell_exec(command4);
+				}
+				Thread.sleep(1000);
+				screenshot_label.setVisible(false);
+			} catch (Exception e1) {
+				e1.printStackTrace();
 			}
 		}
 	}

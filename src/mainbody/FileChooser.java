@@ -62,4 +62,17 @@ public class FileChooser {
         }
 		return files;
 	}
+	public static String file_chooser(){
+		String path="";
+		JFileChooser jfc=new JFileChooser();
+		FileSystemView fsv = FileSystemView.getFileSystemView();
+		jfc.setDialogTitle("≈‰÷√adb¬∑æ∂£¨«Î—°‘Ò—°‘Òadb");
+		jfc.setCurrentDirectory(fsv.getHomeDirectory());
+        jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int returnVal = jfc.showOpenDialog(jfc);
+        if(returnVal == JFileChooser.APPROVE_OPTION){ 
+        	path= jfc.getSelectedFile().getAbsolutePath();
+        }
+		return path;
+	}
 }
