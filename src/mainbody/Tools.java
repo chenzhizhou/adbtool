@@ -10,12 +10,15 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.GridLayout;
 import java.awt.Label;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -30,12 +33,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -45,6 +51,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerDateModel;
+import javax.swing.TransferHandler;
 import javax.swing.filechooser.FileSystemView;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -81,7 +88,17 @@ public class Tools {
 	JComboBox<String> device_selection_box;
 	JTextArea device_display_area;
 	JLabel screenshot_label;
-	private JButton select_adb_path_button;
+	private JProgressBar install_progress_bar;
+	private JTextArea info_area;
+	private JComboBox<String> insatlled_app_box;
+//	private JButton select_adb_path_button;
+	
+	//公有变量
+	ArrayList<String> choosed_appsArrayListString = new ArrayList<String>();
+	private int progress_bar_value;
+	
+	
+
 
 	/**
 	 * Launch the application.
@@ -119,7 +136,7 @@ public class Tools {
 	private void create_main_frame() {
 		frame = new JFrame();
 		frame.setResizable(false);
-		frame.setBounds(100, 100, 950, 650);
+		frame.setBounds(100, 50, 950, 650);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new GridLayout(3, 3, 10, 10));
 	}
@@ -212,10 +229,10 @@ public class Tools {
 		//设备选择下拉框
 		JLabel label_1 = new JLabel("选择连接的设备：");
 		label_1.setBounds(10, 103, 161, 15);
-		panel.add(label_1);
+//		panel.add(label_1);
 		device_selection_box = new JComboBox<String>();
 		device_selection_box.setBounds(6, 130, 177, 30);
-		panel.add(device_selection_box);
+//		panel.add(device_selection_box);
 		//截图信息提示
 		screenshot_label = new JLabel("此处显示截图信息");
 		screenshot_label.setBounds(193, 141, 111, 15);
@@ -380,29 +397,139 @@ public class Tools {
 		push_apps_file_area_scroll.setBounds(126, 20, 178, 104);
 		push_apps_file_area_scroll.setViewportView(push_apps_file_area);
 		panel.add(push_apps_file_area_scroll);
+		push_apps_file_area.setTransferHandler(new TransferHandler(){
+			private static final long serialVersionUID = 1L;
+			@Override
+            public boolean importData(JComponent comp, Transferable t) {
+                try {
+                    Object o = t.getTransferData(DataFlavor.javaFileListFlavor);
+
+                    String filepath = o.toString();
+                    if (filepath.startsWith("[")) {
+                        filepath = filepath.substring(1);
+                    }
+                    if (filepath.endsWith("]")) {
+                        filepath = filepath.substring(0, filepath.length() - 1);
+                    }
+                    String[] strs = filepath.split(", ");
+                    String regexstr = "[\u4e00-\u9fa5\u0020]";
+                    Pattern p = Pattern.compile(regexstr);
+            		ArrayList<String> illegal_configs = new ArrayList<String>();
+            		for (String configstring : strs) {
+            			Matcher m = p.matcher(configstring);
+            			if(m.find()){
+            				//System.out.print("\n包含中文");
+//							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+            				push_apps_file_area.setText("");
+							illegal_configs.add(configstring);
+            			}
+            			else{
+            				choosed_appsArrayListString.add(configstring);
+            				push_apps_file_area.setText("");
+            			}
+            		}
+            		if (illegal_configs.size() != 0) {
+            			String dialog_str = ""; 
+            			for (String config : illegal_configs){
+            				dialog_str += config + "\n"; 
+            			}
+            			JOptionPane.showMessageDialog(null, dialog_str+"\n包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+					}
+            		for (String ChoosedConfigstring : choosed_appsArrayListString) {
+            			push_apps_file_area.append(ChoosedConfigstring+"\n");
+            		}
+                    return true;
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                
+                return false;
+            }
+            @Override
+            public boolean canImport(JComponent comp, DataFlavor[] flavors) {
+                for (int i = 0; i < flavors.length; i++) {
+                    if (DataFlavor.javaFileListFlavor.equals(flavors[i])) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 		//仅安装
 		JButton install_and_restart_button = new JButton("单独安装app");
 		install_and_restart_button.setBounds(6, 84, 104, 35);
 		panel.add(install_and_restart_button);
-		//卸载inhand全套app
-		JButton uninstall_all_inhand_button = new JButton("卸载inhand全套");
+		install_and_restart_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (choosed_appsArrayListString.isEmpty()) {
+					JOptionPane.showMessageDialog(null, "请添加需要安装的安装包", "提示",JOptionPane.CANCEL_OPTION);
+				}
+				else {
+					int n = JOptionPane.showConfirmDialog(null, "是否覆盖安装APP","安装",JOptionPane.OK_CANCEL_OPTION);
+					if (n == 0) {
+						Install_APP_Thread Iat = new Install_APP_Thread();
+						Thread t1 = new Thread(Iat);
+						t1.start();
+					}
+				}
+			}
+		});
+		//卸载全套第三方app
+		JButton uninstall_all_inhand_button = new JButton("卸载All第三方");
 		uninstall_all_inhand_button.setBounds(6, 140, 114, 35);
 		panel.add(uninstall_all_inhand_button);
+		uninstall_all_inhand_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int n = JOptionPane.showConfirmDialog(null, "是否要将系统第三方 APP全部卸载","全部卸载",JOptionPane.OK_CANCEL_OPTION);
+				if (n == 0) {
+					Uninstall_ALL_Thread uIt = new Uninstall_ALL_Thread();
+					Thread t1 = new Thread(uIt);
+					t1.start();
+				}
+			}
+		});
 		//卸载inhand全套app并安装app
-		JButton cover_installation_button = new JButton("<html>卸载<br>全套app<br>并安装</html>");
+		JButton cover_installation_button = new JButton("<html>卸载<br>All第三方<br>并安装</html>");
 		cover_installation_button.setBounds(6, 21, 104, 59);
 		panel.add(cover_installation_button);
+		cover_installation_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (choosed_appsArrayListString.isEmpty()) {
+					JOptionPane.showMessageDialog(null, "请添加需要安装的安装包", "提示",JOptionPane.CANCEL_OPTION);
+				}
+				else {
+					int n = JOptionPane.showConfirmDialog(null, "是否要全部卸载，并安装APP","卸载并安装",JOptionPane.OK_CANCEL_OPTION);
+					if (n == 0) {
+						Uninstall_and_Install_Thread It = new Uninstall_and_Install_Thread();
+						Thread t1 = new Thread(It);
+						t1.start();
+					}
+				}
+			}
+		});
 		//清空待安装app内容
 		JButton clear_push_app_file_area_button = new JButton();
 		clear_push_app_file_area_button.setToolTipText("清空待安装app");
 		clear_push_app_file_area_button.setText("清空待安装app");
 		clear_push_app_file_area_button.setBounds(126, 142, 175, 30);
 		panel.add(clear_push_app_file_area_button);
+		clear_push_app_file_area_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				choosed_appsArrayListString.clear();
+				push_apps_file_area.setText("选择APK文件或拖拽APK文件至文本框\n");
+			}
+		});
 		//进度条
-		JProgressBar install_progress_bar = new JProgressBar();
+		install_progress_bar = new JProgressBar();
 		install_progress_bar.setStringPainted(true);
 		install_progress_bar.setBounds(6, 176, 298, 20);
 		panel.add(install_progress_bar);
+		
 	}
 	private void app_manager_module() {
 		//应用管理模块
@@ -415,18 +542,43 @@ public class Tools {
 		JButton installed_application_information_button = new JButton("已安装app信息");
 		installed_application_information_button.setBounds(6, 21, 135, 36);
 		panel.add(installed_application_information_button);
+		installed_application_information_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Get_app_version_Thread gavt = new Get_app_version_Thread();
+				Thread t1 = new Thread(gavt);
+				t1.start();
+			}
+		});
 		//卸载应用
 		JLabel label = new JLabel("选择需要卸载的应用：");
 		label.setBounds(10, 67, 196, 15);
 		panel.add(label);
 		//已安装应用选择框
-		JComboBox<String> insatlled_app_box = new JComboBox<String>();
+		insatlled_app_box = new JComboBox<String>();
 		insatlled_app_box.setBounds(6, 82, 196, 32);
 		panel.add(insatlled_app_box);
 		//卸载按钮
 		JButton uninstall_app_button = new JButton("卸载");
 		uninstall_app_button.setBounds(90, 120, 117, 29);
 		panel.add(uninstall_app_button);
+		uninstall_app_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String uninstallPackageName = insatlled_app_box.getSelectedItem().toString();
+				if (uninstallPackageName.contains("com")) {
+					int n = JOptionPane.showConfirmDialog(null, "卸载"+uninstallPackageName,"卸载",JOptionPane.OK_CANCEL_OPTION);
+					if (n == 0) {
+						Uninstall_app_Thread uat = new Uninstall_app_Thread();
+						Thread t1 = new Thread(uat);
+						t1.start();
+					}
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "请选择需要卸载的包", "提示",JOptionPane.CANCEL_OPTION);
+				}
+			}
+		});
 	}
 	private void save_log_module() {
 		//日志保存模块
@@ -580,20 +732,29 @@ public class Tools {
 		panel.setBackground(Color.WHITE);
 		panel.setBorder(BorderFactory.createTitledBorder("模块9"));
 		frame.getContentPane().add(panel);
+		info_area = new JTextArea("");
+		info_area.setLineWrap(true);
+		panel.add(info_area);
+		JScrollPane info_area_scroll = new JScrollPane(info_area);
+		info_area_scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		info_area_scroll.setBounds(10, 20, 294, 162);
+		info_area_scroll.setViewportView(info_area);
+		panel.add(info_area_scroll);
 	}
 	 class Execute_command{
 		public String adb_exec(String command) {
 			String device_name = "";
-			if (command.equals("devices")) {
-				device_name = "";
-			}else {
-				device_name =  "-s "+ device_selection_box.getSelectedItem().toString() + " ";
-			}
+			//取消设备选择的功能
+//			if (command.equals("devices")) {
+//				device_name = "";
+//			}else {
+//				device_name =  "-s "+ device_selection_box.getSelectedItem().toString() + " ";
+//			}
 			command = adb_path + device_name + command;
 	        String returnString = "";
 	        Process pro = null;
 	        Runtime runTime = Runtime.getRuntime();
-//	        System.out.print(command);
+//	        System.out.print(command+"\n");
 	        if (runTime == null) {
 	            System.err.println("Create runtime false!");
 	        }
@@ -654,54 +815,219 @@ public class Tools {
 		}
 	    //获取adb devices
 	    public void get_devices_info() {
-	    	String response = "";
-	    	response = ec.adb_exec(cc.get_devices_info_command);
-			response = response.replace(" ", "");
-			response = response.replace("Listofdevicesattached", "");
-			String comobox_content = "";
-			if(response.indexOf("offline") != -1){
-				response = response.replace("offline", "device");
-			}
-			for(int i = 0; i<device_selection_box.getItemCount(); i++){
-				comobox_content += device_selection_box.getItemAt(i);
-			}
-			if (device_selection_box.getItemCount() == 1) {
-				response = response.replace("\n", "");
-			}
-//			System.out.println("comobox_content:"+comobox_content);
-			if(!"".equals(response)){
-				int now_count = 0;
-				try {
-					now_count = response.split("device").length;
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				for (String retval: response.split("device")) {
-			        retval = retval.replace("	", " ");
-//			        System.out.println(retval);
-					if(comobox_content.indexOf(retval) == -1){
-						device_selection_box.addItem(retval);
-					}
-					if(device_selection_box.getItemCount() != now_count){
-						device_selection_box.removeAllItems();
-						device_selection_box.addItem(retval);
-					}
-			      }
-			}else{
-				device_selection_box.removeAllItems();
-			}
-			if("".equals(response) && device_selection_box.getItemCount() == 0){
-				device_display_area.setText("");
-				device_display_area.setText("error: device not found\n- waiting for device -");
-			}else {
-				device_display_area.setText("\n售货机编号:\n"+ach.get_machine_id());
-			}
+	    	device_display_area.setText("\n售货机编号:\n"+ach.get_machine_id());
+	    	//去掉选择设备功能
+//	    	String response = "";
+//	    	response = ec.adb_exec(cc.get_devices_info_command);
+//			response = response.replace(" ", "");
+//			response = response.replace("Listofdevicesattached", "");
+//			String comobox_content = "";
+//			if(response.indexOf("offline") != -1){
+//				response = response.replace("offline", "device");
+//			}
+//			for(int i = 0; i<device_selection_box.getItemCount(); i++){
+//				comobox_content += device_selection_box.getItemAt(i);
+//			}
+//			if (device_selection_box.getItemCount() == 1) {
+//				response = response.replace("\n", "");
+//			}
+////			System.out.println("comobox_content:"+comobox_content);
+//			if(!"".equals(response)){
+//				int now_count = 0;
+//				try {
+//					now_count = response.split("device").length;
+//				} catch (Exception e) {
+//					
+//				}
+//				for (String retval: response.split("device")) {
+//			        retval = retval.replace("	", " ");
+////			        System.out.println(retval);
+//					if(comobox_content.indexOf(retval) == -1){
+//						device_selection_box.addItem(retval);
+//					}
+//					if(device_selection_box.getItemCount() != now_count){
+//						device_selection_box.removeAllItems();
+//						device_selection_box.addItem(retval);
+//					}
+//			      }
+//			}else{
+//				device_selection_box.removeAllItems();
+//			}
+//			if("".equals(response) && device_selection_box.getItemCount() == 0){
+//				device_display_area.setText("");
+//				device_display_area.setText("error: device not found\n- waiting for device -");
+//			}else {
+//				device_display_area.setText("\n售货机编号:\n"+ach.get_machine_id());
+//			}
 		}
 	    //设备屏幕截图
 	    public void devices_screenshot() {
 	    	Screenshot_Thread prtscT = new Screenshot_Thread();
     		Thread pt = new Thread(prtscT);
     		pt.start();
+		}
+	    //进度条显示
+		public void progress_show(int all, int now,JProgressBar progressBar){
+			double prog = (double)now / (double)all;
+			int progbarValue = (int)(prog*100);
+			progressBar.setValue(progbarValue);
+		}
+		//获取第三方应用包名
+		public List<String> get_3_package_list() {
+			String package3String = ec.adb_exec(cc.list_package_3);
+			String[] package3StringsLiStrings = package3String.split("package:");
+			System.out.println(package3StringsLiStrings.length);
+			List<String> package_list=new ArrayList<String>();
+			for (int i = 1; i < package3StringsLiStrings.length; i++) {
+				System.out.println(i +":"+ package3StringsLiStrings[i]);
+				String s1 = package3StringsLiStrings[i].trim();
+				package_list.add(s1);
+				}
+			package_list.add("com.inhand.inboxcore");
+			return package_list;
+		}
+		//获取并显示已安装app版本信息
+		public void get_app_version_String(List<String> package_list) {
+			info_area.setText("版本信息：\n");
+			String grep = "";
+			if (OS_type.equals("mac")) {
+				grep = cc.grepString;
+			}
+			else if (OS_type.equals("windows")) {
+				grep = cc.findstrString;
+			}
+			insatlled_app_box.removeAllItems();
+			insatlled_app_box.addItem("选择要删除的应用");
+			for (String packagename:package_list) {
+				String getVersioncmd = cc.dumpsys_packageString + packagename + cc.symbol_orString + grep + cc.versionNameString;
+				String versionstr = ec.adb_exec(getVersioncmd);
+				versionstr = versionstr.replace("versionName=", "");
+				info_area.append(packagename+":"+versionstr);
+				insatlled_app_box.addItem(packagename);
+			}
+		}
+		
+	}
+	class Get_app_version_Thread implements Runnable{
+		@Override
+		public void run() {
+			ach.get_app_version_String(ach.get_3_package_list());
+		}
+		
+	}
+	class Uninstall_app_Thread implements Runnable{
+		@Override
+		public void run() {
+			String uninstallPackageName = insatlled_app_box.getSelectedItem().toString();
+			String responseString = ec.adb_exec(cc.uninstallString+uninstallPackageName);
+			ach.get_app_version_String(ach.get_3_package_list());
+			info_area.append("卸载"+uninstallPackageName+" "+responseString);
+		}
+		
+	}
+	class Install_APP_Thread implements Runnable{
+		@Override
+		public void run() {
+			try{
+				progress_bar_value = 0;
+				int all = 1;
+				all = all + choosed_appsArrayListString.size();
+				install_progress_bar.setValue(0);
+				String dialogStr = "";
+				for(String tmp:choosed_appsArrayListString){
+					String commandString = cc.installString+tmp;
+					ec.adb_exec(commandString);
+		            ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
+		            dialogStr += tmp + "\n";
+					}
+					ach.restart_APP();
+					install_progress_bar.setValue(100);
+					JOptionPane.showMessageDialog(null, "安装\n"+dialogStr+"完成！", "安装成功",JOptionPane.PLAIN_MESSAGE);
+				}
+			catch(Exception e1){
+				e1.printStackTrace();
+			}
+		}
+	}
+	class Uninstall_ALL_Thread implements Runnable{
+		@Override
+		public void run() {
+			try{
+				progress_bar_value = 0;
+				int all = 0;
+				all = all + choosed_appsArrayListString.size() + 1;
+				install_progress_bar.setValue(0);
+//				String package3String = ec.adb_exec(cc.list_package_3);
+//				String[] package3StringsLiStrings = package3String.split("package:");
+//				System.out.println(package3StringsLiStrings.length);
+//				List<String> package_list=new ArrayList<String>();
+//				for (int i = 1; i < package3StringsLiStrings.length; i++) {
+//					System.out.println(i +":"+ package3StringsLiStrings[i]);
+//					String s1 = package3StringsLiStrings[i].trim();
+//					package_list.add(s1);
+//					}
+//				package_list.add("com.inhand.inboxcore");
+				List<String> package_list = ach.get_3_package_list();
+				System.out.println(package_list);
+				
+				all = all + package_list.size();
+				String dialogStr = "";
+				for(String utemp:package_list){
+					ec.adb_exec(cc.uninstallString+utemp);
+					dialogStr += utemp + "\n";
+					ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
+					}
+				install_progress_bar.setValue(100);
+				JOptionPane.showMessageDialog(null, "卸载\n"+dialogStr+"完成！", "卸载所有第三方app",JOptionPane.PLAIN_MESSAGE);
+				}
+			catch(Exception e1){
+				e1.printStackTrace();
+			}
+		}
+	}
+	class Uninstall_and_Install_Thread implements Runnable{
+		@Override
+		public void run() {
+			try{
+				progress_bar_value = 0;
+				int all = 0;
+				all = all + choosed_appsArrayListString.size() + 1;
+				install_progress_bar.setValue(0);
+//				String package3String = ec.adb_exec(cc.list_package_3);
+//				String[] package3StringsLiStrings = package3String.split("package:");
+//				System.out.println(package3StringsLiStrings.length);
+//				List<String> package_list=new ArrayList<String>();
+//				for (int i = 1; i < package3StringsLiStrings.length; i++) {
+//					System.out.println(i +":"+ package3StringsLiStrings[i]);
+//					String s1 = package3StringsLiStrings[i].trim();
+//					package_list.add(s1);
+//				}
+//				package_list.add("com.inhand.inboxcore");
+				List<String> package_list = ach.get_3_package_list();
+				System.out.println(package_list);
+				
+				all = all + package_list.size();
+				for(String utemp:package_list){
+					ec.adb_exec(cc.uninstallString+utemp);
+					ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
+					}
+				ec.adb_exec(cc.remove_apps_dirString);
+				ec.adb_exec(cc.mkdir_apps_dirString);
+				ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
+				String dialogStr = "";
+				for (String tmp:choosed_appsArrayListString) {
+					String commandString = cc.pushString+tmp+cc.apps_dirString;
+					ec.adb_exec(commandString);
+					ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
+					dialogStr += tmp + "\n";
+					}
+				ec.adb_exec(cc.start_install_activityString);
+				install_progress_bar.setValue(100);
+				JOptionPane.showMessageDialog(null, "推送\n"+dialogStr+"完成！并执行Install安装", "卸载并安装",JOptionPane.PLAIN_MESSAGE);
+				}
+			catch(Exception e1){
+				e1.printStackTrace();
+			}
 		}
 	}
 	class Screenshot_Thread implements Runnable{
