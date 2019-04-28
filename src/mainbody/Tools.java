@@ -68,7 +68,9 @@ import org.w3c.dom.NodeList;
 
 import java.awt.Component;
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxEditor;
+import javax.swing.JRadioButton;
 
 public class Tools {
 
@@ -91,11 +93,17 @@ public class Tools {
 	private JProgressBar install_progress_bar;
 	private JTextArea info_area;
 	private JComboBox<String> insatlled_app_box;
+	private JLabel data_status_label;
+	private JLabel wifi_status_label;
 //	private JButton select_adb_path_button;
 	
 	//公有变量
 	ArrayList<String> choosed_appsArrayListString = new ArrayList<String>();
 	private int progress_bar_value;
+	public String grep = "";
+	private JRadioButton wifi_off_radioButton;
+	private JRadioButton data_off_radioButton;
+
 	
 	
 
@@ -144,9 +152,11 @@ public class Tools {
 	private String get_os_type() {
 		String os_nameString = System.getProperty("os.name").toLowerCase();
 		if (os_nameString.indexOf("mac")>=0) {
+			grep = cc.grepString;
 			return "mac";
 		}
 		else if (os_nameString.indexOf("windows")>=0) {
+			grep = cc.findstrString;
 			return "windows";
 		}
 		else {
@@ -237,6 +247,67 @@ public class Tools {
 		screenshot_label = new JLabel("此处显示截图信息");
 		screenshot_label.setBounds(193, 141, 111, 15);
 		panel.add(screenshot_label);
+		//wifi网络开关
+		JLabel wifi_label = new JLabel("WIFI开关：");
+		wifi_label.setBounds(10, 102, 84, 16);
+		panel.add(wifi_label);
+		wifi_off_radioButton = new JRadioButton("关闭");
+		wifi_off_radioButton.setBounds(65, 121, 58, 23);
+		panel.add(wifi_off_radioButton);
+		wifi_off_radioButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (wifi_off_radioButton.isSelected()) {
+					ec.adb_exec(cc.set_wifi_disableString);
+				}	
+			}
+		});
+		JRadioButton wifi_open_radioButton = new JRadioButton("打开");
+		wifi_open_radioButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (wifi_open_radioButton.isSelected()) {
+					ec.adb_exec(cc.set_wifi_enableString);
+				}	
+			}
+		});
+		wifi_open_radioButton.setBounds(10, 121, 58, 23);
+		panel.add(wifi_open_radioButton);
+		ButtonGroup wifi_group = new ButtonGroup();
+		wifi_group.add(wifi_off_radioButton);
+		wifi_group.add(wifi_open_radioButton);
+		wifi_status_label = new JLabel("●");
+		wifi_status_label.setBounds(78, 102, 61, 16);
+		panel.add(wifi_status_label);
+		//data网络开关
+		JLabel data_label = new JLabel("数据开关：");
+		data_label.setBounds(10, 156, 84, 16);
+		panel.add(data_label);
+		data_off_radioButton = new JRadioButton("关闭");
+		data_off_radioButton.setBounds(65, 173, 58, 23);
+		panel.add(data_off_radioButton);
+		data_off_radioButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (data_off_radioButton.isSelected()) {
+					ec.adb_exec(cc.set_data_disableString);
+				}	
+			}
+		});
+		JRadioButton data_open_radioButton = new JRadioButton("打开");
+		data_open_radioButton.setBounds(10, 173, 58, 23);
+		panel.add(data_open_radioButton);
+		data_open_radioButton.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (data_open_radioButton.isSelected()) {
+					ec.adb_exec(cc.set_data_enableString);
+				}	
+			}
+		});
+		ButtonGroup data_group = new ButtonGroup();
+		data_group.add(data_off_radioButton);
+		data_group.add(data_open_radioButton);
+		data_status_label = new JLabel("●");
+		data_status_label.setBounds(78, 156, 61, 16);
+		panel.add(data_status_label);
+		
 		//轮询devices_info
 		tt.adbdevicesTimerDemo();
 		
@@ -754,7 +825,7 @@ public class Tools {
 	        String returnString = "";
 	        Process pro = null;
 	        Runtime runTime = Runtime.getRuntime();
-//	        System.out.print(command+"\n");
+	        System.out.print(command+"\n");
 	        if (runTime == null) {
 	            System.err.println("Create runtime false!");
 	        }
@@ -813,8 +884,37 @@ public class Tools {
 	    	String response = ec.adb_exec(cmd);
 			return response;
 		}
+	    //设置wifi和数据状态为off，因为可能会被自动开启
+	    public void set_wifi_or_data_off() {
+	    	if (wifi_off_radioButton.isSelected()) {
+				ec.adb_exec(cc.set_wifi_disableString);
+			}
+	    	if (data_off_radioButton.isSelected()) {
+				ec.adb_exec(cc.set_data_disableString);
+			}
+		}
 	    //获取adb devices
 	    public void get_devices_info() {
+	    	String inquire_wifi_command = cc.dumpsys_wifi_String + cc.symbol_orString + grep + cc.WiFi_String;;
+	    	String wifi_status = ec.adb_exec(inquire_wifi_command);
+//	    	System.out.print(wifi_status);
+	    	if (wifi_status.indexOf("enabled")!=-1) {
+				wifi_status_label.setText("on");
+			}
+	    	else {
+	    		wifi_status_label.setText("off");
+			}
+	    	
+	    	String inquire_data_command = cc.dumpsys_telephony_String + cc.symbol_orString + grep + cc.mDataConnectionState_String;;
+	    	String data_status = ec.adb_exec(inquire_data_command);
+//	    	System.out.print(data_status);
+	    	if (data_status.indexOf("=2")!=-1) {
+				data_status_label.setText("on");
+			}
+	    	else {
+	    		data_status_label.setText("off");
+			}
+	    	
 	    	device_display_area.setText("\n售货机编号:\n"+ach.get_machine_id());
 	    	//去掉选择设备功能
 //	    	String response = "";
@@ -889,13 +989,6 @@ public class Tools {
 		//获取并显示已安装app版本信息
 		public void get_app_version_String(List<String> package_list) {
 			info_area.setText("版本信息：\n");
-			String grep = "";
-			if (OS_type.equals("mac")) {
-				grep = cc.grepString;
-			}
-			else if (OS_type.equals("windows")) {
-				grep = cc.findstrString;
-			}
 			insatlled_app_box.removeAllItems();
 			insatlled_app_box.addItem("选择要删除的应用");
 			for (String packagename:package_list) {
@@ -1088,6 +1181,7 @@ public class Tools {
 		       public void run(){
 		    	   try{
 		    		   ach.get_devices_info();
+		    		   ach.set_wifi_or_data_off();
 		    	   } 
 		    	   catch (Exception e){
 		    		   e.printStackTrace();
