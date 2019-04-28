@@ -25,4 +25,6 @@ public class CommonCommands {
 	String set_wifi_enableString = "shell su 0 svc wifi enable";
 	String set_data_disableString = "shell su 0 svc data disable";
 	String set_data_enableString = "shell su 0 svc data enable";
+	String pull_smartvm_cfg_xmlString = "pull /sdcard/inbox/config/smartvm_cfg.xml ";
+	String pull_config_xmlString = "pull /sdcard/inbox/config/config.xml ";
 }

@@ -35,6 +35,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -61,10 +62,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.dom4j.Document;
+import org.dom4j.Element;
 import org.dom4j.Node;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import java.awt.Component;
 import javax.swing.Box;
@@ -79,6 +79,7 @@ public class Tools {
 	//目录
 	public String root_path;
 	public String screenshot_path;
+	public String temp_file_path;
 	
 	private JFrame frame;
 	Execute_command ec;
@@ -95,14 +96,22 @@ public class Tools {
 	private JComboBox<String> insatlled_app_box;
 	private JLabel data_status_label;
 	private JLabel wifi_status_label;
+	private JRadioButton wifi_off_radioButton;
+	private JRadioButton data_off_radioButton;
 //	private JButton select_adb_path_button;
 	
 	//公有变量
 	ArrayList<String> choosed_appsArrayListString = new ArrayList<String>();
 	private int progress_bar_value;
 	public String grep = "";
-	private JRadioButton wifi_off_radioButton;
-	private JRadioButton data_off_radioButton;
+	private Map<String, String>vendor_map = new HashMap<String, String>();
+	private JComboBox<String> server_address_combobox;
+	public String last_machine_id = "";
+	private JComboBox<String> org_name_combobox;
+	private JComboBox<String> serial_port_combobox;
+	private JComboBox<String> current_manufacturer_combobox;
+
+	
 
 	
 	
@@ -168,9 +177,11 @@ public class Tools {
 		OS_type = get_os_type();
 		root_path = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + File.separator + "inhand-adbtool" + File.separator;
 		screenshot_path = root_path + "screenshot" + File.separator;
+		temp_file_path = root_path + "temp_file" + File.separator;
 		String adb_path_file_path = root_path + "adb_path";
 		CommonOperations.mkdir(root_path);
 		CommonOperations.mkdir(screenshot_path);
+		CommonOperations.mkdir(temp_file_path);
 		if (!new File(adb_path_file_path).exists()) {
 			if (OS_type.equals("mac")) {
 				adb_path = FileChooser.file_chooser() + " ";
@@ -739,24 +750,32 @@ public class Tools {
 		panel.add(update_configuration_button);
 		//刷新配置按钮
 		JButton refresh_configuration_button = new JButton("刷新");
+		refresh_configuration_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Display_running_config_Thread drct = new Display_running_config_Thread();
+				Thread t1 = new Thread(drct);
+				t1.start();
+			}
+		});
 		refresh_configuration_button.setBounds(6, 161, 54, 35);
 		panel.add(refresh_configuration_button);
 		//机构名称下拉框
-		JComboBox<String> org_name_combobox = new JComboBox<String>();
+		org_name_combobox = new JComboBox<String>();
 		org_name_combobox.setBounds(74, 24, 174, 25);
 		org_name_combobox.addItem("");
 		org_name_combobox.setEditable(true);
 		ComboBoxEditor org_name_editor = org_name_combobox.getEditor();
 		panel.add(org_name_combobox);
 		//服务器地址下拉框
-		JComboBox<String> server_address_combobox = new JComboBox<String>();
+		server_address_combobox = new JComboBox<String>();
 		server_address_combobox.setBounds(74, 55, 174, 25);
 		server_address_combobox.addItem("");
 		server_address_combobox.setEditable(true);
 		ComboBoxEditor server_addresseditor = server_address_combobox.getEditor();
 		panel.add(server_address_combobox);
 		//串口下拉框
-		JComboBox<String> serial_port_combobox = new JComboBox<String>();
+		serial_port_combobox = new JComboBox<String>();
 		serial_port_combobox.setBounds(74, 88, 105, 25);
 		serial_port_combobox.setEditable(true);
 		serial_port_combobox.addItem("");
@@ -771,7 +790,7 @@ public class Tools {
 		ComboBoxEditor serial_port_combobox_editor = serial_port_combobox.getEditor();
 		panel.add(serial_port_combobox);
 		//当前厂家下拉框
-		JComboBox<String> current_manufacturer_combobox = new JComboBox<String>();
+		current_manufacturer_combobox = new JComboBox<String>();
 		ComboBoxEditor nowVendoreditor = current_manufacturer_combobox.getEditor();
 		current_manufacturer_combobox.setBounds(74, 125, 164, 25);
 		panel.add(current_manufacturer_combobox);
@@ -841,7 +860,7 @@ public class Tools {
 	            output.close();
 	            pro.destroy();
 	        } catch (IOException ex) {
-	            //no
+	        	returnString = "";
 	        }
 	        return returnString;
 	    }
@@ -865,7 +884,7 @@ public class Tools {
 	            output.close();
 	            pro.destroy();
 	        } catch (IOException ex) {
-	            //no
+	        	returnString = "";
 	        }
 	        return returnString;
 	    }
@@ -914,8 +933,16 @@ public class Tools {
 	    	else {
 	    		data_status_label.setText("off");
 			}
-	    	
-	    	device_display_area.setText("\n售货机编号:\n"+ach.get_machine_id());
+	    	String current_machine_id = ach.get_machine_id();
+	    	if (!current_machine_id.equals(last_machine_id)) {
+	    		Display_running_config_Thread drct = new Display_running_config_Thread();
+				Thread t = new Thread(drct);
+				t.start();
+			}
+	    	last_machine_id = current_machine_id;
+	    	device_display_area.setText("\n售货机编号:\n"+current_machine_id);
+//	    	System.out.print("last:"+last_machine_id);
+//	    	System.out.print("now:"+current_machine_id);
 	    	//去掉选择设备功能
 //	    	String response = "";
 //	    	response = ec.adb_exec(cc.get_devices_info_command);
@@ -998,6 +1025,62 @@ public class Tools {
 				info_area.append(packagename+":"+versionstr);
 				insatlled_app_box.addItem(packagename);
 			}
+		}
+		public void download_smartvm_cfg_xml() {
+			// TODO Auto-generated method stub
+			ec.adb_exec(cc.pull_smartvm_cfg_xmlString+temp_file_path);
+		}
+		public void download_config_xml() {
+			// TODO Auto-generated method stub
+			ec.adb_exec(cc.pull_config_xmlString+temp_file_path);
+			
+		}
+		public void parse_smartvm_cfg_and_display() {
+			//机构名称
+			Document smartvm_cfgxml_doc = CommonOperations.load(temp_file_path+"smartvm_cfg.xml");
+			List<Node>org_name_list=smartvm_cfgxml_doc.selectNodes("//org-name");
+			String org_nameString = org_name_list.get(0).getText().toString();
+			org_name_combobox.setSelectedItem(org_nameString);
+			//串口号
+			List<Node>smartvmlist=smartvm_cfgxml_doc.selectNodes("//cabinet[@id='master']");
+			String master_serial = ((Element) smartvmlist.get(0)).attributeValue("serial").toString();
+			serial_port_combobox.setSelectedItem(master_serial);
+			//厂家
+			List<Node>vendor_list=smartvm_cfgxml_doc.selectNodes("//vendor");
+			current_manufacturer_combobox.removeAllItems();
+			for(int i=0 ;i<vendor_list.size();i++){
+				vendor_map.put(((Element)vendor_list.get(i)).attributeValue("id").toString(), vendor_list.get(i).getText());
+			}
+			Iterator<Map.Entry<String, String>> it = vendor_map.entrySet().iterator();
+			while (it.hasNext()) {  
+			    Map.Entry<String, String> entry = it.next();
+			    current_manufacturer_combobox.addItem(entry.getValue());
+			}
+			//当前厂家
+			List<Node>current_vendor_numlist=smartvm_cfgxml_doc.selectNodes("//current-vendor");
+			String current_vendor_numString = current_vendor_numlist.get(0).getText().toString();
+			String vendor_xpathString = String.format("//vendor[@id='%s']", current_vendor_numString);
+			List<Node>current_vendor_namelist=smartvm_cfgxml_doc.selectNodes(vendor_xpathString);
+			String current_vendor_nameString = current_vendor_namelist.get(0).getText().toString();
+			current_manufacturer_combobox.setSelectedItem(current_vendor_nameString);
+		}
+		public void parse_config_and_display() {
+			//服务器地址
+			Document configxml_doc = CommonOperations.load(temp_file_path+"config.xml");
+			List<Node>server_address_list=configxml_doc.selectNodes("//server-address");
+			String server_addressString = server_address_list.get(0).getText().toString();
+			server_address_combobox.setSelectedItem(server_addressString);
+//			System.out.print(server_addressString);
+		}
+		
+	}
+	class Display_running_config_Thread implements Runnable{
+		@Override
+		public void run() {
+			ach.download_smartvm_cfg_xml();
+			ach.download_config_xml();
+			ach.parse_smartvm_cfg_and_display();
+			ach.parse_config_and_display();
 		}
 		
 	}
@@ -1174,7 +1257,7 @@ public class Tools {
 	class Timing_task{
 		public void adbdevicesTimerDemo()
 		{
-		int delay = 0;//ms
+		int delay = 2000;//ms
 		int period = 5000;//ms
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {    

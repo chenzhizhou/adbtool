@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
+
 public class CommonOperations {
 	//新建文件夹
 	public static void mkdir(String path) {
@@ -63,4 +66,14 @@ public class CommonOperations {
         bw.flush();  
         bw.close(); 
 	}
+	public static Document load(String filename) {
+		Document document = null;
+		try {
+			SAXReader saxReader = new SAXReader();
+			document = saxReader.read(new File(filename));  //读取XML文件,获得document对象
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return document;
+	} 
 }
