@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -110,6 +111,7 @@ public class Tools {
 	private JComboBox<String> org_name_combobox;
 	private JComboBox<String> serial_port_combobox;
 	private JComboBox<String> current_manufacturer_combobox;
+	private JCheckBox only_matser_serial_chckbx;
 
 	
 
@@ -207,7 +209,7 @@ public class Tools {
 		app_manager_module();
 		save_log_module();
 		base_config_module();
-		module9();
+		info_module();
 	}
 	private void devices_info_module() {
 		//设备信息模块
@@ -268,6 +270,7 @@ public class Tools {
 		wifi_off_radioButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (wifi_off_radioButton.isSelected()) {
+					ach.info_append_to_text_area("关闭wifi");
 					ec.adb_exec(cc.set_wifi_disableString);
 				}	
 			}
@@ -276,6 +279,7 @@ public class Tools {
 		wifi_open_radioButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (wifi_open_radioButton.isSelected()) {
+					ach.info_append_to_text_area("打开wifi");
 					ec.adb_exec(cc.set_wifi_enableString);
 				}	
 			}
@@ -298,6 +302,7 @@ public class Tools {
 		data_off_radioButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (data_off_radioButton.isSelected()) {
+					ach.info_append_to_text_area("关闭数据网络");
 					ec.adb_exec(cc.set_data_disableString);
 				}	
 			}
@@ -308,6 +313,7 @@ public class Tools {
 		data_open_radioButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (data_open_radioButton.isSelected()) {
+					ach.info_append_to_text_area("打开数据网络");
 					ec.adb_exec(cc.set_data_enableString);
 				}	
 			}
@@ -539,7 +545,7 @@ public class Tools {
             }
         });
 		//仅安装
-		JButton install_and_restart_button = new JButton("单独安装app");
+		JButton install_and_restart_button = new JButton("覆盖安装app");
 		install_and_restart_button.setBounds(6, 84, 104, 35);
 		panel.add(install_and_restart_button);
 		install_and_restart_button.addMouseListener(new MouseAdapter() {
@@ -748,6 +754,14 @@ public class Tools {
 		JButton update_configuration_button = new JButton("更新配置");
 		update_configuration_button.setBounds(72, 161, 86, 35);
 		panel.add(update_configuration_button);
+		update_configuration_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Modify_running_config_Thread mrct = new Modify_running_config_Thread();
+				Thread t1 = new Thread(mrct);
+				t1.start();
+			}
+		});
 		//刷新配置按钮
 		JButton refresh_configuration_button = new JButton("刷新");
 		refresh_configuration_button.addMouseListener(new MouseAdapter() {
@@ -765,14 +779,12 @@ public class Tools {
 		org_name_combobox.setBounds(74, 24, 174, 25);
 		org_name_combobox.addItem("");
 		org_name_combobox.setEditable(true);
-		ComboBoxEditor org_name_editor = org_name_combobox.getEditor();
 		panel.add(org_name_combobox);
 		//服务器地址下拉框
 		server_address_combobox = new JComboBox<String>();
 		server_address_combobox.setBounds(74, 55, 174, 25);
 		server_address_combobox.addItem("");
 		server_address_combobox.setEditable(true);
-		ComboBoxEditor server_addresseditor = server_address_combobox.getEditor();
 		panel.add(server_address_combobox);
 		//串口下拉框
 		serial_port_combobox = new JComboBox<String>();
@@ -787,11 +799,10 @@ public class Tools {
 		serial_port_combobox.addItem("ttyO6");
 		serial_port_combobox.addItem("ttyO7");
 		serial_port_combobox.addItem("ttyO8");
-		ComboBoxEditor serial_port_combobox_editor = serial_port_combobox.getEditor();
 		panel.add(serial_port_combobox);
 		//当前厂家下拉框
 		current_manufacturer_combobox = new JComboBox<String>();
-		ComboBoxEditor nowVendoreditor = current_manufacturer_combobox.getEditor();
+		current_manufacturer_combobox.addItem("----");
 		current_manufacturer_combobox.setBounds(74, 125, 164, 25);
 		panel.add(current_manufacturer_combobox);
 		//新增常用机构按钮
@@ -807,20 +818,26 @@ public class Tools {
 		add_common_address.setBounds(250, 54, 54, 25);
 		panel.add(add_common_address);
 		//只修改主柜串口选择框
-		JCheckBox only_matser_serial_chckbx = new JCheckBox("只修改主柜串口");
+		only_matser_serial_chckbx = new JCheckBox("只修改主柜串口");
 		only_matser_serial_chckbx.setBounds(181, 88, 123, 25);
 		panel.add(only_matser_serial_chckbx);
 		//修改售货机编号
 		JButton change_machine_id_button = new JButton("更改售货机编号");
 		change_machine_id_button.setBounds(162, 161, 142, 35);
 		panel.add(change_machine_id_button);
+		change_machine_id_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				ach.modify_machine_id();
+			}
+		});
 	}
-	private void module9() {
-		//9模块
+	private void info_module() {
+		//信息
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBackground(Color.WHITE);
-		panel.setBorder(BorderFactory.createTitledBorder("模块9"));
+		panel.setBorder(BorderFactory.createTitledBorder("信息"));
 		frame.getContentPane().add(panel);
 		info_area = new JTextArea("");
 		info_area.setLineWrap(true);
@@ -890,17 +907,68 @@ public class Tools {
 	    }
 	}
 	class Action_handler{
+		//信息显示
+		public void info_append_to_text_area(Object text) {
+			String s = String.valueOf(text);
+	    	Date d = new Date();
+	    	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			info_area.append("\n"+sdf.format(d)+" "+s);
+			info_area.setCaretPosition(info_area.getText().length());
+		}
+		//设备断开连接UI变化
+		public void disconnect_ui_change() {
+			server_address_combobox.setSelectedItem("----");
+			serial_port_combobox.setSelectedItem("----");
+			org_name_combobox.setSelectedItem("----");
+			current_manufacturer_combobox.setSelectedItem("----");
+		}
+		public void modify_machine_id() {
+			JFrame frame2 = new JFrame("更改售货机编号");
+		    frame2.getContentPane().setLayout(null);
+		    frame2.setBounds(300, 300, 300, 200);
+		    frame2.setVisible(true);
+		    JTextField MachineId = new JTextField(last_machine_id);
+		    MachineId.setBounds(80, 10, 120, 30);
+			frame2.getContentPane().add(MachineId);
+			JButton changeId = new JButton("确认修改");
+			changeId.setBounds(80, 80, 120, 30);
+			frame2.getContentPane().add(changeId);
+			changeId.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					String fileNameString = temp_file_path+"machine_id.txt";
+					String cmdString = cc.pushString + fileNameString + cc.config_dirString;
+					FileOutputStream fos = null;
+					try {
+						fos = new FileOutputStream(fileNameString);
+						String s = MachineId.getText().toString();
+			            fos.write(s.getBytes());
+			            fos.close();
+						info_append_to_text_area(cmdString);
+						String reString = ec.adb_exec(cmdString);
+						info_append_to_text_area(reString);
+						info_append_to_text_area("修改售货机编号为："+s);
+			            restart_APP();
+			            JOptionPane.showMessageDialog(null, "已更改售货机编号为"+s, "更改售货机编号",JOptionPane.PLAIN_MESSAGE);
+			            frame2.dispose();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}       
+				}
+			});
+		}
 		//重启应用
 	    public void restart_APP(){
-//	    	String cmd = "cmd.exe /c adb -s " + devices_comboBox.getSelectedItem().toString() + " shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
 			String cmd = cc.restart_app_command;
+			info_append_to_text_area(cmd);
     		ec.adb_exec(cmd);
-    		JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
+//    		JOptionPane.showMessageDialog(null, "已重启应用", "重启应用",JOptionPane.PLAIN_MESSAGE);
 	    }
 	    //获取售货机编号
 	    public String get_machine_id() {
 	    	String cmd = cc.get_machine_id;
 	    	String response = ec.adb_exec(cmd);
+	    	response = CommonOperations.replace_trn(response);
 			return response;
 		}
 	    //设置wifi和数据状态为off，因为可能会被自动开启
@@ -935,9 +1003,17 @@ public class Tools {
 			}
 	    	String current_machine_id = ach.get_machine_id();
 	    	if (!current_machine_id.equals(last_machine_id)) {
-	    		Display_running_config_Thread drct = new Display_running_config_Thread();
-				Thread t = new Thread(drct);
-				t.start();
+	    		if (!current_machine_id.equals("")&&!current_machine_id.equals(null)) {
+	    			info_append_to_text_area(String.format("检测到%s连接", current_machine_id));
+		    		info_append_to_text_area("刷新基础配置……");
+		    		Display_running_config_Thread drct = new Display_running_config_Thread();
+					Thread t = new Thread(drct);
+					t.start();
+				}
+	    		else {
+	    			info_append_to_text_area(String.format("%s断开连接", last_machine_id));
+	    			disconnect_ui_change();
+				}
 			}
 	    	last_machine_id = current_machine_id;
 	    	device_display_area.setText("\n售货机编号:\n"+current_machine_id);
@@ -1001,6 +1077,7 @@ public class Tools {
 		}
 		//获取第三方应用包名
 		public List<String> get_3_package_list() {
+			info_append_to_text_area("获取第三方应用包名");
 			String package3String = ec.adb_exec(cc.list_package_3);
 			String[] package3StringsLiStrings = package3String.split("package:");
 			System.out.println(package3StringsLiStrings.length);
@@ -1015,7 +1092,7 @@ public class Tools {
 		}
 		//获取并显示已安装app版本信息
 		public void get_app_version_String(List<String> package_list) {
-			info_area.setText("版本信息：\n");
+			info_append_to_text_area("版本信息：\n");
 			insatlled_app_box.removeAllItems();
 			insatlled_app_box.addItem("选择要删除的应用");
 			for (String packagename:package_list) {
@@ -1027,17 +1104,20 @@ public class Tools {
 			}
 		}
 		public void download_smartvm_cfg_xml() {
-			// TODO Auto-generated method stub
-			ec.adb_exec(cc.pull_smartvm_cfg_xmlString+temp_file_path);
+			String cmdString = cc.pull_smartvm_cfg_xmlString+temp_file_path;
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
 		}
 		public void download_config_xml() {
-			// TODO Auto-generated method stub
-			ec.adb_exec(cc.pull_config_xmlString+temp_file_path);
-			
+			String cmdString = cc.pull_config_xmlString+temp_file_path;
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
 		}
 		public void parse_smartvm_cfg_and_display() {
 			//机构名称
-			Document smartvm_cfgxml_doc = CommonOperations.load(temp_file_path+"smartvm_cfg.xml");
+			Document smartvm_cfgxml_doc = CommonOperations.load_xml(temp_file_path+"smartvm_cfg.xml");
 			List<Node>org_name_list=smartvm_cfgxml_doc.selectNodes("//org-name");
 			String org_nameString = org_name_list.get(0).getText().toString();
 			org_name_combobox.setSelectedItem(org_nameString);
@@ -1046,8 +1126,10 @@ public class Tools {
 			String master_serial = ((Element) smartvmlist.get(0)).attributeValue("serial").toString();
 			serial_port_combobox.setSelectedItem(master_serial);
 			//厂家
+			vendor_map = new HashMap<String, String>();
 			List<Node>vendor_list=smartvm_cfgxml_doc.selectNodes("//vendor");
 			current_manufacturer_combobox.removeAllItems();
+			current_manufacturer_combobox.addItem("----");
 			for(int i=0 ;i<vendor_list.size();i++){
 				vendor_map.put(((Element)vendor_list.get(i)).attributeValue("id").toString(), vendor_list.get(i).getText());
 			}
@@ -1065,22 +1147,100 @@ public class Tools {
 			current_manufacturer_combobox.setSelectedItem(current_vendor_nameString);
 		}
 		public void parse_config_and_display() {
+			String fileNameString = temp_file_path+"config.xml";
 			//服务器地址
-			Document configxml_doc = CommonOperations.load(temp_file_path+"config.xml");
+			Document configxml_doc = CommonOperations.load_xml(fileNameString);
 			List<Node>server_address_list=configxml_doc.selectNodes("//server-address");
 			String server_addressString = server_address_list.get(0).getText().toString();
 			server_address_combobox.setSelectedItem(server_addressString);
 //			System.out.print(server_addressString);
 		}
+		public void modify_smartvm_cfg_xml() {
+			String fileNameString = temp_file_path+"smartvm_cfg.xml";
+			Document smartvm_cfgxml_doc = CommonOperations.load_xml(fileNameString);
+			//机构名称
+			List<Node>org_name_list=smartvm_cfgxml_doc.selectNodes("//org-name");
+			org_name_list.get(0).setText(org_name_combobox.getSelectedItem().toString());
+			//串口号
+			List<Node>masterlist=smartvm_cfgxml_doc.selectNodes("//master");
+			((Element) masterlist.get(0)).addAttribute("serial", serial_port_combobox.getSelectedItem().toString());
+			if (only_matser_serial_chckbx.isSelected()) {
+				List<Node>smartvmlist=smartvm_cfgxml_doc.selectNodes("//cabinet[@id='master']");
+				((Element) smartvmlist.get(0)).attribute("serial").setValue(serial_port_combobox.getSelectedItem().toString());
+			}
+			else {
+				List<Node>smartvmlist=smartvm_cfgxml_doc.selectNodes("//cabinet");
+				for (int i = 0; i < smartvmlist.size(); i++) {
+					((Element) smartvmlist.get(i)).addAttribute("serial", serial_port_combobox.getSelectedItem().toString());
+				}
+			}
+			//当前厂家
+			List<Node>current_vendor_numlist=smartvm_cfgxml_doc.selectNodes("//current-vendor");
+			current_vendor_numlist.get(0).setText(CommonOperations.getKey(vendor_map, current_manufacturer_combobox.getSelectedItem().toString()));
+			List<Node>smartvmlist=smartvm_cfgxml_doc.selectNodes("//cabinet");
+			for (int i = 0; i < smartvmlist.size(); i++) {
+				((Element) smartvmlist.get(i)).addAttribute("vendor", CommonOperations.getKey(vendor_map, current_manufacturer_combobox.getSelectedItem().toString()));
+			}
+			CommonOperations.save_xml(smartvm_cfgxml_doc, fileNameString);
+		}
+		public void modify_config_xml() {
+			String fileNameString = temp_file_path+"config.xml";
+			Document configxml_doc = CommonOperations.load_xml(fileNameString);
+			//服务器地址
+			List<Node>server_address_list=configxml_doc.selectNodes("//server-address");
+			server_address_list.get(0).setText(server_address_combobox.getSelectedItem().toString());
+			CommonOperations.save_xml(configxml_doc, fileNameString);
+		}
+		public void push_smartvm_cfg_xml() {
+			String fileNameString = temp_file_path+"smartvm_cfg.xml";
+			String cmdString = cc.pushString + fileNameString + cc.config_dirString;
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
+		}
+		public void push_config_xml() {
+			String fileNameString = temp_file_path+"config.xml";
+			String cmdString = cc.pushString + fileNameString + cc.config_dirString;
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
+		}
+		public void download_machine_id_txt() {
+			String cmdString = cc.pull_machine_id_txtString+temp_file_path;
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
+			
+		}
 		
+	}
+	class Modify_machine_id_Thread implements Runnable{
+		@Override
+		public void run() {
+			
+			ach.info_append_to_text_area("更新修改基础配置已完成");
+		}	
+	}
+	class Modify_running_config_Thread implements Runnable{
+		@Override
+		public void run() {
+			ach.modify_smartvm_cfg_xml();
+			ach.modify_config_xml();
+			ach.push_smartvm_cfg_xml();
+			ach.push_config_xml();
+			ach.restart_APP();
+			ach.info_append_to_text_area("更新修改基础配置已完成");
+		}	
 	}
 	class Display_running_config_Thread implements Runnable{
 		@Override
 		public void run() {
 			ach.download_smartvm_cfg_xml();
 			ach.download_config_xml();
+			ach.download_machine_id_txt();
 			ach.parse_smartvm_cfg_and_display();
 			ach.parse_config_and_display();
+			ach.info_append_to_text_area("刷新基础配置已完成");
 		}
 		
 	}
@@ -1097,7 +1257,8 @@ public class Tools {
 			String uninstallPackageName = insatlled_app_box.getSelectedItem().toString();
 			String responseString = ec.adb_exec(cc.uninstallString+uninstallPackageName);
 			ach.get_app_version_String(ach.get_3_package_list());
-			info_area.append("卸载"+uninstallPackageName+" "+responseString);
+			ach.info_append_to_text_area("卸载"+uninstallPackageName);
+			ach.info_append_to_text_area(responseString);
 		}
 		
 	}
@@ -1112,7 +1273,9 @@ public class Tools {
 				String dialogStr = "";
 				for(String tmp:choosed_appsArrayListString){
 					String commandString = cc.installString+tmp;
-					ec.adb_exec(commandString);
+					ach.info_append_to_text_area(commandString);
+					String reString = ec.adb_exec(commandString);
+					ach.info_append_to_text_area(reString);
 		            ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
 		            dialogStr += tmp + "\n";
 					}
@@ -1133,23 +1296,16 @@ public class Tools {
 				int all = 0;
 				all = all + choosed_appsArrayListString.size() + 1;
 				install_progress_bar.setValue(0);
-//				String package3String = ec.adb_exec(cc.list_package_3);
-//				String[] package3StringsLiStrings = package3String.split("package:");
-//				System.out.println(package3StringsLiStrings.length);
-//				List<String> package_list=new ArrayList<String>();
-//				for (int i = 1; i < package3StringsLiStrings.length; i++) {
-//					System.out.println(i +":"+ package3StringsLiStrings[i]);
-//					String s1 = package3StringsLiStrings[i].trim();
-//					package_list.add(s1);
-//					}
-//				package_list.add("com.inhand.inboxcore");
 				List<String> package_list = ach.get_3_package_list();
 				System.out.println(package_list);
 				
 				all = all + package_list.size();
 				String dialogStr = "";
 				for(String utemp:package_list){
-					ec.adb_exec(cc.uninstallString+utemp);
+					String uncmd = cc.uninstallString+utemp;
+					ach.info_append_to_text_area(uncmd);
+					String reString = ec.adb_exec(uncmd);
+					ach.info_append_to_text_area(reString);
 					dialogStr += utemp + "\n";
 					ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
 					}
@@ -1169,35 +1325,31 @@ public class Tools {
 				int all = 0;
 				all = all + choosed_appsArrayListString.size() + 1;
 				install_progress_bar.setValue(0);
-//				String package3String = ec.adb_exec(cc.list_package_3);
-//				String[] package3StringsLiStrings = package3String.split("package:");
-//				System.out.println(package3StringsLiStrings.length);
-//				List<String> package_list=new ArrayList<String>();
-//				for (int i = 1; i < package3StringsLiStrings.length; i++) {
-//					System.out.println(i +":"+ package3StringsLiStrings[i]);
-//					String s1 = package3StringsLiStrings[i].trim();
-//					package_list.add(s1);
-//				}
-//				package_list.add("com.inhand.inboxcore");
 				List<String> package_list = ach.get_3_package_list();
 				System.out.println(package_list);
-				
 				all = all + package_list.size();
 				for(String utemp:package_list){
-					ec.adb_exec(cc.uninstallString+utemp);
+					String uncmd = cc.uninstallString+utemp;
+					ach.info_append_to_text_area(uncmd);
+					String reString = ec.adb_exec(uncmd);
+					ach.info_append_to_text_area(reString);
 					ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
 					}
+				ach.info_append_to_text_area(cc.remove_apps_dirString);
 				ec.adb_exec(cc.remove_apps_dirString);
+				ach.info_append_to_text_area(cc.mkdir_apps_dirString);
 				ec.adb_exec(cc.mkdir_apps_dirString);
 				ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
 				String dialogStr = "";
 				for (String tmp:choosed_appsArrayListString) {
 					String commandString = cc.pushString+tmp+cc.apps_dirString;
-					ec.adb_exec(commandString);
+					ach.info_append_to_text_area(commandString);
+					String reString = ec.adb_exec(commandString);
+					ach.info_append_to_text_area(reString);
 					ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
 					dialogStr += tmp + "\n";
 					}
-				ec.adb_exec(cc.start_install_activityString);
+				ach.info_append_to_text_area(ec.adb_exec(cc.start_install_activityString));
 				install_progress_bar.setValue(100);
 				JOptionPane.showMessageDialog(null, "推送\n"+dialogStr+"完成！并执行Install安装", "卸载并安装",JOptionPane.PLAIN_MESSAGE);
 				}
@@ -1241,6 +1393,7 @@ public class Tools {
 				Thread.sleep(100);
 				ec.adb_exec(command2);
 				ec.adb_exec(command3);
+				ach.info_append_to_text_area("截图完成");
 				screenshot_label.setText("完成！");
 				screenshot_label.setForeground(Color.green);
 				int n = JOptionPane.showConfirmDialog(null, "是否立即查看截图？","截图完成",JOptionPane.OK_CANCEL_OPTION);
@@ -1257,7 +1410,7 @@ public class Tools {
 	class Timing_task{
 		public void adbdevicesTimerDemo()
 		{
-		int delay = 2000;//ms
+		int delay = 5000;//ms
 		int period = 5000;//ms
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {    
