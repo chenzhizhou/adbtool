@@ -28,5 +28,10 @@ public class CommonCommands {
 	String pull_smartvm_cfg_xmlString = "pull /sdcard/inbox/config/smartvm_cfg.xml ";
 	String pull_config_xmlString = "pull /sdcard/inbox/config/config.xml ";
 	String pull_machine_id_txtString = "pull /sdcard/inbox/config/machine_id.txt ";
-	String config_dirString = " /sdcard/inbox/config/";
+	String pull_running_config_dirString = "pull /sdcard/inbox/config/ ";
+	String pull_game_config_dirString = "pull /sdcard/inbox/game/ ";
+	String running_config_dirString = " /sdcard/inbox/config/";
+	String game_config_dirString = " /sdcard/inbox/game/";
+	String open_in_windows = "cmd.exe /c start ";
+	String open_in_macosx = "open ";
 }

@@ -103,6 +103,7 @@ public class Tools {
 	
 	//公有变量
 	ArrayList<String> choosed_appsArrayListString = new ArrayList<String>();
+	ArrayList<String> choosed_configsArrayListString = new ArrayList<String>();
 	private int progress_bar_value;
 	public String grep = "";
 	private Map<String, String>vendor_map = new HashMap<String, String>();
@@ -112,6 +113,7 @@ public class Tools {
 	private JComboBox<String> serial_port_combobox;
 	private JComboBox<String> current_manufacturer_combobox;
 	private JCheckBox only_matser_serial_chckbx;
+	private String running_config_file_path;
 
 	
 
@@ -180,10 +182,12 @@ public class Tools {
 		root_path = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + File.separator + "inhand-adbtool" + File.separator;
 		screenshot_path = root_path + "screenshot" + File.separator;
 		temp_file_path = root_path + "temp_file" + File.separator;
+		running_config_file_path = root_path + "running_config" + File.separator;
 		String adb_path_file_path = root_path + "adb_path";
 		CommonOperations.mkdir(root_path);
 		CommonOperations.mkdir(screenshot_path);
 		CommonOperations.mkdir(temp_file_path);
+		CommonOperations.mkdir(running_config_file_path);
 		if (!new File(adb_path_file_path).exists()) {
 			if (OS_type.equals("mac")) {
 				adb_path = FileChooser.file_chooser() + " ";
@@ -340,10 +344,26 @@ public class Tools {
 		JButton get_running_configure_button = new JButton("获取运行配置");
 		get_running_configure_button.setBounds(6, 20, 112, 34);
 		panel.add(get_running_configure_button);
+		get_running_configure_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Pull_running_config_Thread prct = new Pull_running_config_Thread();
+				Thread t1 = new Thread(prct);
+				t1.start();
+			}
+		});
 		//获取活动配置
 		JButton get_active_configuration_button = new JButton("获取活动配置");
 		get_active_configuration_button.setBounds(6, 55, 112, 34);
 		panel.add(get_active_configuration_button);
+		get_active_configuration_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Pull_game_config_Thread pgct = new Pull_game_config_Thread();
+				Thread t1 = new Thread(pgct);
+				t1.start();
+			}
+		});
 		//货道快速配置
 		JButton channel_rapid_configuration_button = new JButton("货道快速配置");
 		channel_rapid_configuration_button.setBounds(6, 140, 112, 34);
@@ -358,6 +378,65 @@ public class Tools {
 		push_configuration_file_area_scroll.setBounds(126, 20, 178, 90);
 		push_configuration_file_area_scroll.setViewportView(push_configuration_file_area);
 		panel.add(push_configuration_file_area_scroll);
+		push_configuration_file_area.setTransferHandler(new TransferHandler(){
+			private static final long serialVersionUID = 1L;
+			@Override
+            public boolean importData(JComponent comp, Transferable t) {
+                try {
+                    Object o = t.getTransferData(DataFlavor.javaFileListFlavor);
+
+                    String filepath = o.toString();
+                    if (filepath.startsWith("[")) {
+                        filepath = filepath.substring(1);
+                    }
+                    if (filepath.endsWith("]")) {
+                        filepath = filepath.substring(0, filepath.length() - 1);
+                    }
+                    String[] strs = filepath.split(", ");
+                    String regexstr = "[\u4e00-\u9fa5\u0020]";
+                    Pattern p = Pattern.compile(regexstr);
+            		ArrayList<String> illegal_configs = new ArrayList<String>();
+            		for (String configstring : strs) {
+            			Matcher m = p.matcher(configstring);
+            			if(m.find()){
+            				//System.out.print("\n包含中文");
+//							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+            				push_configuration_file_area.setText("");
+							illegal_configs.add(configstring);
+            			}
+            			else{
+            				choosed_configsArrayListString.add(configstring);
+            				push_configuration_file_area.setText("");
+            			}
+            		}
+            		if (illegal_configs.size() != 0) {
+            			String dialog_str = ""; 
+            			for (String config : illegal_configs){
+            				dialog_str += config + "\n"; 
+            			}
+            			JOptionPane.showMessageDialog(null, dialog_str+"\n包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+					}
+            		for (String ChoosedConfigstring : choosed_configsArrayListString) {
+            			push_configuration_file_area.append(ChoosedConfigstring+"\n");
+            		}
+                    return true;
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                
+                return false;
+            }
+            @Override
+            public boolean canImport(JComponent comp, DataFlavor[] flavors) {
+                for (int i = 0; i < flavors.length; i++) {
+                    if (DataFlavor.javaFileListFlavor.equals(flavors[i])) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 		//清空推送配置文件内容
 		JButton clear_push_configuration_file_area_button = new JButton();
 		clear_push_configuration_file_area_button.setToolTipText("清空待下发配置");
@@ -365,10 +444,25 @@ public class Tools {
 		//clearconfig.setIcon(new ImageIcon(getClass().getResource("/toolIcon/searchreset.png")));
 		clear_push_configuration_file_area_button.setBounds(126, 145, 175, 30);
 		panel.add(clear_push_configuration_file_area_button);
+		clear_push_configuration_file_area_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				choosed_configsArrayListString.clear();
+				push_configuration_file_area.setText("请将需要下发的配置文件拖拽至此\n文件路径不能包含中文和空格\n");
+			}
+		});
 		//推送下发配置文件
 		JButton push_configuration_file_button = new JButton("推送下发配置文件");
 		push_configuration_file_button.setBounds(124, 110, 180, 34);
 		panel.add(push_configuration_file_button);
+		push_configuration_file_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Push_config_Thread prt = new Push_config_Thread();
+				Thread t1 = new Thread(prt);
+				t1.start();
+			}
+		});
 		//进度条
 		JProgressBar config_progress_bar = new JProgressBar();
 		config_progress_bar.setStringPainted(true);
@@ -609,7 +703,7 @@ public class Tools {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				choosed_appsArrayListString.clear();
-				push_apps_file_area.setText("选择APK文件或拖拽APK文件至文本框\n");
+				push_apps_file_area.setText("将需要安装的APK文件拖拽至此\n文件路径不能包含中文和空格\n");
 			}
 		});
 		//进度条
@@ -937,7 +1031,7 @@ public class Tools {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					String fileNameString = temp_file_path+"machine_id.txt";
-					String cmdString = cc.pushString + fileNameString + cc.config_dirString;
+					String cmdString = cc.pushString + fileNameString + cc.running_config_dirString;
 					FileOutputStream fos = null;
 					try {
 						fos = new FileOutputStream(fileNameString);
@@ -1063,6 +1157,18 @@ public class Tools {
 //				device_display_area.setText("\n售货机编号:\n"+ach.get_machine_id());
 //			}
 		}
+		public void push_config(String fileNameString) {
+			String cmdString = "";
+			if (fileNameString.contains("game") || fileNameString.contains("promotion")) {
+				cmdString = cc.pushString + fileNameString + cc.game_config_dirString;
+			}
+			else {
+				cmdString = cc.pushString + fileNameString + cc.running_config_dirString;
+			}
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
+		}
 	    //设备屏幕截图
 	    public void devices_screenshot() {
 	    	Screenshot_Thread prtscT = new Screenshot_Thread();
@@ -1103,13 +1209,13 @@ public class Tools {
 				insatlled_app_box.addItem(packagename);
 			}
 		}
-		public void download_smartvm_cfg_xml() {
+		public void pull_smartvm_cfg_xml() {
 			String cmdString = cc.pull_smartvm_cfg_xmlString+temp_file_path;
 			info_append_to_text_area(cmdString);
 			String reString = ec.adb_exec(cmdString);
 			info_append_to_text_area(reString);
 		}
-		public void download_config_xml() {
+		public void pull_config_xml() {
 			String cmdString = cc.pull_config_xmlString+temp_file_path;
 			info_append_to_text_area(cmdString);
 			String reString = ec.adb_exec(cmdString);
@@ -1193,14 +1299,14 @@ public class Tools {
 		}
 		public void push_smartvm_cfg_xml() {
 			String fileNameString = temp_file_path+"smartvm_cfg.xml";
-			String cmdString = cc.pushString + fileNameString + cc.config_dirString;
+			String cmdString = cc.pushString + fileNameString + cc.running_config_dirString;
 			info_append_to_text_area(cmdString);
 			String reString = ec.adb_exec(cmdString);
 			info_append_to_text_area(reString);
 		}
 		public void push_config_xml() {
 			String fileNameString = temp_file_path+"config.xml";
-			String cmdString = cc.pushString + fileNameString + cc.config_dirString;
+			String cmdString = cc.pushString + fileNameString + cc.running_config_dirString;
 			info_append_to_text_area(cmdString);
 			String reString = ec.adb_exec(cmdString);
 			info_append_to_text_area(reString);
@@ -1212,13 +1318,70 @@ public class Tools {
 			info_append_to_text_area(reString);
 			
 		}
+		public String mkdir_by_machineid() {
+			String machine_idString = get_machine_id();
+			String dir_pathsString = running_config_file_path + machine_idString + File.separator;
+			CommonOperations.mkdir(dir_pathsString);
+			return dir_pathsString;
+		}
+		public void pull_running_config(String config_dirString) {
+			String cmdString = cc.pull_running_config_dirString+config_dirString;
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
+		}
+		public void open_in_system_explorer(String config_dirString) {
+			String cmdString = "";
+			if (OS_type.equals("mac")) {
+				cmdString = cc.open_in_macosx + config_dirString;
+			}
+			else if (OS_type.equals("windows")) {
+				cmdString = cc.open_in_windows + config_dirString;
+			}
+			ec.shell_exec(cmdString);
+		}
+		public void pull_game_config(String config_dirString) {
+			String cmdString = cc.pull_game_config_dirString+config_dirString;
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
+		}
 		
 	}
-	class Modify_machine_id_Thread implements Runnable{
+	class Push_config_Thread implements Runnable{
 		@Override
 		public void run() {
-			
-			ach.info_append_to_text_area("更新修改基础配置已完成");
+			progress_bar_value = 0;
+			int all = 1;
+			all = all + choosed_configsArrayListString.size();
+			install_progress_bar.setValue(0);
+			String dialogStr = "";
+			for(String tmp:choosed_configsArrayListString){
+				ach.push_config(tmp);
+	            ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
+	            dialogStr += tmp + "\n";
+				}
+				ach.restart_APP();
+				install_progress_bar.setValue(100);
+				JOptionPane.showMessageDialog(null, "push"+dialogStr+"完成！", "下发配置成功",JOptionPane.PLAIN_MESSAGE);
+		}	
+	}
+	class Pull_game_config_Thread implements Runnable{
+		@Override
+		public void run() {
+			String config_dirString = ach.mkdir_by_machineid();
+			ach.pull_game_config(config_dirString);
+			ach.open_in_system_explorer(config_dirString+"game"+File.separator);
+			ach.info_append_to_text_area("获取运行配置完成");
+		}	
+	}
+	class Pull_running_config_Thread implements Runnable{
+		@Override
+		public void run() {
+			String config_dirString = ach.mkdir_by_machineid();
+			ach.pull_running_config(config_dirString);
+			ach.open_in_system_explorer(config_dirString+"config"+File.separator);
+			ach.info_append_to_text_area("获取运行配置完成");
 		}	
 	}
 	class Modify_running_config_Thread implements Runnable{
@@ -1235,8 +1398,8 @@ public class Tools {
 	class Display_running_config_Thread implements Runnable{
 		@Override
 		public void run() {
-			ach.download_smartvm_cfg_xml();
-			ach.download_config_xml();
+			ach.pull_smartvm_cfg_xml();
+			ach.pull_config_xml();
 			ach.download_machine_id_txt();
 			ach.parse_smartvm_cfg_and_display();
 			ach.parse_config_and_display();
@@ -1365,15 +1528,15 @@ public class Tools {
 			String command1 = "shell /system/bin/screencap -p /sdcard/sc123456.png";
 			String command2 = "pull /sdcard/sc123456.png " + screenshot_path + "sc" + formatTime + ".png";
 			String command3 = "shell rm -rf /sdcard/sc123456.png";
-			String command4_windows = "cmd.exe /c start " + screenshot_path;
-			String command4_macosx = "open " + screenshot_path;
+//			String command4_windows = "cmd.exe /c start " + screenshot_path;
+//			String command4_macosx = "open " + screenshot_path;
 			String command4 = "";
 			String command5 = "shell du -k sdcard/sc123456.png";
 			if (OS_type.equals("mac")) {
-				command4 = command4_macosx;
+				command4 = cc.open_in_macosx + screenshot_path;
 			}
 			else if (OS_type.equals("windows")) {
-				command4 = command4_windows;
+				command4 = cc.open_in_windows + screenshot_path;
 			}
 			try {
 				screenshot_label.setVisible(true);
