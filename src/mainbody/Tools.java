@@ -101,6 +101,8 @@ public class Tools {
 	private JLabel wifi_status_label;
 	private JRadioButton wifi_off_radioButton;
 	private JRadioButton data_off_radioButton;
+	private JRadioButton wifi_open_radioButton;
+	private JRadioButton data_open_radioButton;
 //	private JButton select_adb_path_button;
 	
 	//公有变量
@@ -116,6 +118,7 @@ public class Tools {
 	private JComboBox<String> current_manufacturer_combobox;
 	private JCheckBox only_matser_serial_chckbx;
 	private String running_config_file_path;
+
 
 	
 
@@ -284,7 +287,7 @@ public class Tools {
 				}	
 			}
 		});
-		JRadioButton wifi_open_radioButton = new JRadioButton("打开");
+		wifi_open_radioButton = new JRadioButton("打开");
 		wifi_open_radioButton.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (wifi_open_radioButton.isSelected()) {
@@ -316,7 +319,7 @@ public class Tools {
 				}	
 			}
 		});
-		JRadioButton data_open_radioButton = new JRadioButton("打开");
+		data_open_radioButton = new JRadioButton("打开");
 		data_open_radioButton.setBounds(10, 173, 58, 23);
 		panel.add(data_open_radioButton);
 		data_open_radioButton.addItemListener(new ItemListener() {
@@ -1122,11 +1125,19 @@ public class Tools {
 	    	String current_machine_id = ach.get_machine_id();
 	    	if (!current_machine_id.equals(last_machine_id)) {
 	    		if (!current_machine_id.equals("")&&!current_machine_id.equals(null)) {
+	    			//还原网络开关按钮
+	    			wifi_off_radioButton.setSelected(false);
+	    			wifi_open_radioButton.setSelected(false);
+	    			data_off_radioButton.setSelected(false);
+	    			data_open_radioButton.setSelected(false);
+	    			//重新获取基础配置
 	    			info_append_to_text_area(String.format("检测到%s连接", current_machine_id));
 		    		info_append_to_text_area("刷新基础配置……");
 		    		Display_running_config_Thread drct = new Display_running_config_Thread();
 					Thread t = new Thread(drct);
 					t.start();
+					//重新获取已安装应用
+					get_3_package_list();
 				}
 	    		else {
 	    			info_append_to_text_area(String.format("%s断开连接", last_machine_id));
