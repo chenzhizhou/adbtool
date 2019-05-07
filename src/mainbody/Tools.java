@@ -648,7 +648,7 @@ public class Tools {
         });
 		//仅安装
 		JButton install_and_restart_button = new JButton("覆盖安装app");
-		install_and_restart_button.setBounds(6, 84, 104, 35);
+		install_and_restart_button.setBounds(6, 84, 114, 35);
 		panel.add(install_and_restart_button);
 		install_and_restart_button.addMouseListener(new MouseAdapter() {
 			@Override
@@ -683,7 +683,7 @@ public class Tools {
 		});
 		//卸载inhand全套app并安装app
 		JButton cover_installation_button = new JButton("<html>卸载<br>All第三方<br>并安装</html>");
-		cover_installation_button.setBounds(6, 21, 104, 59);
+		cover_installation_button.setBounds(6, 21, 114, 59);
 		panel.add(cover_installation_button);
 		cover_installation_button.addMouseListener(new MouseAdapter() {
 			@Override
