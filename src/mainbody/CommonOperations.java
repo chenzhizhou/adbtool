@@ -25,6 +25,13 @@ public class CommonOperations {
 		s = m.replaceAll("");
 		return s;
 	}
+	//去除字符串中的空格、回车、换行符、制表符
+	public static String replace_tr(String s) {
+		Pattern p = Pattern.compile("\\s*|\t|\r");
+		Matcher m = p.matcher(s);
+		s = m.replaceAll("");
+		return s;
+	}
 	//新建文件夹
 	public static void mkdir(String path) {
 		File file =new File(path);

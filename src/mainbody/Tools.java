@@ -846,7 +846,7 @@ public class Tools {
 		panel.add(lblNewLabel_1);
 		//更新配置按钮
 		JButton update_configuration_button = new JButton("更新配置");
-		update_configuration_button.setBounds(72, 161, 86, 35);
+		update_configuration_button.setBounds(84, 161, 86, 35);
 		panel.add(update_configuration_button);
 		update_configuration_button.addMouseListener(new MouseAdapter() {
 			@Override
@@ -866,7 +866,7 @@ public class Tools {
 				t1.start();
 			}
 		});
-		refresh_configuration_button.setBounds(6, 161, 54, 35);
+		refresh_configuration_button.setBounds(6, 161, 72, 35);
 		panel.add(refresh_configuration_button);
 		//机构名称下拉框
 		org_name_combobox = new JComboBox<String>();
@@ -917,7 +917,7 @@ public class Tools {
 		panel.add(only_matser_serial_chckbx);
 		//修改售货机编号
 		JButton change_machine_id_button = new JButton("更改售货机编号");
-		change_machine_id_button.setBounds(162, 161, 142, 35);
+		change_machine_id_button.setBounds(170, 161, 134, 35);
 		panel.add(change_machine_id_button);
 		change_machine_id_button.addMouseListener(new MouseAdapter() {
 			@Override
@@ -973,6 +973,7 @@ public class Tools {
 	        } catch (IOException ex) {
 	        	returnString = "";
 	        }
+	    	returnString = CommonOperations.replace_trn(returnString);
 	        return returnString;
 	    }
 		public String shell_exec(String command) {
@@ -1205,7 +1206,8 @@ public class Tools {
 				String getVersioncmd = cc.dumpsys_packageString + packagename + cc.symbol_orString + grep + cc.versionNameString;
 				String versionstr = ec.adb_exec(getVersioncmd);
 				versionstr = versionstr.replace("versionName=", "");
-				info_area.append(packagename+":"+versionstr);
+				versionstr = CommonOperations.replace_trn(versionstr);
+				info_area.append(packagename+":"+versionstr+"\n");
 				insatlled_app_box.addItem(packagename);
 			}
 		}
