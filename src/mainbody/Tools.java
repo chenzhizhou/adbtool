@@ -1459,9 +1459,9 @@ public class Tools {
 		public void run() {
 			String uninstallPackageName = insatlled_app_box.getSelectedItem().toString();
 			String responseString = ec.adb_exec(cc.uninstallString+uninstallPackageName);
-			ach.get_app_version_String(ach.get_3_package_list());
 			ach.info_append_to_text_area("卸载"+uninstallPackageName);
 			ach.info_append_to_text_area(responseString);
+			ach.add_3package_to_installed_app_box(ach.get_3_package_list());
 		}
 		
 	}
@@ -1485,6 +1485,7 @@ public class Tools {
 					ach.restart_APP();
 					install_progress_bar.setValue(100);
 					JOptionPane.showMessageDialog(null, "安装\n"+dialogStr+"完成！", "安装成功",JOptionPane.PLAIN_MESSAGE);
+					ach.add_3package_to_installed_app_box(ach.get_3_package_list());
 				}
 			catch(Exception e1){
 				e1.printStackTrace();
@@ -1514,6 +1515,7 @@ public class Tools {
 					}
 				install_progress_bar.setValue(100);
 				JOptionPane.showMessageDialog(null, "卸载\n"+dialogStr+"完成！", "卸载所有第三方app",JOptionPane.PLAIN_MESSAGE);
+				ach.add_3package_to_installed_app_box(ach.get_3_package_list());
 				}
 			catch(Exception e1){
 				e1.printStackTrace();
@@ -1555,7 +1557,8 @@ public class Tools {
 				ach.info_append_to_text_area(ec.adb_exec(cc.start_install_activityString));
 				install_progress_bar.setValue(100);
 				JOptionPane.showMessageDialog(null, "推送\n"+dialogStr+"完成！并执行Install安装", "卸载并安装",JOptionPane.PLAIN_MESSAGE);
-				}
+				ach.add_3package_to_installed_app_box(ach.get_3_package_list());
+			}
 			catch(Exception e1){
 				e1.printStackTrace();
 			}
