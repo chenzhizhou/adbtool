@@ -72,6 +72,8 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JRadioButton;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuEvent;
 
 public class Tools {
 
@@ -169,7 +171,8 @@ public class Tools {
 			return "mac";
 		}
 		else if (os_nameString.indexOf("windows")>=0) {
-			grep = cc.findstrString;
+//			grep = cc.findstrString;
+			grep = cc.grepString;
 			return "windows";
 		}
 		else {
@@ -200,6 +203,8 @@ public class Tools {
 		}
 		else {
 			adb_path = CommonOperations.read_file(adb_path_file_path);
+			adb_path = CommonOperations.replace_trn(adb_path);
+			adb_path = adb_path + " ";
 		}
 	}
 
@@ -738,12 +743,30 @@ public class Tools {
 		panel.add(label);
 		//已安装应用选择框
 		insatlled_app_box = new JComboBox<String>();
+		insatlled_app_box.addPopupMenuListener(new PopupMenuListener() {
+			public void popupMenuCanceled(PopupMenuEvent e) {
+			}
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			}
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+				if (insatlled_app_box.getItemCount()==0) {
+					Get_app_version_Thread gavt = new Get_app_version_Thread();
+					Thread t1 = new Thread(gavt);
+					t1.start();
+				}
+			}
+		});
 		insatlled_app_box.setBounds(6, 82, 196, 32);
 		panel.add(insatlled_app_box);
 		//卸载按钮
 		JButton uninstall_app_button = new JButton("卸载");
 		uninstall_app_button.setBounds(90, 120, 117, 29);
 		panel.add(uninstall_app_button);
+		//点我提示语
+		JLabel lblNewLabel = new JLabel("←看版本号点我(￣.￣)");
+		lblNewLabel.setBounds(145, 30, 146, 16);
+		panel.add(lblNewLabel);
+		
 		uninstall_app_button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
