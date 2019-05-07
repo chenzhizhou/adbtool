@@ -753,9 +753,7 @@ public class Tools {
 			}
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 				if (insatlled_app_box.getItemCount()==0) {
-					Get_app_version_Thread gavt = new Get_app_version_Thread();
-					Thread t1 = new Thread(gavt);
-					t1.start();
+					ach.add_3package_to_installed_app_box(ach.get_3_package_list());
 				}
 			}
 		});
@@ -1042,6 +1040,7 @@ public class Tools {
 			serial_port_combobox.setSelectedItem("----");
 			org_name_combobox.setSelectedItem("----");
 			current_manufacturer_combobox.setSelectedItem("----");
+			insatlled_app_box.removeAllItems();
 		}
 		public void modify_machine_id() {
 			JFrame frame2 = new JFrame("更改售货机编号");
@@ -1136,8 +1135,8 @@ public class Tools {
 		    		Display_running_config_Thread drct = new Display_running_config_Thread();
 					Thread t = new Thread(drct);
 					t.start();
-					//重新获取已安装应用
-					get_3_package_list();
+					//重新获取已安装应用并添加到已安装应用选择框中
+					add_3package_to_installed_app_box(get_3_package_list());
 				}
 	    		else {
 	    			info_append_to_text_area(String.format("%s断开连接", last_machine_id));
@@ -1231,18 +1230,23 @@ public class Tools {
 			package_list.add("com.inhand.inboxcore");
 			return package_list;
 		}
+		//将第三方包名添加至应用选择框
+		public void add_3package_to_installed_app_box(List<String> package_list) {
+			insatlled_app_box.removeAllItems();
+			insatlled_app_box.addItem("选择要删除的应用");
+			for (String packagename:package_list) {
+				insatlled_app_box.addItem(packagename);
+			}
+		}
 		//获取并显示已安装app版本信息
 		public void get_app_version_String(List<String> package_list) {
 			info_append_to_text_area("版本信息：\n");
-			insatlled_app_box.removeAllItems();
-			insatlled_app_box.addItem("选择要删除的应用");
 			for (String packagename:package_list) {
 				String getVersioncmd = cc.dumpsys_packageString + packagename + cc.symbol_orString + grep + cc.versionNameString;
 				String versionstr = ec.adb_exec(getVersioncmd);
 				versionstr = versionstr.replace("versionName=", "");
 				versionstr = CommonOperations.replace_trn(versionstr);
 				info_area.append(packagename+":"+versionstr+"\n");
-				insatlled_app_box.addItem(packagename);
 			}
 		}
 		public void pull_smartvm_cfg_xml() {
