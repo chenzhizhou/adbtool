@@ -103,6 +103,8 @@ public class Tools {
 	private JRadioButton data_off_radioButton;
 	private JRadioButton wifi_open_radioButton;
 	private JRadioButton data_open_radioButton;
+	private ButtonGroup wifi_group;
+	private ButtonGroup data_group;
 //	private JButton select_adb_path_button;
 	
 	//公有变量
@@ -118,6 +120,7 @@ public class Tools {
 	private JComboBox<String> current_manufacturer_combobox;
 	private JCheckBox only_matser_serial_chckbx;
 	private String running_config_file_path;
+
 
 
 	
@@ -298,7 +301,7 @@ public class Tools {
 		});
 		wifi_open_radioButton.setBounds(10, 121, 58, 23);
 		panel.add(wifi_open_radioButton);
-		ButtonGroup wifi_group = new ButtonGroup();
+		wifi_group = new ButtonGroup();
 		wifi_group.add(wifi_off_radioButton);
 		wifi_group.add(wifi_open_radioButton);
 		wifi_status_label = new JLabel("●");
@@ -330,7 +333,7 @@ public class Tools {
 				}	
 			}
 		});
-		ButtonGroup data_group = new ButtonGroup();
+		data_group = new ButtonGroup();
 		data_group.add(data_off_radioButton);
 		data_group.add(data_open_radioButton);
 		data_status_label = new JLabel("●");
@@ -476,6 +479,13 @@ public class Tools {
 		config_progress_bar.setStringPainted(true);
 		config_progress_bar.setBounds(6, 176, 298, 20);
 		panel.add(config_progress_bar);
+		//提示文字
+		JLabel lblNewLabel_2 = new JLabel("      ↓");
+		lblNewLabel_2.setBounds(30, 128, 61, 16);
+		panel.add(lblNewLabel_2);
+		JLabel lblNewLabel_3 = new JLabel("还没做好");
+		lblNewLabel_3.setBounds(30, 112, 61, 16);
+		panel.add(lblNewLabel_3);
 		
 	}
 	private void device_simulate_and_timeset_module() {
@@ -523,6 +533,8 @@ public class Tools {
 		JButton mode_simulating_keyboard_events = new JButton("MODE");
 		mode_simulating_keyboard_events.setBounds(10, 149, 82, 47);
 		panel.add(mode_simulating_keyboard_events);
+		//暂不可用
+		panel.setVisible(false);
 	}
 	private void show_log_module() {
 		//打印日志模块
@@ -569,6 +581,8 @@ public class Tools {
 		JButton clear_log_buffer_button = new JButton("清空日志缓存");
 		clear_log_buffer_button.setBounds(186, 173, 118, 23);
 		panel.add(clear_log_buffer_button);
+		//暂不可用
+		panel.setVisible(false);
 	}
 	private void app_install_module() {
 		//Inhand-app安装模块
@@ -833,7 +847,7 @@ public class Tools {
 		log_saved_path_field.setText(log_saved_path);
 		//崩溃日志
 		//保存崩溃日志
-		JButton save_crash_log_button = new JButton("查看崩溃日志");
+		JButton save_crash_log_button = new JButton("获取崩溃日志");
 		save_crash_log_button.setBounds(10, 158, 114, 38);
 		panel.add(save_crash_log_button);
 		//崩溃日志更新提示
@@ -846,6 +860,8 @@ public class Tools {
 		JCheckBox crash_log_monitor_checkbox = new JCheckBox("崩溃日志监控开关");
 		crash_log_monitor_checkbox.setBounds(135, 173, 136, 23);
 		panel.add(crash_log_monitor_checkbox);
+		//暂不可用
+		panel.setVisible(false);
 	}
 	private void base_config_module() {
 		//基础配置模块
@@ -997,7 +1013,7 @@ public class Tools {
 	        } catch (IOException ex) {
 	        	returnString = "";
 	        }
-	    	returnString = CommonOperations.replace_trn(returnString);
+	    	returnString = CommonOperations.replace_n(returnString);
 	        return returnString;
 	    }
 		public String shell_exec(String command) {
@@ -1125,10 +1141,8 @@ public class Tools {
 	    	if (!current_machine_id.equals(last_machine_id)) {
 	    		if (!current_machine_id.equals("")&&!current_machine_id.equals(null)) {
 	    			//还原网络开关按钮
-	    			wifi_off_radioButton.setSelected(false);
-	    			wifi_open_radioButton.setSelected(false);
-	    			data_off_radioButton.setSelected(false);
-	    			data_open_radioButton.setSelected(false);
+	    			wifi_group.clearSelection();
+	    			data_group.clearSelection();
 	    			//重新获取基础配置
 	    			info_append_to_text_area(String.format("检测到%s连接", current_machine_id));
 		    		info_append_to_text_area("刷新基础配置……");
@@ -1241,13 +1255,17 @@ public class Tools {
 		//获取并显示已安装app版本信息
 		public void get_app_version_String(List<String> package_list) {
 			info_append_to_text_area("版本信息：\n");
+			String dialogString = "";
 			for (String packagename:package_list) {
 				String getVersioncmd = cc.dumpsys_packageString + packagename + cc.symbol_orString + grep + cc.versionNameString;
 				String versionstr = ec.adb_exec(getVersioncmd);
 				versionstr = versionstr.replace("versionName=", "");
 				versionstr = CommonOperations.replace_trn(versionstr);
+				dialogString = dialogString + packagename+":"+versionstr+"\n";
 				info_area.append(packagename+":"+versionstr+"\n");
+				info_area.setCaretPosition(info_area.getText().length());
 			}
+			JOptionPane.showMessageDialog(null, dialogString, "APP版本",JOptionPane.INFORMATION_MESSAGE);
 		}
 		public void pull_smartvm_cfg_xml() {
 			String cmdString = cc.pull_smartvm_cfg_xmlString+temp_file_path;
@@ -1484,8 +1502,8 @@ public class Tools {
 					}
 					ach.restart_APP();
 					install_progress_bar.setValue(100);
-					JOptionPane.showMessageDialog(null, "安装\n"+dialogStr+"完成！", "安装成功",JOptionPane.PLAIN_MESSAGE);
 					ach.add_3package_to_installed_app_box(ach.get_3_package_list());
+					JOptionPane.showMessageDialog(null, "安装\n"+dialogStr+"完成！", "安装成功",JOptionPane.PLAIN_MESSAGE);
 				}
 			catch(Exception e1){
 				e1.printStackTrace();
@@ -1514,8 +1532,8 @@ public class Tools {
 					ach.progress_show(all, progress_bar_value+=1, install_progress_bar);
 					}
 				install_progress_bar.setValue(100);
-				JOptionPane.showMessageDialog(null, "卸载\n"+dialogStr+"完成！", "卸载所有第三方app",JOptionPane.PLAIN_MESSAGE);
 				ach.add_3package_to_installed_app_box(ach.get_3_package_list());
+				JOptionPane.showMessageDialog(null, "卸载\n"+dialogStr+"完成！", "卸载所有第三方app",JOptionPane.PLAIN_MESSAGE);
 				}
 			catch(Exception e1){
 				e1.printStackTrace();
@@ -1556,8 +1574,8 @@ public class Tools {
 					}
 				ach.info_append_to_text_area(ec.adb_exec(cc.start_install_activityString));
 				install_progress_bar.setValue(100);
-				JOptionPane.showMessageDialog(null, "推送\n"+dialogStr+"完成！并执行Install安装", "卸载并安装",JOptionPane.PLAIN_MESSAGE);
 				ach.add_3package_to_installed_app_box(ach.get_3_package_list());
+				JOptionPane.showMessageDialog(null, "推送\n"+dialogStr+"完成！并执行Install安装", "卸载并安装",JOptionPane.PLAIN_MESSAGE);
 			}
 			catch(Exception e1){
 				e1.printStackTrace();

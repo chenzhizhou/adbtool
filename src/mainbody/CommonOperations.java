@@ -26,8 +26,8 @@ public class CommonOperations {
 		return s;
 	}
 	//去除字符串中的空格、回车、换行符、制表符
-	public static String replace_tr(String s) {
-		Pattern p = Pattern.compile("\\s*|\t|\r");
+	public static String replace_n(String s) {
+		Pattern p = Pattern.compile("\n");
 		Matcher m = p.matcher(s);
 		s = m.replaceAll("");
 		return s;
