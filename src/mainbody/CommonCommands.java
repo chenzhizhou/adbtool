@@ -34,4 +34,14 @@ public class CommonCommands {
 	String game_config_dirString = " /sdcard/inbox/game/";
 	String open_in_windows = "cmd.exe /c start ";
 	String open_in_macosx = "open ";
+	String tar_logcat_main_logString = "shell busybox tar -cvf /tmp/logcat_main.tar /sdcard/inbox/log/logcat_main.*";
+	String gzip_logcat_main_logString = "shell gzip /tmp/logcat_main.tar";
+	String pull_logcat_main_logString = "pull /tmp/logcat_main.tar.gz ";
+	String rm_logcat_main_log_targzString = "shell rm /tmp/logcat_main.tar.gz";
+	String pull_crash_logString = "pull /sdcard/inbox/log/crash_log.txt ";
+	String date_set_formatString = "shell date -s\"yymmdd.hhmmss\"";
+	String set_android_system_date_timeString = "shell date -s ";
+	String mode_switchString = "shell am broadcast -a android.intent.action.ENG_MODE_SWITCH";
+	String input_key_eventString = "shell input keyevent ";
+	String du_crash_log_String = "shell du /sdcard/inbox/log/crash_log.txt";
 }
