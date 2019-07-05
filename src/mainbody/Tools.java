@@ -869,23 +869,17 @@ public class Tools {
 		lblNewLabel.setBounds(145, 30, 146, 16);
 		panel.add(lblNewLabel);
 		
-//		JButton btnNewButton = new JButton("New button");
-//		btnNewButton.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				String newString = "";
-//				String cmdString = "pull /sdcard/inbox/config/config.xml /Users/chenzhizhou/Work/中文文件夹/";
-////				try {
-////					newString=new String(cmdString.getBytes(),"ISO-8859-1");
-////				} catch (UnsupportedEncodingException e1) {
-////					// TODO Auto-generated catch block
-////					e1.printStackTrace();
-////				}
-//				System.out.print(ec.adb_exec(cmdString));
-//			}
-//		});
-//		btnNewButton.setBounds(6, 151, 117, 29);
-//		panel.add(btnNewButton);
+		JButton btnNewButton = new JButton("New button");
+		btnNewButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String newString = "";
+				String cmdString = "shell du /sdcard/inbox/log/crash_log.txt | busybox awk '{print $1}'";
+				System.out.print(ec.adb_exec(cmdString));
+			}
+		});
+		btnNewButton.setBounds(6, 151, 117, 29);
+		panel.add(btnNewButton);
 
 	}
 
@@ -1147,7 +1141,7 @@ public class Tools {
 			String returnString = "";
 			Process pro = null;
 			Runtime runTime = Runtime.getRuntime();
-//	        System.out.print(command);
+	        System.out.print(command);
 			if (runTime == null) {
 				System.err.println("Create runtime false!");
 			}
@@ -1642,7 +1636,7 @@ public class Tools {
 
 		public void crash_log_monitor() {
 			String crash_log_size = ec.adb_exec(cc.du_crash_log_String);
-			crash_log_size = crash_log_size.split("	")[0];
+//			crash_log_size = crash_log_size.split("	")[0];
 			String lengthString = "";
 //			System.out.print("crash_log_size:"+crash_log_size);
 			// 读取crash_log_xml里的length值
@@ -1668,7 +1662,7 @@ public class Tools {
 
 		public void record_crash_log_length() {
 			String crash_log_size = ec.adb_exec(cc.du_crash_log_String);
-			crash_log_size = crash_log_size.split("	")[0];
+//			crash_log_size = crash_log_size.split("	")[0];
 			Document doc = CommonOperations.load_xml(crash_log_xml_path);
 			List<Node> org_name_list = doc.selectNodes("//machine[@id='" + last_machine_id + "']");
 			org_name_list.get(0).setText(crash_log_size);
@@ -1893,7 +1887,7 @@ public class Tools {
 //			String command4_windows = "cmd.exe /c start " + screenshot_path;
 //			String command4_macosx = "open " + screenshot_path;
 			String command4 = "";
-			String command5 = "shell du -k sdcard/sc123456.png";
+			String command5 = "shell du -k sdcard/sc123456.png | busybox awk '{print $1}'";
 			if (OS_type.equals("mac")) {
 				command4 = cc.open_in_macosx + screenshot_path;
 			} else if (OS_type.equals("windows")) {
@@ -1907,9 +1901,10 @@ public class Tools {
 				ec.adb_exec(command1);
 				while (!flag) {
 					Thread.sleep(1000);
-					String response = ec.adb_exec(command5);
-					String[] a = response.split("sdcard");
-					String picLength = a[0].trim();
+//					String response = ec.adb_exec(command5);
+//					String[] a = response.split("sdcard");
+//					String picLength = a[0].trim();
+					String picLength = ec.adb_exec(command5);
 					if (!picLength.equals("0")) {
 						flag = true;
 					}

@@ -43,5 +43,5 @@ public class CommonCommands {
 	String set_android_system_date_timeString = "shell date -s ";
 	String mode_switchString = "shell am broadcast -a android.intent.action.ENG_MODE_SWITCH";
 	String input_key_eventString = "shell input keyevent ";
-	String du_crash_log_String = "shell du /sdcard/inbox/log/crash_log.txt";
+	String du_crash_log_String = "shell du /sdcard/inbox/log/crash_log.txt | busybox awk '{print $1}'";
 }
