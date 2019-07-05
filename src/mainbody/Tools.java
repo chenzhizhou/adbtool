@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -115,6 +116,7 @@ public class Tools {
 	private Map<String, String> vendor_map = new HashMap<String, String>();
 	private JComboBox<String> server_address_combobox;
 	public String last_machine_id = "";
+	private String current_machine_id = "";
 	private JComboBox<String> org_name_combobox;
 	private JComboBox<String> serial_port_combobox;
 	private JComboBox<String> current_manufacturer_combobox;
@@ -390,7 +392,7 @@ public class Tools {
 		channel_rapid_configuration_button.setBounds(6, 140, 112, 34);
 		panel.add(channel_rapid_configuration_button);
 		// 推送配置文件
-		JTextArea push_configuration_file_area = new JTextArea("请将需要下发的配置文件拖拽至此\n文件路径不能包含中文和空格\n");
+		JTextArea push_configuration_file_area = new JTextArea("请将需要下发的配置文件拖拽至此\n");
 		push_configuration_file_area.setLineWrap(true);
 		push_configuration_file_area.setEditable(false);
 		panel.add(push_configuration_file_area);
@@ -415,29 +417,31 @@ public class Tools {
 						filepath = filepath.substring(0, filepath.length() - 1);
 					}
 					String[] strs = filepath.split(", ");
-					String regexstr = "[\u4e00-\u9fa5\u0020]";
-					Pattern p = Pattern.compile(regexstr);
-					ArrayList<String> illegal_configs = new ArrayList<String>();
+//					String regexstr = "[\u4e00-\u9fa5\u0020]";
+//					Pattern p = Pattern.compile(regexstr);
+//					ArrayList<String> illegal_configs = new ArrayList<String>();
 					for (String configstring : strs) {
-						Matcher m = p.matcher(configstring);
-						if (m.find()) {
-							// System.out.print("\n包含中文");
-//							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
-							push_configuration_file_area.setText("");
-							illegal_configs.add(configstring);
-						} else {
-							choosed_configsArrayListString.add(configstring);
-							push_configuration_file_area.setText("");
-						}
+						choosed_configsArrayListString.add(configstring);
+						push_configuration_file_area.setText("");
+//						Matcher m = p.matcher(configstring);
+//						if (m.find()) {
+//							// System.out.print("\n包含中文");
+////							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+//							push_configuration_file_area.setText("");
+//							illegal_configs.add(configstring);
+//						} else {
+//							choosed_configsArrayListString.add(configstring);
+//							push_configuration_file_area.setText("");
+//						}
 					}
-					if (illegal_configs.size() != 0) {
-						String dialog_str = "";
-						for (String config : illegal_configs) {
-							dialog_str += config + "\n";
-						}
-						JOptionPane.showMessageDialog(null, dialog_str + "\n包含中文和空格", "添加失败",
-								JOptionPane.WARNING_MESSAGE);
-					}
+//					if (illegal_configs.size() != 0) {
+//						String dialog_str = "";
+//						for (String config : illegal_configs) {
+//							dialog_str += config + "\n";
+//						}
+//						JOptionPane.showMessageDialog(null, dialog_str + "\n包含中文和空格", "添加失败",
+//								JOptionPane.WARNING_MESSAGE);
+//					}
 					for (String ChoosedConfigstring : choosed_configsArrayListString) {
 						push_configuration_file_area.append(ChoosedConfigstring + "\n");
 					}
@@ -471,7 +475,7 @@ public class Tools {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				choosed_configsArrayListString.clear();
-				push_configuration_file_area.setText("请将需要下发的配置文件拖拽至此\n文件路径不能包含中文和空格\n");
+				push_configuration_file_area.setText("请将需要下发的配置文件拖拽至此\n");
 			}
 		});
 		// 推送下发配置文件
@@ -643,7 +647,7 @@ public class Tools {
 		panel.setBorder(BorderFactory.createTitledBorder("Inhand-app安装"));
 		frame.getContentPane().add(panel);
 		// 待安装app框
-		JTextArea push_apps_file_area = new JTextArea("将需要安装的APK文件拖拽至此\n文件路径不能包含中文和空格\n");
+		JTextArea push_apps_file_area = new JTextArea("将需要安装的APK文件拖拽至此\n");
 		push_apps_file_area.setLineWrap(true);
 		push_apps_file_area.setEditable(false);
 		panel.add(push_apps_file_area);
@@ -668,29 +672,31 @@ public class Tools {
 						filepath = filepath.substring(0, filepath.length() - 1);
 					}
 					String[] strs = filepath.split(", ");
-					String regexstr = "[\u4e00-\u9fa5\u0020]";
-					Pattern p = Pattern.compile(regexstr);
-					ArrayList<String> illegal_configs = new ArrayList<String>();
+//					String regexstr = "[\u4e00-\u9fa5\u0020]";
+//					Pattern p = Pattern.compile(regexstr);
+//					ArrayList<String> illegal_configs = new ArrayList<String>();
 					for (String configstring : strs) {
-						Matcher m = p.matcher(configstring);
-						if (m.find()) {
-							// System.out.print("\n包含中文");
-//							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
-							push_apps_file_area.setText("");
-							illegal_configs.add(configstring);
-						} else {
-							choosed_appsArrayListString.add(configstring);
-							push_apps_file_area.setText("");
-						}
+						choosed_appsArrayListString.add(configstring);
+						push_apps_file_area.setText("");
+//						Matcher m = p.matcher(configstring);
+//						if (m.find()) {
+//							// System.out.print("\n包含中文");
+////							JOptionPane.showMessageDialog(null, configstring+"\n文件路径不能包含中文和空格", "添加失败",JOptionPane.WARNING_MESSAGE);
+//							push_apps_file_area.setText("");
+//							illegal_configs.add(configstring);	
+//						} else {
+//							choosed_appsArrayListString.add(configstring);
+//							push_apps_file_area.setText("");
+//						}
 					}
-					if (illegal_configs.size() != 0) {
-						String dialog_str = "";
-						for (String config : illegal_configs) {
-							dialog_str += config + "\n";
-						}
-						JOptionPane.showMessageDialog(null, dialog_str + "\n包含中文和空格", "添加失败",
-								JOptionPane.WARNING_MESSAGE);
-					}
+//					if (illegal_configs.size() != 0) {
+//						String dialog_str = "";
+//						for (String config : illegal_configs) {
+//							dialog_str += config + "\n";
+//						}
+//						JOptionPane.showMessageDialog(null, dialog_str + "\n包含中文和空格", "添加失败",
+//								JOptionPane.WARNING_MESSAGE);
+//					}
 					for (String ChoosedConfigstring : choosed_appsArrayListString) {
 						push_apps_file_area.append(ChoosedConfigstring + "\n");
 					}
@@ -713,7 +719,7 @@ public class Tools {
 			}
 		});
 		// 仅安装
-		JButton install_and_restart_button = new JButton("覆盖安装app");
+		JButton install_and_restart_button = new JButton("安装app");
 		install_and_restart_button.setBounds(6, 84, 114, 35);
 		panel.add(install_and_restart_button);
 		install_and_restart_button.addMouseListener(new MouseAdapter() {
@@ -722,7 +728,7 @@ public class Tools {
 				if (choosed_appsArrayListString.isEmpty()) {
 					JOptionPane.showMessageDialog(null, "请添加需要安装的安装包", "提示", JOptionPane.CANCEL_OPTION);
 				} else {
-					int n = JOptionPane.showConfirmDialog(null, "是否覆盖安装APP", "安装", JOptionPane.OK_CANCEL_OPTION);
+					int n = JOptionPane.showConfirmDialog(null, "是否安装APP", "安装", JOptionPane.OK_CANCEL_OPTION);
 					if (n == 0) {
 						Install_APP_Thread Iat = new Install_APP_Thread();
 						Thread t1 = new Thread(Iat);
@@ -776,7 +782,7 @@ public class Tools {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				choosed_appsArrayListString.clear();
-				push_apps_file_area.setText("将需要安装的APK文件拖拽至此\n文件路径不能包含中文和空格\n");
+				push_apps_file_area.setText("将需要安装的APK文件拖拽至此\n");
 			}
 		});
 		// 进度条
@@ -862,6 +868,24 @@ public class Tools {
 		JLabel lblNewLabel = new JLabel("←看版本号点我(￣.￣)");
 		lblNewLabel.setBounds(145, 30, 146, 16);
 		panel.add(lblNewLabel);
+		
+//		JButton btnNewButton = new JButton("New button");
+//		btnNewButton.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				String newString = "";
+//				String cmdString = "pull /sdcard/inbox/config/config.xml /Users/chenzhizhou/Work/中文文件夹/";
+////				try {
+////					newString=new String(cmdString.getBytes(),"ISO-8859-1");
+////				} catch (UnsupportedEncodingException e1) {
+////					// TODO Auto-generated catch block
+////					e1.printStackTrace();
+////				}
+//				System.out.print(ec.adb_exec(cmdString));
+//			}
+//		});
+//		btnNewButton.setBounds(6, 151, 117, 29);
+//		panel.add(btnNewButton);
 
 	}
 
@@ -1146,6 +1170,7 @@ public class Tools {
 	}
 
 	class Action_handler {
+
 		// 信息显示
 		public void info_append_to_text_area(Object text) {
 			String s = String.valueOf(text);
@@ -1162,6 +1187,7 @@ public class Tools {
 			org_name_combobox.setSelectedItem("----");
 			current_manufacturer_combobox.setSelectedItem("----");
 			insatlled_app_box.removeAllItems();
+			crash_log_tip.setVisible(false);
 		}
 
 		public void modify_machine_id() {
@@ -1248,7 +1274,7 @@ public class Tools {
 			} else {
 				data_status_label.setText("off");
 			}
-			String current_machine_id = ach.get_machine_id();
+			current_machine_id = ach.get_machine_id();
 			if (!current_machine_id.equals(last_machine_id)) {
 				if (!current_machine_id.equals("") && !current_machine_id.equals(null)) {
 					// 还原网络开关按钮
@@ -1930,7 +1956,7 @@ public class Tools {
 			timer.schedule(new TimerTask() {
 				public void run() {
 					try {
-						if (crash_log_monitor_checkbox.isSelected()) {
+						if (crash_log_monitor_checkbox.isSelected() && !current_machine_id.equals("")) {
 							ach.crash_log_monitor();
 						}
 						else {
