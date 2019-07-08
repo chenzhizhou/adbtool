@@ -27,6 +27,7 @@ public class CommonCommands {
 	String set_data_enableString = "shell su 0 svc data enable";
 	String pull_smartvm_cfg_xmlString = "pull /sdcard/inbox/config/smartvm_cfg.xml ";
 	String pull_config_xmlString = "pull /sdcard/inbox/config/config.xml ";
+	String pull_goods_info_xmlString = "pull /sdcard/inbox/config/goods_info.xml ";
 	String pull_machine_id_txtString = "pull /sdcard/inbox/config/machine_id.txt ";
 	String pull_running_config_dirString = "pull /sdcard/inbox/config/ ";
 	String pull_game_config_dirString = "pull /sdcard/inbox/game/ ";

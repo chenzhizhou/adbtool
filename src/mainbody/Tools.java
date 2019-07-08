@@ -65,8 +65,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Node;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 import java.awt.Component;
 import javax.swing.Box;
@@ -233,6 +236,7 @@ public class Tools {
 		base_config_module();
 		info_module();
 	}
+
 	private void init_time_task() {
 		// 轮询devices_info
 		ditt.adbdevicesTimerDemo();
@@ -389,6 +393,12 @@ public class Tools {
 		});
 		// 货道快速配置
 		JButton channel_rapid_configuration_button = new JButton("货道快速配置");
+		channel_rapid_configuration_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				channel_set_frame();
+			}
+		});
 		channel_rapid_configuration_button.setBounds(6, 140, 112, 34);
 		panel.add(channel_rapid_configuration_button);
 		// 推送配置文件
@@ -495,13 +505,6 @@ public class Tools {
 		config_progress_bar.setStringPainted(true);
 		config_progress_bar.setBounds(6, 176, 298, 20);
 		panel.add(config_progress_bar);
-		// 提示文字
-		JLabel lblNewLabel_2 = new JLabel("      ↓");
-		lblNewLabel_2.setBounds(30, 128, 61, 16);
-		panel.add(lblNewLabel_2);
-		JLabel lblNewLabel_3 = new JLabel("还没做好");
-		lblNewLabel_3.setBounds(30, 112, 61, 16);
-		panel.add(lblNewLabel_3);
 
 	}
 
@@ -868,18 +871,18 @@ public class Tools {
 		JLabel lblNewLabel = new JLabel("←看版本号点我(￣.￣)");
 		lblNewLabel.setBounds(145, 30, 146, 16);
 		panel.add(lblNewLabel);
-		
-		JButton btnNewButton = new JButton("New button");
-		btnNewButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				String newString = "";
-				String cmdString = "shell du /sdcard/inbox/log/crash_log.txt | busybox awk '{print $1}'";
-				System.out.print(ec.adb_exec(cmdString));
-			}
-		});
-		btnNewButton.setBounds(6, 151, 117, 29);
-		panel.add(btnNewButton);
+
+//		JButton btnNewButton = new JButton("New button");
+//		btnNewButton.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				String newString = "";
+//				String cmdString = "shell du /sdcard/inbox/log/crash_log.txt | busybox awk '{print $1}'";
+//				System.out.print(ec.adb_exec(cmdString));
+//			}
+//		});
+//		btnNewButton.setBounds(6, 151, 117, 29);
+//		panel.add(btnNewButton);
 
 	}
 
@@ -890,30 +893,30 @@ public class Tools {
 		panel.setBackground(Color.WHITE);
 		panel.setBorder(BorderFactory.createTitledBorder("日志保存"));
 		frame.getContentPane().add(panel);
-		// tag过滤选项
-		JCheckBox save_log_with_tag_checkbox = new JCheckBox("tag过滤");
-		save_log_with_tag_checkbox.setBackground(Color.WHITE);
-		save_log_with_tag_checkbox.setBounds(10, 20, 103, 23);
-		panel.add(save_log_with_tag_checkbox);
-		// 日志tag选择框
-		JLabel label = new JLabel("Tags:");
-		label.setBounds(10, 46, 41, 23);
-		panel.add(label);
-		JComboBox<String> common_tags_combobox = new JComboBox<String>();
-		common_tags_combobox.setBounds(47, 47, 118, 22);
-		panel.add(common_tags_combobox);
-		// 停止保存日志
-		JButton stop_save_log_button = new JButton("Stop");
-		stop_save_log_button.setFont(new Font("宋体", Font.PLAIN, 10));
-		stop_save_log_button.setBounds(223, 108, 69, 39);
-		panel.add(stop_save_log_button);
-		stop_save_log_button.setEnabled(false);
-		// 开始保存日志
-		JButton start_save_log_button = new JButton();
-		start_save_log_button.setFont(new Font("宋体", Font.PLAIN, 10));
-		start_save_log_button.setText("Start");
-		start_save_log_button.setBounds(135, 108, 78, 39);
-		panel.add(start_save_log_button);
+//		// tag过滤选项
+//		JCheckBox save_log_with_tag_checkbox = new JCheckBox("tag过滤");
+//		save_log_with_tag_checkbox.setBackground(Color.WHITE);
+//		save_log_with_tag_checkbox.setBounds(10, 20, 103, 23);
+//		panel.add(save_log_with_tag_checkbox);
+//		// 日志tag选择框
+//		JLabel label = new JLabel("Tags:");
+//		label.setBounds(10, 46, 41, 23);
+//		panel.add(label);
+//		JComboBox<String> common_tags_combobox = new JComboBox<String>();
+//		common_tags_combobox.setBounds(47, 47, 118, 22);
+//		panel.add(common_tags_combobox);
+//		// 停止保存日志
+//		JButton stop_save_log_button = new JButton("Stop");
+//		stop_save_log_button.setFont(new Font("宋体", Font.PLAIN, 10));
+//		stop_save_log_button.setBounds(223, 108, 69, 39);
+//		panel.add(stop_save_log_button);
+//		stop_save_log_button.setEnabled(false);
+//		// 开始保存日志
+//		JButton start_save_log_button = new JButton();
+//		start_save_log_button.setFont(new Font("宋体", Font.PLAIN, 10));
+//		start_save_log_button.setText("Start");
+//		start_save_log_button.setBounds(135, 108, 78, 39);
+//		panel.add(start_save_log_button);
 		// 选择日志保存路径
 		JButton select_log_save_path_button = new JButton("选择日志保存路径");
 		select_log_save_path_button.setBounds(10, 107, 118, 39);
@@ -938,7 +941,7 @@ public class Tools {
 				}
 			}
 		});
-		zip_and_pull_log_button.setBounds(177, 20, 118, 39);
+		zip_and_pull_log_button.setBounds(6, 24, 118, 39);
 		panel.add(zip_and_pull_log_button);
 		// 日志保存路径
 		JLabel label_1 = new JLabel("路径:");
@@ -1101,6 +1104,63 @@ public class Tools {
 		info_area_scroll.setViewportView(info_area);
 		panel.add(info_area_scroll);
 	}
+	private void channel_set_frame() {
+		JFrame frame = new JFrame();
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setBounds(300, 300, 200, 300);
+		JPanel contentPane = new JPanel();
+		frame.setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel tip_1 = new JLabel("一键配置前请同步平台商品");
+		tip_1.setBounds(10, 150, 164, 15);
+		tip_1.setForeground(Color.ORANGE);
+		contentPane.add(tip_1);
+		
+		JButton set_channel_goods_button = new JButton("一键配置货道商品");
+		set_channel_goods_button.setSize(164, 80);
+		set_channel_goods_button.setLocation(10, 10);
+		contentPane.add(set_channel_goods_button);
+		set_channel_goods_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Set_channel_goods_Thread scgt = new Set_channel_goods_Thread();
+				Thread t1 = new Thread(scgt);
+				t1.start();
+			}
+		});
+		
+//		JButton set_all_channel_price_button = new JButton("一键改所有货道价格");
+//		set_all_channel_price_button.setSize(164, 40);
+//		set_all_channel_price_button.setLocation(10, 211);
+//		contentPane.add(set_all_channel_price_button);
+//		
+//		JTextField price_input_filed = new JTextField();
+//		price_input_filed.setBounds(57, 180, 73, 21);
+//		contentPane.add(price_input_filed);
+//		price_input_filed.setColumns(10);
+//		
+//		JLabel tip_2 = new JLabel("价格：");
+//		tip_2.setBounds(10, 183, 54, 15);
+//		contentPane.add(tip_2);
+//		
+//		JLabel tip_3 = new JLabel("分");
+//		tip_3.setBounds(130, 183, 54, 15);
+//		contentPane.add(tip_3);
+		
+		JButton clear_all_channel_goods_button = new JButton("一键清空货道配置");
+		clear_all_channel_goods_button.setBounds(10, 100, 164, 40);
+		contentPane.add(clear_all_channel_goods_button);
+		clear_all_channel_goods_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Clear_channel_goods_Thread ccgt = new Clear_channel_goods_Thread();
+				Thread t1 = new Thread(ccgt);
+				t1.start();
+			}
+		});
+	}
 
 	class Execute_command {
 		public String adb_exec(String command) {
@@ -1141,7 +1201,7 @@ public class Tools {
 			String returnString = "";
 			Process pro = null;
 			Runtime runTime = Runtime.getRuntime();
-	        System.out.print(command);
+			System.out.print(command);
 			if (runTime == null) {
 				System.err.println("Create runtime false!");
 			}
@@ -1420,6 +1480,13 @@ public class Tools {
 			info_append_to_text_area(reString);
 		}
 
+		public void pull_goods_info_xml() {
+			String cmdString = cc.pull_goods_info_xmlString + temp_file_path;
+			info_append_to_text_area(cmdString);
+			String reString = ec.adb_exec(cmdString);
+			info_append_to_text_area(reString);
+		}
+
 		public void parse_smartvm_cfg_and_display() {
 			// 机构名称
 			Document smartvm_cfgxml_doc = CommonOperations.load_xml(temp_file_path + "smartvm_cfg.xml");
@@ -1669,6 +1736,121 @@ public class Tools {
 			CommonOperations.save_xml(doc, crash_log_xml_path);
 			crash_log_tip.setVisible(false);
 		}
+		public void insertGoods(Element cabinetsElem,String vmnumber,String[] goodsidList, String machineType,String[] channelList,String[] goodsPriceList,int cursor){
+	        Element cabinetElem=cabinetsElem.addElement("cabinet");
+	        cabinetElem.addAttribute("machineType", machineType);
+	        cabinetElem.addAttribute("number", vmnumber);
+	        int idnum = cursor;
+	        int goodslength=goodsidList.length;
+	        System.out.println("\ngoodsidList:"+goodsidList.length+"idnum:"+idnum);
+	        for(String i:channelList){
+	        	if (goodslength==idnum) {
+					return;
+				}
+	        	System.out.println("\n"+idnum);
+	        	Element channelElem = cabinetElem.addElement("channel");
+	            channelElem.addAttribute("id", i);
+	            channelElem.addAttribute("capacity", "20");
+	            channelElem.addAttribute("goodsId", goodsidList[idnum]);
+	            channelElem.addAttribute("threshold", "3");
+	            channelElem.addAttribute("price", goodsPriceList[idnum]);
+	            channelElem.addAttribute("wechat-url", "");
+	            channelElem.addAttribute("alipay-url", "");
+	            channelElem.addAttribute("baidu-url", "");
+	            channelElem.addAttribute("desc1", "");
+	            channelElem.addAttribute("desc2", "");
+	            channelElem.addAttribute("desc3", "");
+	            channelElem.addAttribute("weight", "500");
+	            channelElem.addAttribute("calorie", "");
+	            channelElem.addAttribute("package", "0");
+	            idnum += 1;
+	            
+	        }
+		}
+		
+		public String set_each_goods_to_channel() {
+			String smartvm_cfg_pathString = temp_file_path + "smartvm_cfg.xml";
+			String goods_info_cfg_pathString = temp_file_path + "goods_info.xml";
+			String channel_cfg_pathString = temp_file_path + "channel_cfg.xml";
+			//1.创建文档
+	        Document doc=DocumentHelper.createDocument();
+	        //2.添加标签和属性
+	        Element cabinetsElem=doc.addElement("cabinets");
+	        cabinetsElem.addAttribute("version", "1.1");
+			Document smartvmdocument=CommonOperations.load_xml(smartvm_cfg_pathString);
+			Document goodsdocument=CommonOperations.load_xml(goods_info_cfg_pathString);
+			List<Node>smartvmlist=smartvmdocument.selectNodes("//cabinet[@id]");
+			//System.out.print(smartvmlist.size());
+			List<Node>goodslist=goodsdocument.selectNodes("//goods");
+			int goodscount = goodslist.size();
+			int cursor = 0;
+			String[] goodsIdList = new String[goodscount];
+			String[] goodsPriceList = new String[goodscount];
+			for(int i2=0;i2<goodscount;i2++){
+	            goodsIdList[i2] = ((Element) goodslist.get(i2)).attributeValue("id").toString();
+	            goodsPriceList[i2] = ((Element) goodslist.get(i2)).attributeValue("price").toString();
+			}
+			for(int i=0;i<smartvmlist.size();i++){
+				String vmnumber = ((Element) smartvmlist.get(i)).attributeValue("id").toString();
+				String vmType = ((Element) smartvmlist.get(i)).attributeValue("machineType").toString();
+				List<Node>smartlist=smartvmdocument.selectNodes("//cabinet[@id='"+vmnumber+"']//channel");
+				int channelNumber = smartlist.size();
+				if (goodscount<=channelNumber) {
+					channelNumber=goodscount;
+				}
+				//System.out.println(channelNumber);
+				String[] channelList = new String[channelNumber];
+
+				for(int i2=0;i2<goodscount;i2++){
+					if(i2<channelNumber){
+						channelList[i2] = smartlist.get(i2).getText().toString();
+					}
+//		            goodsIdList[i2] = ((Element) goodslist.get(i2)).attributeValue("id").toString();
+//		            goodsPriceList[i2] = ((Element) goodslist.get(i2)).attributeValue("price").toString();
+				}
+//				if (cursor>=goodscount) {
+//					cursor = 0;
+//				}
+				insertGoods(cabinetsElem,vmnumber,goodsIdList,vmType,channelList,goodsPriceList,cursor);
+				cursor += channelNumber;
+				if(cursor>=goodscount){
+					break;
+				}
+			}
+			CommonOperations.save_xml(doc, channel_cfg_pathString);
+			return channel_cfg_pathString;
+		}
+		public String clear_channel_goods() {
+			String channel_cfg_pathString = temp_file_path + "channel_cfg.xml";
+			//1.创建文档
+	        Document doc=DocumentHelper.createDocument();
+	        //2.添加标签和属性
+	        Element cabinetsElem=doc.addElement("cabinets");
+	        cabinetsElem.addAttribute("version", "1.1");
+	        CommonOperations.save_xml(doc, channel_cfg_pathString);
+			return channel_cfg_pathString;
+		}
+	}
+
+	public class Set_channel_goods_Thread implements Runnable {
+
+		@Override
+		public void run() {
+			ach.pull_smartvm_cfg_xml();
+			ach.pull_goods_info_xml();
+			ach.push_config(ach.set_each_goods_to_channel());
+			ach.restart_APP();
+			ach.info_append_to_text_area("货道配置完成");
+		}
+	}
+	public class Clear_channel_goods_Thread implements Runnable {
+
+		@Override
+		public void run() {
+			ach.push_config(ach.clear_channel_goods());
+			ach.restart_APP();
+			ach.info_append_to_text_area("货道配置完成");
+		}
 	}
 
 	class Pull_main_log_Thread implements Runnable {
@@ -1876,7 +2058,6 @@ public class Tools {
 			}
 		}
 	}
-
 	class Screenshot_Thread implements Runnable {
 		@Override
 		public void run() {
@@ -1926,11 +2107,10 @@ public class Tools {
 			}
 		}
 	}
-
 	class Device_info_Timing_task {
 		public void adbdevicesTimerDemo() {
-			int delay = 5000;// ms
-			int period = 5000;// ms
+			int delay = 3000;// ms
+			int period = 3500;// ms
 			Timer timer = new Timer();
 			timer.schedule(new TimerTask() {
 				public void run() {
@@ -1953,8 +2133,7 @@ public class Tools {
 					try {
 						if (crash_log_monitor_checkbox.isSelected() && !current_machine_id.equals("")) {
 							ach.crash_log_monitor();
-						}
-						else {
+						} else {
 							crash_log_tip.setVisible(false);
 						}
 					} catch (Exception e) {
@@ -1964,4 +2143,5 @@ public class Tools {
 			}, delay, period);
 		}
 	}
+	
 }
