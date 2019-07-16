@@ -1293,6 +1293,7 @@ public class Tools {
 			String cmd = cc.get_machine_id;
 			String response = ec.adb_exec(cmd);
 			response = CommonOperations.replace_trn(response);
+			device_display_area.setText("\n售货机编号:\n" + response);
 			return response;
 		}
 
@@ -1349,7 +1350,6 @@ public class Tools {
 				}
 			}
 			last_machine_id = current_machine_id;
-			device_display_area.setText("\n售货机编号:\n" + current_machine_id);
 //	    	System.out.print("last:"+last_machine_id);
 //	    	System.out.print("now:"+current_machine_id);
 			// 去掉选择设备功能
@@ -2109,7 +2109,7 @@ public class Tools {
 	}
 	class Device_info_Timing_task {
 		public void adbdevicesTimerDemo() {
-			int delay = 3000;// ms
+			int delay = 5000;// ms
 			int period = 3500;// ms
 			Timer timer = new Timer();
 			timer.schedule(new TimerTask() {
