@@ -133,6 +133,13 @@ public class Tools {
 	private String crash_log_xml_path;
 	private JLabel crash_log_tip;
 	private JCheckBox crash_log_monitor_checkbox;
+	private JCheckBox log_advertisement_CheckBox;
+	private JCheckBox log_UI_CheckBox;
+	private JCheckBox log_vcs_CheckBox;
+	private JCheckBox log_dms_CheckBox;
+	private JCheckBox log_pay_CheckBox;
+	private JCheckBox log_setting_CheckBox;
+	private JCheckBox log_core_CheckBox;
 
 	/**
 	 * Launch the application.
@@ -594,52 +601,51 @@ public class Tools {
 	}
 
 	private void show_log_module() {
-		// 打印日志模块
+		// 日志命令模块
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBackground(Color.WHITE);
-		panel.setBorder(BorderFactory.createTitledBorder("打印日志"));
+		panel.setBorder(BorderFactory.createTitledBorder("打印日志命令获取"));
 		frame.getContentPane().add(panel);
-		// 命令标签
-		JLabel label = new JLabel("adb logcat -v time ");
-		label.setBounds(10, 27, 153, 23);
-		panel.add(label);
-		JLabel label_1 = new JLabel("adb logcat -v time -s ");
-		label_1.setBounds(10, 56, 153, 23);
-		panel.add(label_1);
-		JLabel label_2 = new JLabel("Tags:");
-		label_2.setBounds(10, 91, 41, 23);
-		panel.add(label_2);
-		// 日志tag选择框
-		JComboBox<String> common_tags_combobox = new JComboBox<String>();
-		common_tags_combobox.setBounds(47, 92, 118, 22);
-		panel.add(common_tags_combobox);
 		// 日志tag输入框
 		JTextField tags_input_field = new JTextField();
-		tags_input_field.setBounds(10, 117, 294, 54);
+		tags_input_field.setBounds(10, 142, 294, 54);
 		panel.add(tags_input_field);
 		tags_input_field.setColumns(10);
-		// 添加常用日志tag
-		JLabel label_3 = new JLabel("添加常用Tag：");
-		label_3.setBounds(10, 176, 93, 15);
-		panel.add(label_3);
-		JButton add_log_tag_button = new JButton("+");
-		add_log_tag_button.setFont(new Font("宋体", Font.PLAIN, 12));
-		add_log_tag_button.setBounds(94, 173, 40, 22);
-		panel.add(add_log_tag_button);
-		// 打印日志按钮
-		JButton show_log_button = new JButton("打印所有日志");
-		show_log_button.setBounds(175, 20, 93, 39);
-		panel.add(show_log_button);
-		JButton show_log_with_filter_button = new JButton("打印过滤日志");
-		show_log_with_filter_button.setBounds(175, 75, 93, 39);
-		panel.add(show_log_with_filter_button);
-		// 清空日志缓存
-		JButton clear_log_buffer_button = new JButton("清空日志缓存");
-		clear_log_buffer_button.setBounds(186, 173, 118, 23);
-		panel.add(clear_log_buffer_button);
+		// 获取日志命令
+		JButton get_log_cmd_button = new JButton("获取日志命令");
+		get_log_cmd_button.setBounds(186, 103, 118, 37);
+		panel.add(get_log_cmd_button);
+		
+		log_advertisement_CheckBox = new JCheckBox("Advertise");
+		log_advertisement_CheckBox.setBounds(10, 79, 128, 23);
+		panel.add(log_advertisement_CheckBox);
+		
+		log_UI_CheckBox = new JCheckBox("UI、Game");
+		log_UI_CheckBox.setBounds(10, 49, 128, 23);
+		panel.add(log_UI_CheckBox);
+		
+		log_vcs_CheckBox = new JCheckBox("VCS");
+		log_vcs_CheckBox.setBounds(122, 19, 128, 23);
+		panel.add(log_vcs_CheckBox);
+		
+		log_dms_CheckBox = new JCheckBox("DMS");
+		log_dms_CheckBox.setBounds(122, 49, 128, 23);
+		panel.add(log_dms_CheckBox);
+		
+		log_pay_CheckBox = new JCheckBox("PAY");
+		log_pay_CheckBox.setBounds(122, 79, 128, 23);
+		panel.add(log_pay_CheckBox);
+		
+		log_setting_CheckBox = new JCheckBox("VMCSetting");
+		log_setting_CheckBox.setBounds(10, 109, 128, 23);
+		panel.add(log_setting_CheckBox);
+		
+		log_core_CheckBox = new JCheckBox("InboxCore");
+		log_core_CheckBox.setBounds(10, 19, 128, 23);
+		panel.add(log_core_CheckBox);
 		// 暂不可用
-		panel.setVisible(false);
+//		panel.setVisible(false);
 	}
 
 	private void app_install_module() {
@@ -2143,5 +2149,4 @@ public class Tools {
 			}, delay, period);
 		}
 	}
-	
 }
