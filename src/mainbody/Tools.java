@@ -1890,6 +1890,9 @@ public class Tools {
 			if (is_filter){
 				log_cmdString += "| grep ";
 				for(String cid_s : list) {
+					if (cid_s.equals("\n")) {
+						continue;
+					}
 					log_cmdString += "-e " + cid_s + " "; 
 				}
 			}
