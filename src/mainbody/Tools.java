@@ -196,8 +196,8 @@ public class Tools {
 			grep = cc.grepString;
 			return "mac";
 		} else if (os_nameString.indexOf("windows") >= 0) {
-//			grep = cc.findstrString;
-			grep = cc.grepString;
+			grep = cc.findstrString;
+//			grep = cc.grepString;
 			return "windows";
 		} else {
 			return null;
