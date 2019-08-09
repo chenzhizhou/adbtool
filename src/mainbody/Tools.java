@@ -1844,7 +1844,7 @@ public class Tools {
 		}
 		public void get_log_cmd() {
 			//TODO
-			String log_cmdString = "adb logcat -v time ";
+			String log_cmdString = "logcat -v time ";
 			String ps_grep_String = "shell ps | grep ";
 			String ext_filterString = "";
 			boolean is_filter = false;
@@ -1863,7 +1863,7 @@ public class Tools {
 			}
 			if (log_pay_CheckBox.isSelected()) {
 				is_filter = true;
-				ext_filterString += "-e pay ";
+				ext_filterString += "-e payservice ";
 			}
 			if (log_setting_CheckBox.isSelected()) {
 				is_filter = true;
@@ -1888,7 +1888,7 @@ public class Tools {
 			String[] list = {}; 
 			list = reString.split("\n");
 			if (is_filter){
-				log_cmdString += "| " + grep + " ";
+				log_cmdString += "| grep ";
 				for(String cid_s : list) {
 					log_cmdString += "-e " + cid_s + " "; 
 				}
