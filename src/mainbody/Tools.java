@@ -17,7 +17,10 @@ import javax.swing.JOptionPane;
 
 import java.awt.GridLayout;
 import java.awt.Label;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -140,6 +143,8 @@ public class Tools {
 	private JCheckBox log_pay_CheckBox;
 	private JCheckBox log_setting_CheckBox;
 	private JCheckBox log_core_CheckBox;
+	private JCheckBox log_vmcservice_CheckBox;
+	private JTextField tags_input_field;
 
 	/**
 	 * Launch the application.
@@ -608,42 +613,52 @@ public class Tools {
 		panel.setBorder(BorderFactory.createTitledBorder("打印日志命令获取"));
 		frame.getContentPane().add(panel);
 		// 日志tag输入框
-		JTextField tags_input_field = new JTextField();
+		tags_input_field = new JTextField();
 		tags_input_field.setBounds(10, 142, 294, 54);
 		panel.add(tags_input_field);
 		tags_input_field.setColumns(10);
 		// 获取日志命令
 		JButton get_log_cmd_button = new JButton("获取日志命令");
+		get_log_cmd_button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				ach.get_log_cmd();
+			}
+		});
 		get_log_cmd_button.setBounds(186, 103, 118, 37);
 		panel.add(get_log_cmd_button);
 		
 		log_advertisement_CheckBox = new JCheckBox("Advertise");
-		log_advertisement_CheckBox.setBounds(10, 79, 128, 23);
+		log_advertisement_CheckBox.setBounds(10, 79, 118, 23);
 		panel.add(log_advertisement_CheckBox);
 		
 		log_UI_CheckBox = new JCheckBox("UI、Game");
-		log_UI_CheckBox.setBounds(10, 49, 128, 23);
+		log_UI_CheckBox.setBounds(10, 49, 118, 23);
 		panel.add(log_UI_CheckBox);
 		
 		log_vcs_CheckBox = new JCheckBox("VCS");
-		log_vcs_CheckBox.setBounds(122, 19, 128, 23);
+		log_vcs_CheckBox.setBounds(122, 19, 79, 23);
 		panel.add(log_vcs_CheckBox);
 		
 		log_dms_CheckBox = new JCheckBox("DMS");
-		log_dms_CheckBox.setBounds(122, 49, 128, 23);
+		log_dms_CheckBox.setBounds(122, 49, 79, 23);
 		panel.add(log_dms_CheckBox);
 		
 		log_pay_CheckBox = new JCheckBox("PAY");
-		log_pay_CheckBox.setBounds(122, 79, 128, 23);
+		log_pay_CheckBox.setBounds(122, 79, 79, 23);
 		panel.add(log_pay_CheckBox);
 		
 		log_setting_CheckBox = new JCheckBox("VMCSetting");
-		log_setting_CheckBox.setBounds(10, 109, 128, 23);
+		log_setting_CheckBox.setBounds(10, 109, 118, 23);
 		panel.add(log_setting_CheckBox);
 		
 		log_core_CheckBox = new JCheckBox("InboxCore");
-		log_core_CheckBox.setBounds(10, 19, 128, 23);
+		log_core_CheckBox.setBounds(10, 19, 118, 23);
 		panel.add(log_core_CheckBox);
+		
+		log_vmcservice_CheckBox = new JCheckBox("VMCService");
+		log_vmcservice_CheckBox.setBounds(199, 19, 128, 23);
+		panel.add(log_vmcservice_CheckBox);
 		// 暂不可用
 //		panel.setVisible(false);
 	}
@@ -1066,18 +1081,6 @@ public class Tools {
 		current_manufacturer_combobox.addItem("----");
 		current_manufacturer_combobox.setBounds(74, 125, 164, 25);
 		panel.add(current_manufacturer_combobox);
-		// 新增常用机构按钮
-		JButton add_common_organization = new JButton("ADD");
-		add_common_organization.setToolTipText("新增常用机构");
-		add_common_organization.setFont(new Font("宋体", Font.PLAIN, 12));
-		add_common_organization.setBounds(250, 23, 54, 25);
-		panel.add(add_common_organization);
-		// 新增常用平台地址
-		JButton add_common_address = new JButton("ADD");
-		add_common_address.setToolTipText("新增常用平台地址");
-		add_common_address.setFont(new Font("宋体", Font.PLAIN, 12));
-		add_common_address.setBounds(250, 54, 54, 25);
-		panel.add(add_common_address);
 		// 只修改主柜串口选择框
 		only_matser_serial_chckbx = new JCheckBox("只修改主柜串口");
 		only_matser_serial_chckbx.setBounds(181, 88, 123, 25);
@@ -1199,7 +1202,8 @@ public class Tools {
 			} catch (IOException ex) {
 				returnString = "";
 			}
-			returnString = CommonOperations.replace_n(returnString);
+//			returnString = CommonOperations.replace_n(returnString);
+			System.out.print(returnString + "\n");
 			return returnString;
 		}
 
@@ -1709,6 +1713,7 @@ public class Tools {
 
 		public void crash_log_monitor() {
 			String crash_log_size = ec.adb_exec(cc.du_crash_log_String);
+			crash_log_size = CommonOperations.replace_n(crash_log_size);
 //			crash_log_size = crash_log_size.split("	")[0];
 			String lengthString = "";
 //			System.out.print("crash_log_size:"+crash_log_size);
@@ -1735,6 +1740,7 @@ public class Tools {
 
 		public void record_crash_log_length() {
 			String crash_log_size = ec.adb_exec(cc.du_crash_log_String);
+			crash_log_size = CommonOperations.replace_n(crash_log_size);
 //			crash_log_size = crash_log_size.split("	")[0];
 			Document doc = CommonOperations.load_xml(crash_log_xml_path);
 			List<Node> org_name_list = doc.selectNodes("//machine[@id='" + last_machine_id + "']");
@@ -1835,6 +1841,64 @@ public class Tools {
 	        cabinetsElem.addAttribute("version", "1.1");
 	        CommonOperations.save_xml(doc, channel_cfg_pathString);
 			return channel_cfg_pathString;
+		}
+		public void get_log_cmd() {
+			//TODO
+			String log_cmdString = "adb logcat -v time ";
+			String ps_grep_String = "shell ps | grep ";
+			String ext_filterString = "";
+			boolean is_filter = false;
+			if (log_advertisement_CheckBox.isSelected()) {
+				is_filter = true;
+				ext_filterString += "-e ads ";
+				ext_filterString += "-e adplayer ";
+			}
+			if (log_core_CheckBox.isSelected()) {
+				is_filter = true;
+				ext_filterString += "-e inboxcore ";
+			}
+			if (log_dms_CheckBox.isSelected()) {
+				is_filter = true;
+				ext_filterString += "-e dms ";
+			}
+			if (log_pay_CheckBox.isSelected()) {
+				is_filter = true;
+				ext_filterString += "-e pay ";
+			}
+			if (log_setting_CheckBox.isSelected()) {
+				is_filter = true;
+				ext_filterString += "-e vmcsettings ";
+			}
+			if (log_UI_CheckBox.isSelected()) {
+				is_filter = true;
+				ext_filterString += "-e smartvm ";
+				ext_filterString += "-e game ";
+			}
+			if (log_vcs_CheckBox.isSelected()) {
+				is_filter = true;
+				ext_filterString += "-e vcs ";
+			}
+			if (log_vmcservice_CheckBox.isSelected()) {
+				is_filter = true;
+				ext_filterString += "-e vmcservice ";
+			}
+			String cmdString = ps_grep_String + ext_filterString;
+			cmdString += "| busybox awk '{print $(2)}'";
+			String reString = ec.adb_exec(cmdString);
+			String[] list = {}; 
+			list = reString.split("\n");
+			if (is_filter){
+				log_cmdString += "| " + grep + " ";
+				for(String cid_s : list) {
+					log_cmdString += "-e " + cid_s + " "; 
+				}
+			}
+			System.out.print(log_cmdString);
+			tags_input_field.setText(log_cmdString);
+			Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();  
+	        Transferable tText = new StringSelection(log_cmdString);  
+	        clip.setContents(tText, null);
+	        JOptionPane.showMessageDialog(null, "已将命令内容复制进剪贴板\n命令："+log_cmdString, "提示", JOptionPane.CLOSED_OPTION);
 		}
 	}
 
