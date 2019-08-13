@@ -945,7 +945,7 @@ public class Tools {
 //		start_save_log_button.setBounds(135, 108, 78, 39);
 //		panel.add(start_save_log_button);
 		// 选择日志保存路径
-		JButton select_log_save_path_button = new JButton("选择日志保存路径");
+		JButton select_log_save_path_button = new JButton("选择保存路径");
 		select_log_save_path_button.setBounds(10, 107, 118, 39);
 		panel.add(select_log_save_path_button);
 		select_log_save_path_button.addMouseListener(new MouseAdapter() {
