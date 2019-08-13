@@ -17,9 +17,9 @@ public class CommonCommands {
 	String dumpsys_packageString = "shell dumpsys package ";
 	String symbol_orString = " | ";
 	String versionNameString = "versionName";
-	String dumpsys_wifi_String = "shell dumpsys wifi ";
+	String dumpsys_wifi_String = "shell dumpsys wifi | grep Wi-Fi";
 	String WiFi_String = "Wi-Fi";
-	String dumpsys_telephony_String = "shell dumpsys telephony.registry ";
+	String dumpsys_telephony_String = "shell dumpsys telephony.registry | grep mDataConnectionState";
 	String mDataConnectionState_String = "mDataConnectionState";
 	String set_wifi_disableString = "shell su 0 svc wifi disable";
 	String set_wifi_enableString = "shell su 0 svc wifi enable";

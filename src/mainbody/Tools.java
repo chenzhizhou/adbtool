@@ -1319,7 +1319,7 @@ public class Tools {
 
 		// ªÒ»°adb devices
 		public void get_devices_info() {
-			String inquire_wifi_command = cc.dumpsys_wifi_String + cc.symbol_orString + grep + cc.WiFi_String;
+			String inquire_wifi_command = cc.dumpsys_wifi_String;
 			;
 			String wifi_status = ec.adb_exec(inquire_wifi_command);
 //	    	System.out.print(wifi_status);
@@ -1329,8 +1329,7 @@ public class Tools {
 				wifi_status_label.setText("off");
 			}
 
-			String inquire_data_command = cc.dumpsys_telephony_String + cc.symbol_orString + grep
-					+ cc.mDataConnectionState_String;
+			String inquire_data_command = cc.dumpsys_telephony_String;
 			;
 			String data_status = ec.adb_exec(inquire_data_command);
 //	    	System.out.print(data_status);
@@ -1890,7 +1889,7 @@ public class Tools {
 			if (is_filter){
 				log_cmdString += "| grep ";
 				for(String cid_s : list) {
-					if (!cid_s.equals("\n")) {
+					if (!cid_s.equals("")) {
 						log_cmdString += "-e " + cid_s + " "; 
 					}
 				}
