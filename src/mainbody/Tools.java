@@ -145,6 +145,7 @@ public class Tools {
 	private JCheckBox log_core_CheckBox;
 	private JCheckBox log_vmcservice_CheckBox;
 	private JTextField tags_input_field;
+	private JCheckBox inboxcore_uninstall_CheckBox;
 
 	/**
 	 * Launch the application.
@@ -542,7 +543,7 @@ public class Tools {
 		set_time_button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				ach.set_android_system_time();
+				ach.set_time();
 			}
 		});
 		set_time_button.setBounds(167, 91, 122, 35);
@@ -551,7 +552,7 @@ public class Tools {
 		reduction_time_button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				ach.revert_android_system_time();
+				ach.revert_time();
 			}
 		});
 		reduction_time_button.setBounds(167, 125, 122, 35);
@@ -744,7 +745,7 @@ public class Tools {
 		});
 		// 仅安装
 		JButton install_and_restart_button = new JButton("安装app");
-		install_and_restart_button.setBounds(6, 84, 114, 35);
+		install_and_restart_button.setBounds(6, 112, 114, 35);
 		panel.add(install_and_restart_button);
 		install_and_restart_button.addMouseListener(new MouseAdapter() {
 			@Override
@@ -814,6 +815,11 @@ public class Tools {
 		install_progress_bar.setStringPainted(true);
 		install_progress_bar.setBounds(6, 176, 298, 20);
 		panel.add(install_progress_bar);
+		
+		inboxcore_uninstall_CheckBox = new JCheckBox("卸载core？");
+		inboxcore_uninstall_CheckBox.setSelected(true);
+		inboxcore_uninstall_CheckBox.setBounds(6, 77, 128, 23);
+		panel.add(inboxcore_uninstall_CheckBox);
 
 	}
 
@@ -1667,29 +1673,40 @@ public class Tools {
 			info_append_to_text_area(ec.adb_exec(cmdString));
 			return save_pathString;
 		}
-
-		public void set_android_system_time() {
+		public void set_time() {
 			Object time = time_selector.getValue();
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
-			String time_by_format = formatter.format(time);
-			String format_cmdString = cc.date_set_formatString;
-			String set_time_cmdString = cc.set_android_system_date_timeString + time_by_format;
-			ec.adb_exec(format_cmdString);
-			ec.adb_exec(set_time_cmdString);
+			set_android_system_time(time);
 			info_append_to_text_area("将系统时间更改为：\n" + time.toString());
 			if (set_time_and_restart_checkbox.isSelected()) {
 				restart_APP();
 			}
 		}
 
-		public void revert_android_system_time() {
+		public void set_android_system_time(Object time) {
+			//获取系统API level
+			String api_level_cmdString = cc.api_level_cmdString;
+			String re_api_level = ec.adb_exec(api_level_cmdString);
+			re_api_level = CommonOperations.replace_n(re_api_level);
+			int api_level = Integer.parseInt(re_api_level);
+			if (api_level >= 23) {
+				SimpleDateFormat formatter = new SimpleDateFormat("MMddHHmmyyyy.ss");
+				String time_by_format = formatter.format(time);
+				String set_time_cmdString = cc.date_set_up6 + time_by_format;
+				ec.adb_exec(set_time_cmdString);
+			}
+			else {
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
+				String time_by_format = formatter.format(time);
+				String format_cmdString = cc.date_set_formatString;
+				String set_time_cmdString = cc.set_android_system_date_timeString + time_by_format;
+				ec.adb_exec(format_cmdString);
+				ec.adb_exec(set_time_cmdString);
+			}
+		}
+
+		public void revert_time() {
 			Date now_time_date = new Date();
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmss");
-			String now_time = formatter.format(now_time_date);
-			String format_cmdString = cc.date_set_formatString;
-			String set_time_cmdString = cc.set_android_system_date_timeString + now_time;
-			ec.adb_exec(format_cmdString);
-			ec.adb_exec(set_time_cmdString);
+			set_android_system_time(now_time_date);
 			info_append_to_text_area("将系统时间复原：\n" + now_time_date.toString());
 			if (set_time_and_restart_checkbox.isSelected()) {
 				restart_APP();
@@ -1899,7 +1916,7 @@ public class Tools {
 			Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();  
 	        Transferable tText = new StringSelection(log_cmdString);  
 	        clip.setContents(tText, null);
-	        JOptionPane.showMessageDialog(null, "已将命令内容复制进剪贴板\n命令："+log_cmdString, "提示", JOptionPane.CLOSED_OPTION);
+	        JOptionPane.showMessageDialog(null, "已将命令内容复制进剪贴板\n命令：\n第一步：adb shell\n第二步："+log_cmdString, "提示", JOptionPane.CLOSED_OPTION);
 		}
 	}
 
@@ -2097,6 +2114,9 @@ public class Tools {
 				all = all + choosed_appsArrayListString.size() + 1;
 				install_progress_bar.setValue(0);
 				List<String> package_list = ach.get_3_package_list();
+				if (!inboxcore_uninstall_CheckBox.isSelected()) {
+					package_list.remove("com.inhand.inboxcore");
+				}
 				System.out.println(package_list);
 				all = all + package_list.size();
 				for (String utemp : package_list) {

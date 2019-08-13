@@ -2,6 +2,7 @@ package mainbody;
 
 public class CommonCommands {
 	String get_devices_info_command = "devices";
+	String api_level_cmdString = "shell getprop ro.build.version.sdk";
 	String restart_app_command = "shell am broadcast -a com.inhand.intent.INBOXCORE_RESTART_APP";
 	String get_machine_id = "shell cat /sdcard/inbox/config/machine_id.txt";
 	String list_package_3 = "shell pm list package -3";
@@ -41,6 +42,7 @@ public class CommonCommands {
 	String rm_logcat_main_log_targzString = "shell rm /sdcard/inbox/logcat_main.tar.gz";
 	String pull_crash_logString = "pull /sdcard/inbox/log/crash_log.txt ";
 	String date_set_formatString = "shell date -s\"yymmdd.hhmmss\"";
+	String date_set_up6 = "shell date ";
 	String set_android_system_date_timeString = "shell date -s ";
 	String mode_switchString = "shell am broadcast -a android.intent.action.ENG_MODE_SWITCH";
 	String input_key_eventString = "shell input keyevent ";
